@@ -951,7 +951,6 @@ ul, ol {
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  padding: 24px 16px;
 }
 
 .position__block--fixed {
@@ -963,11 +962,11 @@ ul, ol {
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  transform: translateY(20%);
+  padding: 16px;
 }
 
 .position__block-text--left {
-  padding-left: 24px;
+  padding-top: 64px;
 }
 
 .position__block-title {
@@ -1232,8 +1231,6 @@ ul, ol {
   .position__block-emoji { font-size: 52px; left: auto; right: 12px; top: 12px; }
   .position__block-body  { font-size: 14px; }
   .position__block-title { font-size: 16px; }
-  .position__block-text { transform: translateY(15%);  }
-  .position__block-text--left { padding-left: 16px; }
 
   /* --- Publications --- */
   .publications            { gap: 32px; }
@@ -1420,8 +1417,10 @@ ul, ol {
     flex: none;
   }
   .position__block-text {
-    width: 100%;
-    padding: 64px 16px 24px;
+    padding: 24px;
+  }
+  .position__block-perforation--left .position__block-text { 
+    padding-top: 48px; 
   }
   
   .position__block-title { font-size: 18px; }
@@ -1565,11 +1564,48 @@ ul, ol {
 
 /* ===================== PERFORATED CARD ===================== */
 
+.position__block-perforation--top {
+  display: flex;
+  flex-direction: column;
+}
+
+.position__block-perforation--left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
 .perforated-card_top {
   background-image: url(/assets/paper-gorizontal.svg);
   background-size: auto;
   background-position: top center;
   background-repeat: repeat-x;
+  height: 48px;
+  flex: none;
+}
+
+.perforated-card_left {
+  background-image: url(/assets/paper-vertical.svg);
+  background-position: center left;
+  background-repeat: repeat-y;
+  background-size: auto;
+  height: 100%;
+  width: 38px;
+  flex: none;
+}
+
+@media (max-width: 767px) {
+  .position__block-perforation--left {
+    align-items: normal;
+  }
+
+  .perforated-card_left {
+    width: 28px;
+    height: auto;
+    background-repeat: no-repeat;
+    background-size: 100%;
+  }
 }
 
 .perforated_row {
@@ -1591,14 +1627,6 @@ ul, ol {
   display: block;
   bottom: 0;
   left: 0;
-}
-
-.perforated-card_left {
-  background-image: url(/assets/paper-vertical.svg);
-  background-position: center left;
-  background-repeat: repeat-y;
-  background-size: contain;
-  padding-left: 28px;
 }
 
 .module-number h1 {

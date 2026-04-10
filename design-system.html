@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KANT — Design System</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <style>
+    /* ---- Design-system page layout (not part of the component library) ---- */
+    .ds-page {
+      max-width: var(--layout-max-width);
+      margin: 0 auto;
+      padding: 0 var(--space-5xl) 120px;
+    }
+
+    .ds-section {
+      margin-top: var(--space-3xl);
+    }
+
+    .ds-label {
+      display: flex;
+      align-items: center;
+      height: 70px;
+      padding: var(--space-lg) 0;
+      border-top: 1px solid var(--color-gray);
+      font-family: var(--font-body);
+      font-size: var(--text-paragraph-size);
+      font-weight: var(--weight-regular);
+      color: var(--color-black);
+    }
+
+    /* Typography specimens */
+    .ds-type-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3xl);
+      padding-left: 120px;
+      margin-top: var(--space-xl);
+    }
+
+    .ds-type-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .ds-type-name {
+      font-family: var(--font-body);
+      font-size: 24px;
+      font-weight: var(--weight-bold);
+      color: var(--color-black);
+    }
+
+    .ds-type-body {
+      display: flex;
+      gap: var(--space-xs);
+      align-items: flex-start;
+    }
+
+    .ds-type-spec {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      width: 200px;
+      flex-shrink: 0;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: var(--weight-regular);
+      color: var(--color-black);
+      line-height: normal;
+    }
+
+    .ds-type-spec-row {
+      display: flex;
+      gap: 4px;
+    }
+
+    .ds-type-note {
+      margin-top: var(--space-xs);
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: #808080;
+    }
+
+    /* Color swatches */
+    .ds-colors {
+      display: flex;
+      gap: var(--space-md);
+      padding: var(--space-3xl);
+      background: white;
+      margin-top: var(--space-xl);
+    }
+
+    .ds-swatch {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      width: 180px;
+    }
+
+    .ds-swatch__color {
+      width: 180px;
+      height: 90px;
+    }
+
+    .ds-swatch__name {
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: var(--weight-bold);
+      color: var(--color-black);
+    }
+
+    .ds-swatch__value {
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: var(--weight-regular);
+      color: var(--color-black);
+    }
+
+    .ds-swatch__note {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: #808080;
+    }
+
+    /* Icons row */
+    .ds-icons {
+      display: flex;
+      gap: 34px;
+      align-items: center;
+      padding-left: 120px;
+      margin-top: var(--space-xl);
+    }
+
+    /* Logo row */
+    .ds-logos {
+      display: flex;
+      align-items: center;
+      gap: 100px;
+      padding-left: 120px;
+      margin-top: var(--space-xl);
+    }
+
+    /* Buttons showcase */
+    .ds-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3xl);
+      padding-left: 120px;
+      margin-top: var(--space-xl);
+    }
+
+    .ds-buttons__row {
+      display: flex;
+      gap: var(--space-lg);
+      align-items: flex-start;
+    }
+
+    .ds-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .ds-btn-label {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: #808080;
+      margin-bottom: 4px;
+    }
+
+    /* Card showcase */
+    .ds-cards {
+      padding-left: 0;
+      margin-top: var(--space-xl);
+    }
+
+    .ds-card-pair {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    /* Perforations */
+    .ds-perforations {
+      margin-top: var(--space-xl);
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Navigation full-width */
+    .ds-nav-wrap {
+      margin-top: var(--space-xl);
+      margin-left: calc(-1 * var(--space-5xl));
+      margin-right: calc(-1 * var(--space-5xl));
+    }
+
+    /* Interlinking demo */
+    .ds-interlinking {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      padding-left: 120px;
+      margin-top: var(--space-3xl);
+    }
+
+    .ds-interlinking__pair {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    /* Author card pair */
+    .ds-author-cards {
+      display: flex;
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+      padding-left: 120px;
+    }
+
+    .ds-author-state {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ds-author-state .ds-btn-label {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="ds-page" data-figma-node="447:301">
+
+    <!-- ==================== TYPOGRAPHY ==================== -->
+    <section class="ds-section" data-figma-node="643:9983">
+      <div class="ds-label" data-figma-node="627:407">Typography</div>
+
+      <div class="ds-type-list">
+
+        <!-- H1 -->
+        <div class="ds-type-item" data-figma-node="643:9984">
+          <div class="ds-type-name">H1</div>
+          <div class="ds-type-body">
+            <div class="ds-type-spec">
+              <div class="ds-type-spec-row"><span>Bloc</span><span>Regular</span></div>
+              <div class="ds-type-spec-row"><span>92px</span><span>/</span><span>88%</span></div>
+            </div>
+            <div>
+              <p class="text-h1">The quick brown fox</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- H2 -->
+        <div class="ds-type-item" data-figma-node="643:9985">
+          <div class="ds-type-name">H2</div>
+          <div class="ds-type-body">
+            <div class="ds-type-spec">
+              <div class="ds-type-spec-row"><span>Bloc</span><span>Regular</span></div>
+              <div class="ds-type-spec-row"><span>64px</span><span>/</span><span>auto</span></div>
+            </div>
+            <div>
+              <p class="text-h2">The Quick Brown Fox</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- H3 -->
+        <div class="ds-type-item" data-figma-node="643:9986">
+          <div class="ds-type-name">H3</div>
+          <div class="ds-type-body">
+            <div class="ds-type-spec">
+              <div class="ds-type-spec-row"><span>Bloc</span><span>Regular</span></div>
+              <div class="ds-type-spec-row"><span>24px</span><span>/</span><span>26px</span></div>
+            </div>
+            <div>
+              <p class="text-h3">The quick brown fox</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- H4 -->
+        <div class="ds-type-item" data-figma-node="643:9987">
+          <div class="ds-type-name">H4</div>
+          <div class="ds-type-body">
+            <div class="ds-type-spec">
+              <div class="ds-type-spec-row"><span>Golos</span><span>Text Regular</span></div>
+              <div class="ds-type-spec-row"><span>20px</span><span>/</span><span>auto</span></div>
+            </div>
+            <div>
+              <p class="text-h4">The quick brown fox</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paragraph -->
+        <div class="ds-type-item" data-figma-node="643:9988">
+          <div class="ds-type-name">Paragraph</div>
+          <div class="ds-type-body">
+            <div class="ds-type-spec">
+              <div class="ds-type-spec-row"><span>Golos</span><span>Text Regular</span></div>
+              <div class="ds-type-spec-row"><span>18px</span><span>/</span><span>auto</span></div>
+            </div>
+            <div>
+              <p class="text-paragraph">The quick brown fox jumps over the lazy dog.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paragraph_Caps -->
+        <div class="ds-type-item" data-figma-node="643:9989">
+          <div class="ds-type-name">Paragraph_Caps</div>
+          <div class="ds-type-body">
+            <div class="ds-type-spec">
+              <div class="ds-type-spec-row"><span>Golos</span><span>Text Regular</span></div>
+              <div class="ds-type-spec-row"><span>20px</span><span>/</span><span>auto</span></div>
+            </div>
+            <div>
+              <p class="text-paragraph-caps">The quick brown fox jumps over the lazy dog.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descriptor -->
+        <div class="ds-type-item" data-figma-node="643:9990">
+          <div class="ds-type-name">Descriptor</div>
+          <div class="ds-type-body">
+            <div class="ds-type-spec">
+              <div class="ds-type-spec-row"><span>Golos</span><span>Text Regular</span></div>
+              <div class="ds-type-spec-row"><span>16px</span><span>/</span><span>auto</span></div>
+            </div>
+            <div>
+              <p class="text-descriptor">The quick brown fox jumps over the lazy dog.</p>
+              <p class="ds-type-note">For First Blocks</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== COLORS ==================== -->
+    <section class="ds-section" data-figma-node="646:10241">
+      <div class="ds-label" data-figma-node="627:396">Colors</div>
+
+      <div class="ds-colors" data-figma-node="646:10243">
+
+        <div class="ds-swatch" data-figma-node="646:10244">
+          <div class="ds-swatch__color bg-white" style="border: 1px solid #ddd;"></div>
+          <div class="ds-swatch__name">Kant 1 - White</div>
+          <div class="ds-swatch__value">#F2F2F2</div>
+          <div class="ds-swatch__value">rgb(242, 242, 242)</div>
+          <div class="ds-swatch__value">hsl(0, 0, 95)</div>
+          <div class="ds-swatch__note">Backgrounds, white text</div>
+        </div>
+
+        <div class="ds-swatch" data-figma-node="646:10245">
+          <div class="ds-swatch__color bg-beige"></div>
+          <div class="ds-swatch__name">Kant 2 - Beige</div>
+          <div class="ds-swatch__value">#D8CBBA</div>
+          <div class="ds-swatch__value">rgb(216, 203, 186)</div>
+          <div class="ds-swatch__value">hsl(34, 28, 79)</div>
+          <div class="ds-swatch__note">Background for cards or blocks, decor, text</div>
+        </div>
+
+        <div class="ds-swatch" data-figma-node="646:10246">
+          <div class="ds-swatch__color bg-gray"></div>
+          <div class="ds-swatch__name">Kant 3 - Gray</div>
+          <div class="ds-swatch__value">#8C8481</div>
+          <div class="ds-swatch__value">rgb(140, 132, 129)</div>
+          <div class="ds-swatch__value">hsl(16, 5, 53)</div>
+          <div class="ds-swatch__note">Backgrounds for cards or blocks</div>
+        </div>
+
+        <div class="ds-swatch" data-figma-node="646:10247">
+          <div class="ds-swatch__color bg-brown"></div>
+          <div class="ds-swatch__name">Kant 4 - Brown</div>
+          <div class="ds-swatch__value">#59514E</div>
+          <div class="ds-swatch__value">rgb(89, 81, 78)</div>
+          <div class="ds-swatch__value">hsl(16, 7, 33)</div>
+          <div class="ds-swatch__note">Backgrounds for blocks</div>
+        </div>
+
+        <div class="ds-swatch" data-figma-node="646:10248">
+          <div class="ds-swatch__color bg-black"></div>
+          <div class="ds-swatch__name">Kant 5 - Black</div>
+          <div class="ds-swatch__value">#0D0D0D</div>
+          <div class="ds-swatch__value">rgb(13, 13, 13)</div>
+          <div class="ds-swatch__value">hsl(0, 0, 5)</div>
+          <div class="ds-swatch__note">Text, Backgrounds, Icons</div>
+        </div>
+
+        <div class="ds-swatch" data-figma-node="646:10249">
+          <div class="ds-swatch__color bg-accent"></div>
+          <div class="ds-swatch__name">Kant 6 - Accent</div>
+          <div class="ds-swatch__value">#FF5800</div>
+          <div class="ds-swatch__value">rgb(255, 88, 0)</div>
+          <div class="ds-swatch__value">hsl(21, 100, 50)</div>
+          <div class="ds-swatch__note">Buttons, Links, Backgrounds for some cards</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== ICONS ==================== -->
+    <section class="ds-section" data-figma-node="646:10363">
+      <div class="ds-label" data-figma-node="646:10302">Icons</div>
+
+      <div class="ds-icons">
+        <span class="icon icon--md" data-figma-node="647:10417"><img src="assets/icons/arrow-left.svg" alt="Arrow Left"></span>
+        <span class="icon icon--md" data-figma-node="646:10325"><img src="assets/icons/arrow-right.svg" alt="Arrow Right"></span>
+        <span class="icon icon--md" data-figma-node="646:10326"><img src="assets/icons/material.svg" alt="Material"></span>
+        <span class="icon icon--md" data-figma-node="646:10327"><img src="assets/icons/download.svg" alt="Download"></span>
+        <span class="icon icon--md" data-figma-node="646:10328"><img src="assets/icons/hand-left.svg" alt="Hand Left"></span>
+        <span class="icon icon--md" data-figma-node="646:10329"><img src="assets/icons/hand-right.svg" alt="Hand Right"></span>
+        <span class="icon icon--sm" data-figma-node="660:10583" style="transform:rotate(180deg);"><img src="assets/icons/chevron-up.svg" alt="Chevron Up"></span>
+      </div>
+    </section>
+
+    <!-- ==================== LOGO ==================== -->
+    <section class="ds-section">
+      <div class="ds-label" data-figma-node="647:10364">Logo</div>
+
+      <div class="ds-logos">
+        <div class="logo" data-figma-node="647:10393">
+          <img src="assets/logo.svg" alt="KANT" width="76" height="24">
+        </div>
+
+        <div class="logo-crease" data-figma-node="627:255">
+          <img src="assets/logo-crease.svg" alt="KANT pennant" style="width:100%;height:100%;">
+        </div>
+
+        <div class="logo-page-decore" data-figma-node="647:10400">
+          <img src="assets/logo-page-decore.svg" alt="KANT decorative">
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== BUTTONS ==================== -->
+    <section class="ds-section">
+      <div class="ds-label" data-figma-node="647:10407">Buttons</div>
+
+      <div class="ds-buttons">
+
+        <!-- Primary button -->
+        <div class="ds-btn-group">
+          <div class="ds-btn-label">Button — default / hover</div>
+          <div class="ds-buttons__row">
+            <a href="#" class="btn btn-primary" data-figma-node="627:293">Show full progam</a>
+            <a href="#" class="btn btn-primary" style="background-color:var(--color-accent);border-color:var(--color-accent);" data-figma-node="639:9657">Show full progam</a>
+          </div>
+        </div>
+
+        <!-- Arrow buttons -->
+        <div class="ds-btn-group">
+          <div class="ds-btn-label">Arrow Buttons — hover changes icon from black to accent (interactive)</div>
+          <div class="ds-buttons__row" style="gap:48px;">
+            <button class="btn-arrow" data-figma-node="647:10426">
+              <img class="btn-arrow__default" src="assets/icons/arrow-left-32.svg" alt="Left">
+              <img class="btn-arrow__hover" src="assets/icons/arrow-left-hover.svg" alt="Left hover">
+            </button>
+            <button class="btn-arrow" data-figma-node="649:10544">
+              <img class="btn-arrow__default" src="assets/icons/arrow-right-32.svg" alt="Right">
+              <img class="btn-arrow__hover" src="assets/icons/arrow-right-hover.svg" alt="Right hover">
+            </button>
+
+            <div class="slider-arrows" data-figma-node="647:10438">
+              <button class="btn-arrow">
+                <img class="btn-arrow__default" src="assets/icons/arrow-left-32.svg" alt="Left">
+                <img class="btn-arrow__hover" src="assets/icons/arrow-left-hover.svg" alt="Left hover">
+              </button>
+              <button class="btn-arrow">
+                <img class="btn-arrow__default" src="assets/icons/arrow-right-32.svg" alt="Right">
+                <img class="btn-arrow__hover" src="assets/icons/arrow-right-hover.svg" alt="Right hover">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interlinking Prev -->
+        <div class="ds-btn-group">
+          <div class="ds-btn-label">Interlinking_Button_Prev — default / hover</div>
+          <div class="ds-interlinking__pair">
+            <a href="#" class="btn-interlinking btn-interlinking--prev" data-figma-node="647:10461">
+              <span class="btn-interlinking__icon icon icon--xl"><img src="assets/icons/hand-left-48.png" alt=""></span>
+              <span class="btn-interlinking__text"><strong>Module 10.</strong> MILITARISM IN THE 20TH AND 21ST CENTURIES: FORGOTTEN LESSONS OF MODERN HISTORY</span>
+            </a>
+            <a href="#" class="btn-interlinking btn-interlinking--prev" style="gap:var(--space-3xl);padding-left:var(--space-lg);padding-right:var(--space-3xl);" data-figma-node="647:10463">
+              <span class="btn-interlinking__icon icon icon--xl"><img src="assets/icons/hand-left-48.png" alt=""></span>
+              <span class="btn-interlinking__text" style="text-decoration:underline;"><strong>Module 10.</strong> MILITARISM IN THE 20TH AND 21ST CENTURIES: FORGOTTEN LESSONS OF MODERN HISTORY</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Interlinking Next -->
+        <div class="ds-btn-group">
+          <div class="ds-btn-label">Interlinking_Button_Next — default / hover</div>
+          <div class="ds-interlinking__pair">
+            <a href="#" class="btn-interlinking btn-interlinking--next" data-figma-node="647:10495">
+              <span class="btn-interlinking__text"><strong>Module 2.</strong> MILITARISM IN THE 20TH AND 21ST CENTURIES: FORGOTTEN LESSONS OF MODERN HISTORY</span>
+              <span class="btn-interlinking__icon icon icon--xl"><img src="assets/icons/hand-right-48.png" alt=""></span>
+            </a>
+            <a href="#" class="btn-interlinking btn-interlinking--next" style="gap:var(--space-3xl);padding-left:var(--space-3xl);padding-right:var(--space-lg);" data-figma-node="647:10497">
+              <span class="btn-interlinking__text" style="text-decoration:underline;"><strong>Module 2.</strong> MILITARISM IN THE 20TH AND 21ST CENTURIES: FORGOTTEN LESSONS OF MODERN HISTORY</span>
+              <span class="btn-interlinking__icon icon icon--xl"><img src="assets/icons/hand-right-48.png" alt=""></span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <section class="ds-section">
+      <div class="ds-label" data-figma-node="647:10514">Navigation</div>
+
+      <div class="ds-nav-wrap">
+        <header class="header" data-figma-node="628:310">
+          <img class="header__bg" src="assets/images/header-bg.svg" alt="" data-figma-node="628:310">
+          <a href="#" class="header__logo logo" data-figma-node="647:10366">
+            <img src="assets/logo.svg" alt="KANT" width="76" height="24">
+          </a>
+          <div class="header__menu" data-figma-node="628:300">
+            <nav class="nav" data-figma-node="628:301">
+              <a href="#" class="nav__link" data-figma-node="628:302">About</a>
+              <a href="#" class="nav__link" data-figma-node="628:303">Modules</a>
+              <a href="#" class="nav__link" data-figma-node="628:304">Publications</a>
+            </nav>
+            <div class="lang-switcher" data-figma-node="628:305">
+              <span class="lang-switcher__label" data-figma-node="628:306">EN</span>
+              <span class="lang-switcher__chevron">
+                <span class="icon icon--sm" data-figma-node="628:307"><img src="assets/icons/chevron-up.svg" alt=""></span>
+              </span>
+            </div>
+          </div>
+        </header>
+      </div>
+    </section>
+
+    <!-- ==================== CARD LINK ==================== -->
+    <section class="ds-section ds-cards">
+      <div class="ds-label">Card_Link</div>
+
+      <div class="ds-card-pair">
+        <!-- Interactive: hover to see action appear -->
+        <div class="ds-btn-label">State=Default → State=Hover (hover the card to see "Learn the module" action)</div>
+        <a href="#" class="card-link" data-figma-node="636:9496">
+          <p class="card-link__number text-card-number" data-figma-node="162:1327">1</p>
+          <div class="card-link__body" data-figma-node="162:1329">
+            <div class="card-link__content" data-figma-node="162:1330">
+              <p class="card-link__title text-h3" data-figma-node="162:1331">Вечный мир или как освободиться от войн: рецепт от Иммануила Канта</p>
+              <p class="card-link__description text-paragraph" data-figma-node="162:1332">Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.</p>
+              <p class="card-link__meta" data-figma-node="162:1333">Video 14:23<br>Podcast<br>PDF<br><strong>EN, RU, DE, KZ</strong></p>
+            </div>
+            <div class="card-link__action" data-figma-node="638:9564">
+              <div class="card-link__action-label" data-figma-node="638:9565">
+                <p>Learn</p>
+                <p>the module</p>
+              </div>
+              <span class="icon icon--md" data-figma-node="646:10325"><img src="assets/icons/arrow-right.svg" alt=""></span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ==================== AUTHOR CARD ==================== -->
+    <section class="ds-section">
+      <div class="ds-label">Author Card</div>
+
+      <div class="ds-author-cards">
+        <!-- Interactive: hover to flip photo → quote -->
+        <div class="ds-author-state">
+          <div class="ds-btn-label">State=Default → State=Hover (hover to flip)</div>
+          <div class="card-author" data-figma-node="638:9607">
+            <div class="card-author__photo" data-figma-node="182:311">
+              <img src="assets/images/author-photo.jpg" alt="Sevil Huseynova">
+              <div class="card-author__name text-author-name" data-figma-node="182:312">
+                <p>Sevil</p>
+                <p>Huseynova</p>
+              </div>
+            </div>
+            <div class="card-author__quote" data-figma-node="638:9630">
+              <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-end;">
+                <p class="card-author__bio" data-figma-node="638:9633">Social Anthropologist, Center for Independent Social Research Berlin</p>
+              </div>
+              <div class="card-author__name text-author-name" data-figma-node="638:9634">
+                <p>Sevil</p>
+                <p>Huseynova</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PERFORATIONS ==================== -->
+    <section class="ds-section">
+      <div class="ds-label">Perforations</div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-xl);margin-top:var(--space-xl);">
+        <div class="perforation-row" data-figma-node="627:322"></div>
+
+        <div class="perforations" data-figma-node="627:319">
+          <!-- Paper_gorizontal -->
+          <div class="paper-horizontal" data-figma-node="627:303">
+            <div class="paper-horizontal__dots">
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+              <div class="paper-horizontal__dot"></div>
+            </div>
+          </div>
+
+          <!-- Author_paper -->
+          <div class="author-paper" data-figma-node="627:320">
+            <img src="assets/images/author-paper.svg" alt="" style="width:100%;height:100%;">
+          </div>
+
+          <!-- Paper_vertical (node 660:10602) — natively vertical, border-right -->
+          <div class="paper-vertical" data-figma-node="660:10602">
+            <div class="paper-vertical__dots" data-figma-node="660:10599">
+              <img src="assets/images/dots-vertical.svg" alt="" style="width:100%;height:100%;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

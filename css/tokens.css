@@ -1,0 +1,163 @@
+/* ==========================================================================
+   KANT Design System — Design Tokens
+   Source: Figma "Кант-Сайт" → frame "Design System" (node 447:301)
+   File:   Q4qoKLXrnwwF1kRsYnDyt3
+   
+   Every variable is annotated with its Figma path.
+   To update after Figma changes: run get_variable_defs → find by comment → replace value.
+   ========================================================================== */
+
+/* --- Fonts ----------------------------------------------------------------
+   "Bloc" — display / heading typeface (local file required in assets/fonts/)
+   "Golos Text" — body / UI typeface (Google Fonts or local)
+   -------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Bloc';
+  src: url('../assets/fonts/bloc_regular.woff2') format('woff2'),
+       url('../assets/fonts/bloc_regular.woff')  format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+
+  /* ===================== COLORS ===================== */
+
+  /* Figma: Kant 1 - White  |  Backgrounds, white text */
+  --color-white: #F2F2F2;
+
+  /* Figma: Kant 2 - Beige  |  Background for cards or blocks, decor, text */
+  --color-beige: #D8CBBA;
+
+  /* Figma: Kant 3 - Gray  |  Backgrounds for cards or blocks */
+  --color-gray: #8C8481;
+
+  /* Figma: Kant 4 - Brown  |  Backgrounds for blocks */
+  --color-brown: #59514E;
+
+  /* Figma: Kant 5 - Black  |  Text, Backgrounds, Icons */
+  --color-black: #0D0D0D;
+
+  /* Figma: Kant 6 - Accent  |  Buttons, Links, Backgrounds for some cards */
+  --color-accent: #FF5800;
+
+
+  /* ===================== FONTS ===================== */
+
+  /* Figma: Bloc Regular — headings, logos, display */
+  --font-display: 'Bloc', 'Georgia', serif;
+
+  /* Figma: Golos Text — body, UI, navigation */
+  --font-body: 'Golos Text', 'Helvetica Neue', Arial, sans-serif;
+
+
+  /* ===================== TYPOGRAPHY ===================== */
+
+  /* Figma: H1 — Bloc Regular 92 / 88% / ls 0 */
+  --text-h1-size: 92px;
+  --text-h1-weight: 700;
+  --text-h1-line-height: 0.88;
+  --text-h1-letter-spacing: 0;
+
+  /* Figma: H2 — Bloc Regular 64 / auto / ls 2% → 1.28px */
+  --text-h2-size: 64px;
+  --text-h2-weight: 700;
+  --text-h2-line-height: normal;
+  --text-h2-letter-spacing: 1.28px;
+
+  /* Figma: H3 — Bloc Regular 24 / 26px / ls 1% → 0.24px */
+  --text-h3-size: 24px;
+  --text-h3-weight: 700;
+  --text-h3-line-height: 26px;
+  --text-h3-letter-spacing: 0.24px;
+
+  /* Figma: H4 — Golos Text Regular 20 / auto / ls 0 */
+  --text-h4-size: 20px;
+  --text-h4-weight: 400;
+  --text-h4-line-height: normal;
+  --text-h4-letter-spacing: 0;
+
+  /* Figma: Paragraph — Golos Text Regular 18 / auto / ls 0 */
+  --text-paragraph-size: 18px;
+  --text-paragraph-weight: 400;
+  --text-paragraph-line-height: normal;
+  --text-paragraph-letter-spacing: 0;
+
+  /* Figma: Paragraph_Caps — Golos Text Regular 20 / auto / ls 0 */
+  --text-paragraph-caps-size: 20px;
+  --text-paragraph-caps-weight: 400;
+  --text-paragraph-caps-line-height: normal;
+  --text-paragraph-caps-letter-spacing: 0;
+
+  /* Figma: Descriptor — Golos Text Regular 16 / auto / ls 0 */
+  --text-descriptor-size: 16px;
+  --text-descriptor-weight: 400;
+  --text-descriptor-line-height: normal;
+  --text-descriptor-letter-spacing: 0;
+
+
+  /* ===================== FONT WEIGHTS (Golos Text) ===================== */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+
+  /* ===================== SPACING ===================== */
+
+  /* Figma: var(--sds-size-space-200) */
+  --space-xs: 8px;
+
+  /* Figma: var(--sds-size-space-300) */
+  --space-sm: 12px;
+
+  /* Figma: var(--sds-size-space-400) */
+  --space-md: 16px;
+
+  /* Figma: var(--sds-size-space-600) */
+  --space-lg: 24px;
+
+  /* Figma: var(--sds-size-space-800) */
+  --space-xl: 32px;
+
+  /* Derived from component layouts */
+  --space-2xl: 36px;
+  --space-3xl: 48px;
+  --space-4xl: 56px;
+  --space-5xl: 60px;
+
+
+  /* ===================== BORDER ===================== */
+
+  /* Figma: var(--sds-size-stroke-border) */
+  --border-width: 1px;
+
+  --border-color-divider: var(--color-brown);
+  --border-style-divider: dashed;
+
+
+  /* ===================== ICON SIZE ===================== */
+
+  --icon-size-sm: 16px;
+  --icon-size-md: 24px;
+  --icon-size-lg: 32px;
+  --icon-size-xl: 48px;
+
+
+  /* ===================== LAYOUT ===================== */
+
+  --layout-max-width: 1440px;
+  --layout-content-width: 1320px;
+  --layout-header-height: 88px;
+  --layout-header-padding-x: 60px;
+  --layout-header-padding-y: 24px;
+
+
+  /* ===================== TRANSITIONS ===================== */
+
+  --transition-fast: 0.15s ease-in-out;
+  --transition-base: 0.3s ease-in-out;
+}

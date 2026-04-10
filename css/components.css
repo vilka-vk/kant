@@ -1,0 +1,1608 @@
+/* ==========================================================================
+   KANT Design System — Component Styles
+   All values reference tokens from tokens.css via var(--token).
+   Every component is annotated with its Figma node ID for traceability.
+   ========================================================================== */
+
+
+/* ===================== RESET & BASE ===================== */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  color: var(--color-black);
+  background-color: var(--color-white);
+  line-height: normal;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+
+/* ===================== TYPOGRAPHY ===================== */
+
+/* Figma: H1 (node I643:9984) */
+.text-h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-h1-size);
+  font-weight: var(--text-h1-weight);
+  line-height: var(--text-h1-line-height);
+  letter-spacing: var(--text-h1-letter-spacing);
+  color: var(--color-black);
+  text-transform: uppercase;
+}
+
+/* Figma: H2 (node I643:9985) */
+.text-h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-h2-size);
+  font-weight: var(--text-h2-weight);
+  line-height: var(--text-h2-line-height);
+  letter-spacing: var(--text-h2-letter-spacing);
+  color: var(--color-black);
+  text-transform: capitalize;
+  font-feature-settings: 'cpsp' 1, 'case' 1;
+}
+
+/* Figma: H3 (node I643:9986) */
+.text-h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-line-height);
+  letter-spacing: var(--text-h3-letter-spacing);
+  color: var(--color-black);
+  text-transform: uppercase;
+}
+
+/* Figma: H4 (node I643:9987) */
+.text-h4 {
+  font-family: var(--font-body);
+  font-size: var(--text-h4-size);
+  font-weight: var(--text-h4-weight);
+  line-height: var(--text-h4-line-height);
+  letter-spacing: var(--text-h4-letter-spacing);
+  color: var(--color-black);
+  text-transform: uppercase;
+}
+
+/* Figma: Paragraph (node I643:9988) */
+.text-paragraph {
+  font-family: var(--font-body);
+  font-size: var(--text-paragraph-size);
+  font-weight: var(--text-paragraph-weight);
+  line-height: var(--text-paragraph-line-height);
+  letter-spacing: var(--text-paragraph-letter-spacing);
+  color: var(--color-black);
+}
+
+/* Figma: Paragraph_Caps (node I643:9989) */
+.text-paragraph-caps {
+  font-family: var(--font-body);
+  font-size: var(--text-paragraph-caps-size);
+  font-weight: var(--text-paragraph-caps-weight);
+  line-height: var(--text-paragraph-caps-line-height);
+  letter-spacing: var(--text-paragraph-caps-letter-spacing);
+  color: var(--color-black);
+  text-transform: uppercase;
+}
+
+/* Figma: Descriptor (node I643:9990) */
+.text-descriptor {
+  font-family: var(--font-body);
+  font-size: var(--text-descriptor-size);
+  font-weight: var(--text-descriptor-weight);
+  line-height: var(--text-descriptor-line-height);
+  letter-spacing: var(--text-descriptor-letter-spacing);
+  color: var(--color-black);
+  text-transform: uppercase;
+}
+
+/* Author name on cards — Bloc 32px, 0.94 line-height */
+.text-author-name {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: var(--text-h1-weight);
+  line-height: 0.94;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+/* Card large number — Bloc 146px, decorative */
+.text-card-number {
+  font-family: var(--font-display);
+  font-size: 146px;
+  font-weight: var(--text-h1-weight);
+  line-height: 1.1;
+  letter-spacing: 2.92px;
+  text-transform: uppercase;
+  color: var(--color-beige);
+}
+
+
+/* ===================== ICONS ===================== */
+
+/* Figma: Icons (node 646:10363) */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon img,
+.icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.icon--sm {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.icon--md {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+.icon--lg {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+
+.icon--xl {
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
+}
+
+
+/* ===================== LOGO ===================== */
+
+/* Figma: Logo (node 647:10393) — compact, 76×24 */
+.logo {
+  display: block;
+  width: 76px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* Figma: Logo_Crease (node 627:255) — triangular pennant */
+.logo-crease {
+  display: block;
+  width: 395.5px;
+  height: 349px;
+}
+
+/* Figma: Logo_Page_Decore (node 647:10400) — rotated "KANT" watermark */
+.logo-page-decore {
+  display: block;
+  width: 346px;
+  height: 112px;
+  margin-right: -18px;
+}
+
+
+
+/* ===================== BUTTONS ===================== */
+
+/* Figma: Button base (node 627:293) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  height: 72px;
+  padding: var(--space-sm) var(--space-lg);
+  border: var(--border-width) solid transparent;
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  color: var(--color-white);
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+/* Figma: Button default — black bg (node 627:293) */
+.btn-primary {
+  background-color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+/* Figma: Button hover — accent bg (node 639:9657) */
+.btn-primary:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Figma: Arrow_Button — 32×32 arrow navigation (nodes 647:10426, 649:10544) */
+.btn-arrow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.btn-arrow img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.btn-arrow__default { opacity: 1; transition: opacity var(--transition-fast); }
+.btn-arrow__hover   { opacity: 0; transition: opacity var(--transition-fast); }
+.btn-arrow:hover .btn-arrow__default { opacity: 0; }
+.btn-arrow:hover .btn-arrow__hover   { opacity: 1; }
+
+/* Figma: Hamburger (node 694:1653) — hidden on desktop, visible on mobile */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.hamburger__bar {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: var(--color-black);
+}
+
+/* Figma: Slider Arrow Buttons (node 647:10438) */
+.slider-arrows {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+}
+
+/* Figma: Interlinking_Button base (nodes 647:10461, 647:10495) */
+.btn-interlinking {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 590px;
+  padding: var(--space-2xl) var(--space-3xl);
+  gap: var(--space-lg);
+  background-color: var(--color-accent);
+  border: var(--border-width) solid var(--color-accent);
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  transition: gap var(--transition-base), padding var(--transition-base);
+}
+
+.btn-interlinking__text {
+  flex: 1 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-descriptor-size);
+  font-weight: var(--weight-regular);
+  line-height: 1.2;
+  color: var(--color-black);
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.btn-interlinking__text strong {
+  font-weight: var(--weight-semibold);
+}
+
+.btn-interlinking:hover .btn-interlinking__text {
+  text-decoration: underline;
+}
+
+/* Figma: Interlinking_Button_Prev (node 647:10461) */
+.btn-interlinking--prev {
+  flex-direction: row;
+}
+
+.btn-interlinking--prev .btn-interlinking__text {
+  text-align: left;
+}
+
+.btn-interlinking--prev:hover {
+  gap: var(--space-3xl);
+  padding-left: var(--space-lg);
+  padding-right: var(--space-3xl);
+}
+
+/* Figma: Interlinking_Button_Next (node 647:10495) */
+.btn-interlinking--next {
+  flex-direction: row;
+}
+
+.btn-interlinking--next .btn-interlinking__text {
+  text-align: right;
+}
+
+.btn-interlinking--next:hover {
+  gap: var(--space-3xl);
+  padding-left: var(--space-3xl);
+  padding-right: var(--space-lg);
+}
+
+.btn-interlinking__icon {
+  flex-shrink: 0;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
+}
+
+
+/* ===================== HEADER / NAVIGATION ===================== */
+
+/* Figma: Header (node 628:310) */
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: var(--layout-header-height);
+  padding: var(--layout-header-padding-y) var(--layout-header-padding-x);
+  margin: 0 auto;
+  background: linear-gradient(180deg, #FFF -35.11%, rgba(255, 255, 255, 0.00) 100%);
+}
+
+.header__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+}
+
+.header__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.header__logo {
+  position: relative;
+  z-index: 1;
+}
+
+/* Figma: Menu (node 628:300) */
+.header__menu {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4xl);
+}
+
+/* Figma: Nav (node 628:301) */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4xl);
+}
+
+.nav__link {
+  font-family: var(--font-body);
+  font-size: var(--text-h4-size);
+  font-weight: var(--weight-semibold);
+  line-height: normal;
+  color: var(--color-black);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.nav__link:hover {
+  color: var(--color-accent);
+}
+
+/* Figma: Lang (node 628:305) */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: var(--space-xs) 6px;
+  cursor: pointer;
+}
+
+.lang-switcher__label {
+  font-family: var(--font-body);
+  font-size: var(--text-h4-size);
+  font-weight: var(--weight-semibold);
+  line-height: normal;
+  color: var(--color-black);
+}
+
+.lang-switcher__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(180deg);
+}
+
+.lang-switcher__chevron .icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+
+/* ===================== CARD LINK ===================== */
+
+/* Figma: Card_Link (node 636:9496) */
+.card-link {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-lg);
+  min-width: 240px;
+  width: var(--layout-content-width);
+  padding: var(--space-xl) 0;
+  border-bottom: var(--border-width) var(--border-style-divider) var(--border-color-divider);
+  cursor: pointer;
+}
+
+.card-link__number {
+  position: absolute;
+  left: 0.5px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.card-link__body {
+  display: flex;
+  flex: 1 0 0;
+  align-items: flex-start;
+  gap: var(--space-md);
+  min-width: 160px;
+  min-height: 1px;
+  z-index: 1;
+}
+
+.card-link__content {
+  display: flex;
+  flex: 1 0 0;
+  align-items: flex-start;
+  gap: var(--space-3xl);
+  padding-left: 40px;
+  min-height: 1px;
+  min-width: 1px;
+}
+
+.card-link__title {
+  width: 396px;
+  flex-shrink: 0;
+}
+
+.card-link__description {
+  width: 395px;
+  flex-shrink: 0;
+}
+
+/* Figma: meta info — gray secondary text */
+.card-link__meta {
+  flex: 1 0 0;
+  min-width: 1px;
+  min-height: 1px;
+  font-family: var(--font-body);
+  font-size: var(--text-paragraph-size);
+  font-weight: var(--text-paragraph-weight);
+  line-height: normal;
+  color: var(--color-gray);
+}
+
+/* Figma: Card_Link hover state — "Learn the module" action (node 638:9557) */
+.card-link__action {
+  display: none;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.card-link:hover .card-link__action {
+  display: flex;
+}
+
+.card-link__action-label {
+  width: 99px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: var(--weight-regular);
+  line-height: 1.1;
+  letter-spacing: -0.24px;
+  text-transform: uppercase;
+  color: var(--color-brown);
+}
+
+
+/* ===================== AUTHOR CARD ===================== */
+
+/* Figma: Author Card (node 638:9607) */
+.card-author {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+  width: 321px;
+}
+
+/* Figma: Photo state (node 182:311) */
+.card-author__photo {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: 321px;
+  height: 346px;
+  padding: var(--space-md);
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--transition-base);
+}
+
+.card-author__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transition: transform 0.4s ease;
+}
+
+.card-author:hover .card-author__photo img {
+  transform: scale(1.05);
+}
+
+.card-author__name {
+  position: relative;
+  z-index: 1;
+  color: var(--color-white);
+  transition: opacity var(--transition-base);
+}
+
+/* Figma: Quote / hover state (node 638:9630) */
+.card-author__quote {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 346px;
+  padding: var(--space-md);
+  background-color: var(--color-brown);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+.card-author:hover .card-author__photo {
+  opacity: 0;
+}
+
+.card-author:hover .card-author__quote {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-author__bio {
+  font-family: var(--font-body);
+  font-size: var(--text-descriptor-size);
+  font-weight: var(--text-descriptor-weight);
+  line-height: normal;
+  color: var(--color-white);
+  width: 283px;
+}
+
+.card-author__quote .card-author__name {
+  align-self: flex-end;
+}
+
+
+/* ===================== PERFORATION / DECORATIVE ===================== */
+
+/* Figma: perforation_row (node 627:322) */
+.perforation-row {
+  width: 100%;
+  max-width: 1118px;
+  height: 1px;
+  border-bottom: var(--border-width) var(--border-style-divider) var(--border-color-divider);
+}
+
+/* Figma: Paper_gorizontal (node 627:303) — dots via repeating radial-gradient */
+.paper-horizontal {
+  position: relative;
+  width: 440px;
+  height: 48px;
+  border-bottom: var(--border-width) var(--border-style-divider) var(--color-white);
+}
+
+.paper-horizontal::before {
+  content: '';
+  position: absolute;
+  top: 18.75%;
+  left: 2.95%;
+  right: 2.95%;
+  height: 14px;
+  background: radial-gradient(circle 7px at center, var(--color-white) 99%, transparent 100%);
+  background-size: 40px 14px;
+  background-repeat: repeat-x;
+}
+
+/* Figma: Paper_vertical (node 660:10602) — 2 dots via radial-gradient */
+.paper-vertical {
+  position: relative;
+  width: 38px;
+  height: 440px;
+  border-right: var(--border-width) var(--border-style-divider) var(--color-white);
+}
+
+.paper-vertical::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 230px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background:
+    radial-gradient(circle 10px, var(--color-white) 96%, transparent 100%) center top / 20px 100px no-repeat,
+    radial-gradient(circle 10px, var(--color-white) 96%, transparent 100%) center bottom / 20px 100px no-repeat
+}
+
+/* Figma: Author_paper (node 627:320) */
+.author-paper {
+  width: 357px;
+  height: 8px;
+}
+
+/* Figma: Perforations container (node 627:319) */
+.perforations {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background-color: var(--color-accent);
+  width: 922px;
+}
+
+
+/* ===================== PAGE LAYOUT ===================== */
+
+.page {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  background-color: var(--color-white);
+  overflow: hidden;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 120px;
+  max-width: 1920px;
+  min-width: 320px;
+  padding: 120px 60px 120px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  align-items: flex-start;
+  width: 100%;
+  max-width: var(--layout-content-width);
+}
+
+
+/* ===================== HEADER (FIXED) ===================== */
+
+.header--fixed {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: 100%;
+}
+
+
+/* ===================== HERO ===================== */
+
+/* Figma: First block (node 580:286) — 1440×838 */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  padding-left: 60px;
+  padding-right: 60px;
+  overflow: hidden;
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Figma: Right Section Image (node 627:256) — logo crease triangle */
+.hero__crease {
+  position: absolute;
+  display: block;
+  right: 0;
+  bottom: 0;
+  width: 400px;
+  height: 350px;
+}
+
+/* Figma: Headline wrapper (node 664:541) */
+.hero__content {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  max-width: 1009px;
+  height: auto;
+  padding: 0 60px;
+}
+
+
+/* Figma: Subtitle (node 580:328) — positioned within content wrapper */
+.hero__subtitle {
+  position: absolute;
+  left: 376px;
+  bottom: 86px;
+}
+
+
+/* ===================== ABOUT ===================== */
+
+.about {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 24px;
+}
+
+.about__left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  height: fit-content;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  font-family: var(--font-body);
+  font-size: var(--text-paragraph-caps-size);
+  font-weight: var(--weight-regular);
+  line-height: normal;
+  border: 1px solid var(--color-black);
+  background-color: var(--color-white);
+  color: var(--color-black);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.tab--active {
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.about__player {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: var(--color-black);
+}
+
+.about__player-panel {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
+}
+
+.about__player-panel.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.about__player-panel iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+#about {
+  width: 100%;
+}
+
+.about__right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-top: 36px;
+}
+
+.about__sticker {
+  position: relative;
+  width: 440px;
+  height: 479px;
+  background-color: var(--color-beige);
+}
+
+.about__sticker-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 80px;
+  width: 390px;
+}
+
+
+/* ===================== MODULES ===================== */
+
+.modules__program {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 38px;
+  width: 100%;
+}
+
+.modules__cards {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+
+/* ===================== POSITION (OUR POSITION) ===================== */
+
+.position {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.position__row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  height: 440px;
+}
+
+.position__block {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  padding: 24px 16px;
+}
+
+.position__block--fixed {
+  flex: 0.5;
+}
+
+.position__block-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  transform: translateY(20%);
+}
+
+.position__block-text--left {
+  padding-left: 24px;
+}
+
+.position__block-title {
+  font-family: var(--font-body);
+  font-size: var(--text-paragraph-caps-size);
+  font-weight: var(--weight-regular);
+  line-height: normal;
+  text-transform: uppercase;
+}
+
+.position__block-body {
+  font-family: var(--font-body);
+  font-size: var(--text-paragraph-size);
+  font-weight: var(--weight-regular);
+  line-height: normal;
+}
+
+.position__block-emoji {
+  position: absolute;
+  left: 256px;
+  top: 10px;
+  font-size: 88px;
+  line-height: normal;
+}
+
+.position__block-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.position__objectives-list {
+  list-style: disc;
+  padding-left: 27px;
+  font-family: var(--font-body);
+  font-size: var(--text-paragraph-size);
+  font-weight: var(--weight-regular);
+  line-height: normal;
+}
+
+.position__objectives-list li + li {
+  margin-top: 0;
+}
+
+
+/* ===================== PUBLICATIONS ===================== */
+
+.publications {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+  width: 100%;
+}
+
+.publication-item {
+  display: flex;
+  flex: 1;
+  gap: var(--space-md);
+  align-items: center;
+  min-width: 0;
+}
+
+.publication-item:hover {
+  text-decoration: underline;
+}
+
+.publication-item__image {
+  width: 103px;
+  height: 130px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.publication-item__title {
+  flex: 1;
+  min-width: 0;
+}
+
+
+/* ===================== AUTHORS ===================== */
+
+.authors-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.authors-slider {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  overflow: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  user-select: none;
+}
+
+.authors-slider.is-dragging {
+  scroll-behavior: auto;
+  cursor: grabbing;
+}
+
+.authors-slider .card-author {
+  flex: 0 0 calc((100% - 36px) / 4);
+  min-width: 0;
+}
+
+.authors-slider .card-author__photo {
+  width: 100%;
+}
+
+
+/* ===================== FOOTER DECORE ===================== */
+
+.footer-decore {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: -16px;
+}
+
+
+/* ===================== FOOTER ===================== */
+
+.footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 96px;
+  padding: 36px 60px;
+  background-color: var(--color-black);
+}
+
+.footer__logo img {
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+.footer__socials {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.footer__social {
+  display: block;
+  width: 24px;
+  height: 24px;
+  transition: opacity var(--transition-base);
+}
+
+.footer__social:hover {
+  opacity: 0.7;
+}
+
+.footer__social img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+
+/* ===================== UTILITY CLASSES ===================== */
+
+.color-white   { color: var(--color-white); }
+.color-beige   { color: var(--color-beige); }
+.color-gray    { color: var(--color-gray); }
+.color-brown   { color: var(--color-brown); }
+.color-black   { color: var(--color-black); }
+.color-accent  { color: var(--color-accent); }
+
+.bg-white      { background-color: var(--color-white); }
+.bg-beige      { background-color: var(--color-beige); }
+.bg-gray       { background-color: var(--color-gray); }
+.bg-brown      { background-color: var(--color-brown); }
+.bg-black      { background-color: var(--color-black); }
+.bg-accent     { background-color: var(--color-accent); }
+
+.uppercase     { text-transform: uppercase; }
+.capitalize    { text-transform: capitalize; }
+
+
+/* ==========================================================================
+   RESPONSIVE — TABLET  (768–1199px, targets 820px Figma frame)
+   ========================================================================== */
+
+@media (max-width: 1199px) {
+
+  /* --- Layout --- */
+  .main {
+    gap: 80px;
+    padding: 80px 32px;
+  }
+  .section { gap: 32px; }
+
+  /* --- Typography scale-down --- */
+  .text-h1             { font-size: 64px; }
+  .text-h2             { font-size: 40px; letter-spacing: 0.8px; }
+  .text-h3             { font-size: 20px; line-height: 24px; }
+  .text-paragraph      { font-size: 16px; }
+  .text-paragraph-caps { font-size: 16px; }
+  .text-card-number    { font-size: 80px; letter-spacing: 1.6px; }
+
+  /* --- Header --- */
+  .header       { height: 72px; padding: 16px 32px; }
+  .header__menu { gap: 32px; }
+  .nav          { gap: 24px; }
+  .nav__link    { font-size: 16px; }
+  .lang-switcher__label { font-size: 16px; }
+
+  /* --- Hero --- */
+  .hero          { padding-left: 32px; padding-right: 32px; }
+  .hero__content { max-width: 600px; padding: 0 32px; }
+  .hero__crease  { width: 280px; height: 245px; }
+  .hero__subtitle { left: 260px; bottom: 60px; }
+
+  /* --- About — stack on tablet too (820px is too narrow for side-by-side) --- */
+  .about {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .about__left  { width: 100%; }
+  .about__right {
+    width: 100%;
+    padding-top: 0;
+  }
+  .about__sticker {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+  }
+  .about__sticker-text {
+    position: static;
+    transform: none;
+    width: auto;
+    padding: 72px 24px 24px;
+  }
+
+  /* --- Buttons --- */
+  .btn {
+    height: 48px;
+    font-size: 16px;
+    padding: var(--space-xs) var(--space-lg);
+  }
+
+  /* --- Card Link — remove hardcoded widths --- */
+  .card-link          { width: 100%; min-width: 0; }
+  .card-link__content { gap: var(--space-lg); padding-left: 32px; }
+  .card-link__title       { width: auto; flex: 1 1 0; min-width: 0; }
+  .card-link__description { width: auto; flex: 1 1 0; min-width: 0; }
+
+  /* --- Position grid — shorter rows --- */
+  .position__row           { height: 300px; gap: 8px; }
+  
+  .position__block-emoji { font-size: 52px; left: auto; right: 12px; top: 12px; }
+  .position__block-body  { font-size: 14px; }
+  .position__block-title { font-size: 16px; }
+  .position__block-text { transform: translateY(15%);  }
+  .position__block-text--left { padding-left: 16px; }
+
+  /* --- Publications --- */
+  .publications            { gap: 32px; }
+  .publication-item__image { width: 76px; height: 96px; }
+  .publication-item__title { font-size: 14px; }
+
+  /* --- Author slider — show 3, fluid cards --- */
+  .card-author             { width: auto; }
+  .card-author__photo      { width: 100%; height: 280px; }
+  .card-author__quote      { width: 100%; height: 280px; }
+  .card-author__bio        { width: auto; }
+  .authors-slider .card-author { flex: 0 0 calc((100% - 24px) / 3); }
+
+  /* --- Decorations fluid --- */
+  .paper-horizontal { width: 100%; }
+  .paper-vertical   { height: 100%; }
+
+  /* --- Interlinking --- */
+  .btn-interlinking { width: 100%; }
+
+  /* --- Footer --- */
+  .footer             { padding: 36px 32px; }
+}
+
+
+/* ==========================================================================
+   RESPONSIVE — MOBILE  (≤ 767px, targets 390px Figma frame · node 694:1421)
+   Values extracted from Figma design context.
+   ========================================================================== */
+
+@media (max-width: 1040px) {
+  .position__block-body { font-size: 12px; }
+}
+
+@media (max-width: 767px) {
+
+  /* --- Layout (Figma: Main gap-[64px] px-[16px]) --- */
+  .main {
+    gap: 64px;
+    padding: 64px 16px;
+  }
+  .section { gap: 16px; }
+
+  /* --- Typography — Figma keeps type LARGE on mobile --- */
+  .text-h1             { font-size: 56px; line-height: 0.88; }
+  .text-h2             { font-size: 40px; letter-spacing: 0.8px; }
+  .text-h3             { font-size: 19px; line-height: 21px; letter-spacing: 0.19px; }
+  .text-descriptor     { font-size: 14px; }
+  .text-card-number    { font-size: 82px; letter-spacing: 1.64px; }
+
+  /* --- Header — same height, hamburger replaces nav (Figma: h-[88px] px-[16px] py-[24px]) --- */
+  .header { padding: 24px 16px; }
+  .nav { display: none; }
+  .hamburger { display: flex; }
+
+  /* --- Hero (Figma: h-[844px], headline at top-[394px] left-[16px]) --- */
+  .hero {
+    height: 844px;
+    padding: 0;
+  }
+  .hero__content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    left: 16px;
+    top: 394px;
+    transform: none;
+    max-width: calc(100% - 32px);
+    padding: 5px;
+  }
+  .hero__subtitle {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin-top: 0;
+    font-size: 14px;
+    width: 123px;
+  }
+  .hero__crease {
+    width: 168px;
+    height: 148px;
+  }
+
+  /* --- About — vertical stack (Figma: flex-col gap-[16px]) --- */
+  .about {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .about__left  { width: 100%; }
+  .about__right {
+    width: 100%;
+    padding-top: 0;
+    gap: var(--space-md);
+  }
+  .about__sticker {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
+  .about__sticker-text {
+    position: static;
+    transform: none;
+    width: auto;
+    font-size: 12px;
+    padding: 64px 16px 24px;
+  }
+
+  /* --- Button (Figma: h-[40px] text-[16px] px-[24px]) --- */
+  .btn {
+    height: 40px;
+    font-size: 16px;
+    padding: var(--space-xs) var(--space-lg);
+  }
+  .about__right .btn { width: 100%; }
+
+  /* --- Card Link — keeps horizontal layout (Figma: same structure as desktop) ---
+     Number: text-[82px] absolute top-0 left-0
+     Body > Content: flex-col, pl-[24px], gap-[16px]
+     Title: text-[19px], Description: text-[11px], Meta: text-[11px] w-[144px]
+     Action: text-[8px] w-[62px], arrow 14px — always visible, aligned bottom-right */
+  .card-link {
+    width: 100%;
+    min-width: 0;
+  }
+  .card-link__number {
+    top: 0;
+    transform: none;
+  }
+  .card-link__content {
+    flex-direction: column;
+    gap: var(--space-md);
+    padding-left: 24px;
+  }
+  .card-link__title {
+    width: 100%;
+    flex: initial;
+    min-width: 0;
+  }
+  .card-link__description {
+    width: 100%;
+    flex: initial;
+    min-width: 0;
+    font-size: 11px;
+  }
+  .card-link__meta {
+    font-size: 11px;
+    width: 144px;
+    flex: none;
+  }
+  .card-link__action {
+    display: flex;
+    align-self: flex-end;
+  }
+  .card-link__action-label {
+    font-size: 8px;
+    letter-spacing: -0.16px;
+    width: 62px;
+  }
+  .card-link__action .icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* --- Position — vertical stack (Figma: flex-col gap-[8px]) ---
+     Concept: bg-accent, pt-[40px] pb-[16px] px-[16px], title 18px, body 16px
+     Principles: bg-beige, horizontal with paper-vertical left, text right
+     Image blocks: h-[260px] w-full, image absolute cover
+     Objectives: bg-black, same padding as Concept */
+  .position { gap: 8px; }
+  .position__row {
+    flex-direction: column;
+    height: auto;
+    gap: 8px;
+  }
+  .position__block {
+    flex: none;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .position__block--fixed {
+    width: 100%;
+    flex: none;
+  }
+  .position__block-text {
+    width: 100%;
+    padding: 64px 16px 24px;
+  }
+  
+  .position__block-title { font-size: 18px; }
+  .position__block-body  { font-size: 16px; }
+  .position__block-emoji {
+    font-size: 44px;
+    left: auto;
+    right: 12px;
+    top: 12px;
+  }
+  .position__objectives-list { font-size: 16px; padding-left: 24px; }
+  .position__block-image {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 260px;
+  }
+
+  /* --- Decorations — fluid (Figma: paper-horizontal 358×28, paper-vertical 28×324) --- */
+  .paper-horizontal {
+    width: 100% !important;
+    height: 28px;
+    left: 0 !important;
+    transform: none !important;
+  }
+  .paper-horizontal::before {
+    top: 22%;
+    left: 1.5%;
+    right: 1.5%;
+    height: 7px;
+    background-image: radial-gradient(circle 3.5px at center, var(--color-white) 99%, transparent 100%);
+    background-size: 20px 7px;
+  }
+  .paper-vertical { width: 28px; height: 324px; }
+  .paper-vertical::before {
+    width: 20px;
+    height: 230px;
+    background:
+    radial-gradient(circle 10px, var(--color-white) 96%, transparent 100%) center top / 20px 100px no-repeat,
+    radial-gradient(circle 10px, var(--color-white) 96%, transparent 100%) center bottom / 20px 100px no-repeat
+  }
+
+  /* --- Publications (Figma: flex-col gap-[24px], image 76×96, title text-[12px]) --- */
+  .publications {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .publication-item       { width: 100%; }
+  .publication-item__image { width: 76px; height: 96px; }
+  .publication-item__title { font-size: 12px; }
+
+  /* --- Authors (Figma: node 694:1574, card 320×420)
+     Photo: 320×266, stamp perforation at bottom, name hidden
+     Quote: 154px, bg-beige, items-end, justify-between, always visible
+     Bio: 16px, 283px, right-aligned | Name: 32px Bloc, right-aligned */
+  .authors-slider { gap: 24px; }
+  .authors-slider .card-author {
+    flex: 0 0 320px;
+  }
+  .card-author {
+    width: 320px;
+    height: 420px;
+    align-items: center;
+    gap: 0;
+  }
+  .card-author__photo {
+    width: 320px;
+    height: 266px;
+    padding: 0 var(--space-md);
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  /* Stamp perforation edge between photo and quote (matches Figma Author_paper: 7px circles, 20px pitch) */
+  .card-author__photo::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 8px;
+    background: radial-gradient(
+      circle 3.5px at 50% 0,
+      transparent 100%,
+      var(--color-beige) 0
+    );
+    background-size: 12px 8px;
+    z-index: 2;
+  }
+
+  /* Hide name overlay on photo — name lives in quote on mobile */
+  .card-author__photo .card-author__name {
+    display: none;
+  }
+
+  .card-author__quote {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    width: 100%;
+    height: 154px;
+    padding: var(--space-md);
+    background-color: var(--color-beige);
+    align-items: flex-end;
+  }
+
+  /* Disable hover effects on mobile */
+  .card-author:hover .card-author__photo { opacity: 1; }
+  .card-author:hover .card-author__photo img { transform: none; }
+  .card-author:hover .card-author__quote { opacity: 1; }
+
+  .card-author__quote .card-author__name {
+    color: var(--color-black);
+    align-self: flex-end;
+  }
+  .card-author__bio {
+    color: var(--color-black);
+    width: 283px;
+    font-size: 16px;
+  }
+
+  /* --- Interlinking buttons --- */
+  .btn-interlinking {
+    width: 100%;
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+  .btn-interlinking__text { font-size: 14px; }
+  .btn-interlinking__icon {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+  }
+
+  /* --- Footer --- */
+  .footer             { padding: 36px 16px; }
+  .footer__socials    { gap: 16px; }
+}
+
+
+/* ===================== PERFORATED CARD ===================== */
+
+.perforated-card_top {
+  background-image: url(/assets/paper-gorizontal.svg);
+  background-size: auto;
+  background-position: top center;
+  background-repeat: repeat-x;
+}
+
+.perforated_row {
+  border: 0;
+}
+
+.perforated_row .line_perforation {
+  border: 0;
+  position: relative;
+}
+
+.perforated_row .line_perforation::before {
+  content: '';
+  background-image: url(/assets/perforation-row.svg);
+  background-position: bottom center;
+  width: 100%;
+  height: 1px;
+  position: absolute;
+  display: block;
+  bottom: 0;
+  left: 0;
+}
+
+.perforated-card_left {
+  background-image: url(/assets/paper-vertical.svg);
+  background-position: center left;
+  background-repeat: repeat-y;
+  background-size: contain;
+  padding-left: 28px;
+}
+
+.module-number h1 {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 2px #f2f2f2;
+}

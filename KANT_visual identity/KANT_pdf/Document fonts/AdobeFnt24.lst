@@ -1,0 +1,136 @@
+%!Adobe-FontList 1.24
+%Locale:0x409
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoEmoji-Medium
+FamilyName:Noto Emoji
+StyleName:Medium
+FullName:Noto Emoji Medium
+MenuName:Noto Emoji Medium
+StyleBits:0
+WritingScript:Emoji
+OutlineFileName:D:\WORK\Фриланс\KANT\can be edit\материалы\KANT_pdf template Folder\Document fonts\NotoEmoji-Medium.ttf
+DataFormat:sfntData
+hasSVG:no
+hasCOLR:no
+VariableFontType:NonVariableFont
+FileLength:879076
+FileModTime:1651179600
+WeightClass:500
+WidthClass:5
+AngleClass:0
+NameArray:0,Win,1,Noto Emoji Medium
+NameArray:0,Win,16,Noto Emoji
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:NotoEmoji-Regular
+FamilyName:Noto Emoji
+StyleName:Regular
+FullName:Noto Emoji Regular
+MenuName:Noto Emoji
+FamilyPrefix:NotoEmoji
+StyleBits:0
+WritingScript:Emoji
+OutlineFileName:D:\WORK\Фриланс\KANT\can be edit\материалы\KANT_pdf template Folder\Document fonts\NotoEmoji-VariableFont_wght.ttf
+DataFormat:sfntData
+hasSVG:no
+hasCOLR:no
+VariableFontType:TrueTypeVariableFont
+FileLength:1966236
+FileModTime:1674219214
+WeightClass:400
+WidthClass:5
+AngleClass:0
+NameArray:0,Win,1,Noto Emoji
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:Bloc
+FamilyName:Bloc
+StyleName:Regular
+FullName:Bloc
+MenuName:Bloc
+StyleBits:0
+WritingScript:Roman
+OutlineFileName:D:\WORK\Фриланс\KANT\can be edit\материалы\KANT_pdf template Folder\Document fonts\bloc_regular.ttf
+DataFormat:sfntData
+hasSVG:no
+hasCOLR:no
+VariableFontType:NonVariableFont
+FileLength:261720
+FileModTime:1759521232
+WeightClass:700
+WidthClass:5
+AngleClass:0
+NameArray:0,Mac,18,Bloc
+NameArray:0,Mac,4,Bloc
+NameArray:0,Win,1,Bloc
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:GolosText-Medium
+FamilyName:Golos
+StyleName:Text Medium
+FullName:Golos Text Medium
+MenuName:Golos Text Medium
+StyleBits:0
+FamilyNameNative:Golos
+StyleNameNative:Text Medium
+FullNameNative:Golos Text Medium
+WritingScript:Cyrillic
+OutlineFileName:D:\WORK\Фриланс\KANT\can be edit\материалы\KANT_pdf template Folder\Document fonts\golos-text_medium.ttf
+DataFormat:sfntData
+hasSVG:no
+hasCOLR:no
+VariableFontType:NonVariableFont
+FileLength:157796
+FileModTime:1759569844
+WeightClass:500
+WidthClass:5
+AngleClass:0
+NameArray:0,Mac,18,Golos Text Medium
+NameArray:0,Mac,4,Golos Text Medium
+NameArray:0,Win,1,Golos Text Medium
+NameArray:0,Win,16,Golos
+NameArray:7,Win,16,Golos
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:GolosText-Regular
+FamilyName:Golos
+StyleName:Text Regular
+FullName:Golos Text Regular
+MenuName:Golos Text
+StyleBits:0
+FamilyNameNative:Golos
+StyleNameNative:Text Regular
+FullNameNative:Golos Text Regular
+WritingScript:Cyrillic
+OutlineFileName:D:\WORK\Фриланс\KANT\can be edit\материалы\KANT_pdf template Folder\Document fonts\golos-text_regular.ttf
+DataFormat:sfntData
+hasSVG:no
+hasCOLR:no
+VariableFontType:NonVariableFont
+FileLength:155332
+FileModTime:1759569844
+WeightClass:400
+WidthClass:5
+AngleClass:0
+NameArray:0,Mac,18,Golos Text Regular
+NameArray:0,Mac,4,Golos Text Regular
+NameArray:0,Win,1,Golos Text
+NameArray:0,Win,16,Golos
+NameArray:7,Win,16,Golos
+%EndFont
+

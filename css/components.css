@@ -525,6 +525,10 @@ ul, ol {
   color: var(--color-accent);
 }
 
+.nav__link--active {
+  color: var(--color-accent);
+}
+
 /* Figma: Lang (node 628:305) */
 .lang-switcher {
   position: relative;

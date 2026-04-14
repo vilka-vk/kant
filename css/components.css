@@ -310,6 +310,71 @@ ul, ol {
   background-color: var(--color-black);
 }
 
+.mobile-menu {
+  height: 100vh;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(216, 203, 186, 0);
+  z-index: 120;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(100%);
+  will-change: transform, opacity, background-color;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.5s;
+}
+
+.mobile-menu.is-open {
+  background-color: rgba(216, 203, 186, 1);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+  transition:
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
+}
+
+.mobile-menu__nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.mobile-menu__nav .nav__link {
+  font-size: 28px;
+  text-transform: uppercase;
+}
+
+.mobile-menu__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-black);
+  cursor: pointer;
+}
+
+.mobile-menu__close svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* Figma: Slider Arrow Buttons (node 647:10438) */
 .slider-arrows {
   display: flex;
@@ -462,10 +527,20 @@ ul, ol {
 
 /* Figma: Lang (node 628:305) */
 .lang-switcher {
+  position: relative;
   display: flex;
   align-items: center;
+}
+
+.lang-switcher__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   height: 40px;
+  width: 60px;
   padding: var(--space-xs) 6px;
+  border: none;
+  background: transparent;
   cursor: pointer;
 }
 
@@ -489,6 +564,40 @@ ul, ol {
   height: var(--icon-size-sm);
 }
 
+.lang-switcher__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  display: none;
+  flex-direction: column;
+  min-width: 64px;
+  border: 1px solid var(--color-black);
+  background-color: var(--color-white);
+  z-index: 20;
+}
+
+.lang-switcher.is-open .lang-switcher__menu {
+  display: flex;
+}
+
+.lang-switcher.is-open .lang-switcher__chevron {
+  transform: rotate(0deg);
+}
+
+.lang-switcher__option {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: var(--text-h4-size);
+  font-weight: var(--weight-semibold);
+  line-height: normal;
+  color: var(--color-black);
+  text-align: left;
+  cursor: pointer;
+}
 
 /* ===================== CARD LINK ===================== */
 
@@ -1314,6 +1423,7 @@ ul, ol {
   .header { padding: 24px 16px; }
   .nav { display: none; }
   .hamburger { display: flex; }
+  .header__menu { position: static; }
 
   /* --- Hero (Figma: h-[844px], headline at top-[394px] left-[16px]) --- */
   .hero {
@@ -1364,7 +1474,7 @@ ul, ol {
     transform: none;
     width: auto;
     font-size: 12px;
-    padding: 64px 16px 24px;
+    padding: 24px;
   }
 
   /* --- Button (Figma: h-[40px] text-[16px] px-[24px]) --- */

@@ -29,17 +29,33 @@
           <a href="#publications" class="nav__link" data-figma-node="628:304">Publications</a>
         </nav>
         <div class="lang-switcher" data-figma-node="628:305">
-          <span class="lang-switcher__label" data-figma-node="628:306">EN</span>
-          <span class="lang-switcher__chevron">
-            <span class="icon icon--sm" data-figma-node="628:307"><img src="assets/icons/chevron-up.svg" alt=""></span>
-          </span>
+          <button class="lang-switcher__trigger" type="button" aria-expanded="false" aria-haspopup="listbox" aria-label="Choose language">
+            <span class="lang-switcher__label" data-figma-node="628:306">EN</span>
+            <span class="lang-switcher__chevron">
+              <span class="icon icon--sm" data-figma-node="628:307"><img src="assets/icons/chevron-up.svg" alt=""></span>
+            </span>
+          </button>
+          <div class="lang-switcher__menu" role="listbox" aria-label="Site language">
+            <button class="lang-switcher__option is-active" type="button" role="option" aria-selected="true" data-lang="EN">EN</button>
+            <button class="lang-switcher__option" type="button" role="option" aria-selected="false" data-lang="RU">RU</button>
+          </div>
         </div>
-        <button class="hamburger" aria-label="Menu" data-figma-node="694:1653">
+        <button class="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu" data-figma-node="694:1653">
           <span class="hamburger__bar"></span>
           <span class="hamburger__bar"></span>
           <span class="hamburger__bar"></span>
         </button>
       </div>
+    </div>
+
+    <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+      <button class="mobile-menu__close" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+          <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+        </svg>
+      </button>
+      <nav class="mobile-menu__nav" aria-label="Mobile navigation"></nav>
     </div>
   </header>
 
@@ -471,5 +487,7 @@
 
 <script src="js/tabs.js"></script>
 <script src="js/slider.js"></script>
+<script src="js/lang-switcher.js"></script>
+<script src="js/mobile-menu.js"></script>
 </body>
 </html>

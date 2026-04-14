@@ -529,7 +529,7 @@ ul, ol {
 
 /* Figma: meta info — gray secondary text */
 .card-link__meta {
-  flex: 1 0 0;
+  flex: 0.5 0 0;
   min-width: 1px;
   min-height: 1px;
   font-family: var(--font-body);
@@ -551,7 +551,7 @@ ul, ol {
 }
 
 .card-link__action-label {
-  width: 99px;
+  margin-right: 16px;
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: var(--weight-regular);
@@ -1209,7 +1209,7 @@ ul, ol {
     position: static;
     transform: none;
     width: auto;
-    padding: 72px 24px 24px;
+    padding: 24px;
   }
 
   /* --- Buttons --- */
@@ -1221,9 +1221,12 @@ ul, ol {
 
   /* --- Card Link — remove hardcoded widths --- */
   .card-link          { width: 100%; min-width: 0; }
-  .card-link__content { gap: var(--space-lg); padding-left: 32px; }
+  .card-link__content { gap: var(--space-lg); padding-left: 24px; }
   .card-link__title       { width: auto; flex: 1 1 0; min-width: 0; }
   .card-link__description { width: auto; flex: 1 1 0; min-width: 0; }
+  .card-link__action { display: flex; align-items: center; flex-shrink: 0; }
+  .card-link__action-label { font-size: 10px; letter-spacing: -0.2px; }
+  .card-link__action .icon { width: 14px; height: 14px; }
 
   /* --- Position grid — shorter rows --- */
   .position__row           { height: 300px; gap: 8px; }
@@ -1373,21 +1376,21 @@ ul, ol {
     width: 100%;
     flex: initial;
     min-width: 0;
-    font-size: 11px;
   }
   .card-link__meta {
-    font-size: 11px;
     width: 144px;
     flex: none;
+  }
+  .text-paragraph {
+    font-size: 12px;
   }
   .card-link__action {
     display: flex;
     align-self: flex-end;
   }
   .card-link__action-label {
-    font-size: 8px;
+    font-size: 10px;
     letter-spacing: -0.16px;
-    width: 62px;
   }
   .card-link__action .icon {
     width: 14px;

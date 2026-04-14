@@ -483,7 +483,7 @@ ul, ol {
   align-items: flex-start;
   gap: var(--space-lg);
   min-width: 240px;
-  width: var(--layout-content-width);
+  width: 100%;
   padding: var(--space-xl) 0;
   border-bottom: var(--border-width) var(--border-style-divider) var(--border-color-divider);
   cursor: pointer;
@@ -517,19 +517,9 @@ ul, ol {
   min-width: 1px;
 }
 
-.card-link__title {
-  width: 396px;
-  flex-shrink: 0;
-}
-
-.card-link__description {
-  width: 395px;
-  flex-shrink: 0;
-}
-
 /* Figma: meta info — gray secondary text */
 .card-link__meta {
-  flex: 0.5 0 0;
+  flex: 1 1 auto;
   min-width: 1px;
   min-height: 1px;
   font-family: var(--font-body);
@@ -537,6 +527,19 @@ ul, ol {
   font-weight: var(--text-paragraph-weight);
   line-height: normal;
   color: var(--color-gray);
+}
+
+.card-link__meta-action {
+  display: flex;
+  flex: 0.5 0 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  min-width: 1px;
+}
+
+.card-link__title, .card-link__description, .card-link__meta-action {
+  flex: 1 0 0;
 }
 
 /* Figma: Card_Link hover state — "Learn the module" action (node 638:9557) */
@@ -641,7 +644,7 @@ ul, ol {
   font-weight: var(--text-descriptor-weight);
   line-height: normal;
   color: var(--color-white);
-  width: 283px;
+  width: 100%;
 }
 
 .card-author__quote .card-author__name {
@@ -1224,6 +1227,7 @@ ul, ol {
   .card-link__content { gap: var(--space-lg); padding-left: 24px; }
   .card-link__title       { width: auto; flex: 1 1 0; min-width: 0; }
   .card-link__description { width: auto; flex: 1 1 0; min-width: 0; }
+  .card-link__meta-action { flex: 1 1 0; }
   .card-link__action { display: flex; align-items: center; flex-shrink: 0; }
   .card-link__action-label { font-size: 10px; letter-spacing: -0.2px; }
   .card-link__action .icon { width: 14px; height: 14px; }
@@ -1244,7 +1248,6 @@ ul, ol {
   .card-author             { width: auto; }
   .card-author__photo      { width: 100%; height: 280px; }
   .card-author__quote      { width: 100%; height: 280px; }
-  .card-author__bio        { width: auto; }
   .authors-slider .card-author { flex: 0 0 calc((100% - 24px) / 3); }
 
   /* --- Decorations fluid --- */
@@ -1378,15 +1381,23 @@ ul, ol {
     min-width: 0;
   }
   .card-link__meta {
-    width: 144px;
-    flex: none;
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .card-link__meta-action {
+    width: 100%;
+    flex: initial;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-md);
   }
   .text-paragraph {
     font-size: 12px;
   }
   .card-link__action {
     display: flex;
-    align-self: flex-end;
+    align-self: auto;
   }
   .card-link__action-label {
     font-size: 10px;
@@ -1543,7 +1554,7 @@ ul, ol {
   }
   .card-author__bio {
     color: var(--color-black);
-    width: 283px;
+    width: 100%;
     font-size: 16px;
   }
 

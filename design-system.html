@@ -133,6 +133,7 @@
     /* Icons row */
     .ds-icons {
       display: flex;
+      flex-wrap: wrap;
       gap: 34px;
       align-items: center;
       padding-left: 120px;
@@ -200,6 +201,19 @@
       margin-top: var(--space-xl);
       margin-left: calc(-1 * var(--space-5xl));
       margin-right: calc(-1 * var(--space-5xl));
+    }
+
+    .ds-nav-wrap .mobile-menu {
+      position: relative;
+      inset: auto;
+      width: 100%;
+      min-height: 360px;
+      display: flex;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+      background-color: rgba(216, 203, 186, 1);
     }
 
     /* Interlinking demo */
@@ -422,6 +436,11 @@
         <span class="icon icon--md" data-figma-node="646:10328"><img src="assets/icons/hand-left.svg" alt="Hand Left"></span>
         <span class="icon icon--md" data-figma-node="646:10329"><img src="assets/icons/hand-right.svg" alt="Hand Right"></span>
         <span class="icon icon--sm" data-figma-node="660:10583" style="transform:rotate(180deg);"><img src="assets/icons/chevron-up.svg" alt="Chevron Up"></span>
+        <span class="icon-illustration icon-illustration--philosophy" data-figma-node="694:1322" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.0615 15.0577L0.126923 7.93846V7.46538L1.11923 7.07308C1.18846 6.88846 1.22308 6.68846 1.22308 6.47308C1.22308 6.27308 1.18846 6.05 1.11923 5.80385C1.05769 5.55769 0.961538 5.29231 0.830769 5.00769H1.25769C1.55 5.4 1.69615 5.86923 1.69615 6.41538C1.69615 6.66154 1.66154 6.92308 1.59231 7.2C1.52308 7.47692 1.41154 7.75385 1.25769 8.03077L12.9462 14.4692L12.6462 14.4808C12.8538 14.0269 12.9577 13.4923 12.9577 12.8769C12.9577 12.6077 12.9308 12.3423 12.8769 12.0808C12.8308 11.8115 12.7538 11.5808 12.6462 11.3885L0 4.71923V4.23462L8.45769 0.276923C8.86539 0.0923077 9.22692 0 9.54231 0C9.85 0 10.1654 0.0846154 10.4885 0.253846L22.0385 6.32308C22.6615 6.65385 23.1038 6.99615 23.3654 7.35C23.6346 7.69615 23.7692 8.09615 23.7692 8.55C23.7692 9.00385 23.6423 9.39231 23.3885 9.71538C23.1346 10.0308 22.75 10.3154 22.2346 10.5692L13.0615 15.0577Z" fill="#0D0D0D"/>
+          </svg>
+        </span>
       </div>
     </section>
 
@@ -531,17 +550,41 @@
           <div class="header__menu" data-figma-node="628:300">
             <nav class="nav" data-figma-node="628:301">
               <a href="#" class="nav__link" data-figma-node="628:302">About</a>
-              <a href="#" class="nav__link" data-figma-node="628:303">Modules</a>
+              <a href="#" class="nav__link nav__link--active" data-figma-node="628:303">Modules</a>
               <a href="#" class="nav__link" data-figma-node="628:304">Publications</a>
             </nav>
             <div class="lang-switcher" data-figma-node="628:305">
-              <span class="lang-switcher__label" data-figma-node="628:306">EN</span>
-              <span class="lang-switcher__chevron">
-                <span class="icon icon--sm" data-figma-node="628:307"><img src="assets/icons/chevron-up.svg" alt=""></span>
-              </span>
+              <button class="lang-switcher__trigger" type="button" aria-expanded="false" aria-haspopup="listbox" aria-label="Choose language">
+                <span class="lang-switcher__label" data-figma-node="628:306">EN</span>
+                <span class="lang-switcher__chevron">
+                  <span class="icon icon--sm" data-figma-node="628:307"><img src="assets/icons/chevron-up.svg" alt=""></span>
+                </span>
+              </button>
+              <div class="lang-switcher__menu" role="listbox" aria-label="Site language">
+                <button class="lang-switcher__option is-active" type="button" role="option" aria-selected="true" data-lang="EN">EN</button>
+                <button class="lang-switcher__option" type="button" role="option" aria-selected="false" data-lang="RU">RU</button>
+              </div>
             </div>
+            <button class="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu-preview">
+              <span class="hamburger__bar"></span>
+              <span class="hamburger__bar"></span>
+              <span class="hamburger__bar"></span>
+            </button>
           </div>
         </header>
+        <div class="mobile-menu" id="mobile-menu-preview" aria-hidden="false">
+          <button class="mobile-menu__close" type="button" aria-label="Close menu">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+              <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+            </svg>
+          </button>
+          <nav class="mobile-menu__nav" aria-label="Mobile navigation">
+            <a href="#" class="nav__link">About</a>
+            <a href="#" class="nav__link">Modules</a>
+            <a href="#" class="nav__link">Publications</a>
+          </nav>
+        </div>
       </div>
     </section>
 
@@ -552,20 +595,21 @@
       <div class="ds-card-pair">
         <!-- Interactive: hover to see action appear -->
         <div class="ds-btn-label">State=Default → State=Hover (hover the card to see "Learn the module" action)</div>
-        <a href="#" class="card-link" data-figma-node="636:9496">
+        <a href="#" class="card-link perforated_row" data-figma-node="636:9496">
           <p class="card-link__number text-card-number" data-figma-node="162:1327">1</p>
           <div class="card-link__body" data-figma-node="162:1329">
             <div class="card-link__content" data-figma-node="162:1330">
-              <p class="card-link__title text-h3" data-figma-node="162:1331">Вечный мир или как освободиться от войн: рецепт от Иммануила Канта</p>
+              <h3 class="card-link__title text-h3" data-figma-node="162:1331">Вечный мир или как освободиться от войн: рецепт от Иммануила Канта</h3>
               <p class="card-link__description text-paragraph" data-figma-node="162:1332">Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.</p>
-              <p class="card-link__meta" data-figma-node="162:1333">Video 14:23<br>Podcast<br>PDF<br><strong>EN, RU, DE, KZ</strong></p>
-            </div>
-            <div class="card-link__action" data-figma-node="638:9564">
-              <div class="card-link__action-label" data-figma-node="638:9565">
-                <p>Learn</p>
-                <p>the module</p>
+              <div class="card-link__meta-action">
+                <p class="card-link__meta text-paragraph" data-figma-node="162:1333">Video 14:23<br>Podcast<br>PDF<br><strong>EN, RU, DE, KZ</strong></p>
+                <div class="card-link__action" data-figma-node="638:9564">
+                  <div class="card-link__action-label" data-figma-node="638:9565">
+                    <p>Learn<br>the module</p>
+                  </div>
+                  <span class="icon icon--md" data-figma-node="646:10325"><img src="assets/icons/arrow-right.svg" alt=""></span>
+                </div>
               </div>
-              <span class="icon icon--md" data-figma-node="646:10325"><img src="assets/icons/arrow-right.svg" alt=""></span>
             </div>
           </div>
         </a>
@@ -607,25 +651,11 @@
       <div class="ds-label">Perforations</div>
 
       <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-xl);margin-top:var(--space-xl);">
-        <div class="perforation-row" data-figma-node="627:322"></div>
+        <div class="perforated_row" data-figma-node="627:322"></div>
 
         <div class="perforations" data-figma-node="627:319">
           <!-- Paper_gorizontal -->
-          <div class="paper-horizontal" data-figma-node="627:303">
-            <div class="paper-horizontal__dots">
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-              <div class="paper-horizontal__dot"></div>
-            </div>
-          </div>
+          <div class="perforated-card_top" data-figma-node="627:303"></div>
 
           <!-- Author_paper -->
           <div class="author-paper" data-figma-node="627:320">
@@ -633,15 +663,12 @@
           </div>
 
           <!-- Paper_vertical (node 660:10602) — natively vertical, border-right -->
-          <div class="paper-vertical" data-figma-node="660:10602">
-            <div class="paper-vertical__dots" data-figma-node="660:10599">
-              <img src="assets/images/dots-vertical.svg" alt="" style="width:100%;height:100%;">
-            </div>
-          </div>
+          <div class="perforated-card_left" data-figma-node="660:10602"></div>
         </div>
       </div>
     </section>
 
   </div>
+  <script src="js/lang-switcher.js"></script>
 </body>
 </html>

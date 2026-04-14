@@ -1736,6 +1736,10 @@ ul, ol {
   flex: none;
 }
 
+.ds-section .perforated-card_top {
+  width: 440px;
+}
+
 .perforated-card_left {
   background-image: url(/assets/paper-vertical.svg);
   background-position: center left;
@@ -1744,6 +1748,10 @@ ul, ol {
   height: 100%;
   width: 38px;
   flex: none;
+}
+
+.ds-section .perforated-card_left {
+  height: 440px;
 }
 
 @media (max-width: 767px) {
@@ -1765,6 +1773,12 @@ ul, ol {
 
 .perforated_row .line_perforation {
   border: 0;
+  position: relative;
+}
+
+.ds-section .perforated_row {
+  width: 100%;
+  height: 1px;
   position: relative;
 }
 

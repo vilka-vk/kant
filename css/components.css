@@ -183,6 +183,25 @@ ul, ol {
   height: var(--icon-size-xl);
 }
 
+/* Figma: Philosophy Icon (node 694:1322) */
+.icon-illustration {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-black);
+}
+
+.icon-illustration svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.icon-illustration--philosophy {
+  width: 24px;
+  height: 24px;
+}
+
 
 /* ===================== LOGO ===================== */
 
@@ -204,8 +223,6 @@ ul, ol {
 /* Figma: Logo_Page_Decore (node 647:10400) — rotated "KANT" watermark */
 .logo-page-decore {
   display: block;
-  width: 346px;
-  height: 112px;
   margin-right: -18px;
 }
 
@@ -987,12 +1004,12 @@ ul, ol {
   line-height: normal;
 }
 
-.position__block-emoji {
+.position__block-icon {
   position: absolute;
-  left: 256px;
+  right: 12px;
   top: 10px;
-  font-size: 88px;
-  line-height: normal;
+  width: 88px;
+  height: 88px;
 }
 
 .position__block-image {
@@ -1092,6 +1109,7 @@ ul, ol {
   display: flex;
   justify-content: flex-end;
   width: 100%;
+  height: 200px;
   margin-bottom: -16px;
 }
 
@@ -1235,7 +1253,12 @@ ul, ol {
   /* --- Position grid — shorter rows --- */
   .position__row           { height: 300px; gap: 8px; }
   
-  .position__block-emoji { font-size: 52px; left: auto; right: 12px; top: 12px; }
+  .position__block-icon {
+    right: 12px;
+    top: 12px;
+    width: 52px;
+    height: 52px;
+  }
   .position__block-body  { font-size: 14px; }
   .position__block-title { font-size: 16px; }
 
@@ -1439,9 +1462,9 @@ ul, ol {
   
   .position__block-title { font-size: 18px; }
   .position__block-body  { font-size: 16px; }
-  .position__block-emoji {
-    font-size: 44px;
-    left: auto;
+  .position__block-icon {
+    width: 44px;
+    height: 44px;
     right: 12px;
     top: 12px;
   }
@@ -1631,7 +1654,7 @@ ul, ol {
   position: relative;
 }
 
-.perforated_row .line_perforation::before {
+.perforated_row::before {
   content: '';
   background-image: url(/assets/perforation-row.svg);
   background-position: bottom center;

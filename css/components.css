@@ -1377,6 +1377,21 @@ ul, ol {
   line-height: 22px;
 }
 
+.publications--grid {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.publications-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.publications--grid .publication-item {
+  flex: 0 0 calc((100% - 2 * 60px) / 3);
+}
+
 
 /* ===================== ABOUT MODAL ===================== */
 

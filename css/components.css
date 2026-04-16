@@ -1424,6 +1424,30 @@ ul, ol {
   stroke-width: 2;
   stroke-linecap: square;
 }
+
+.modal__downloads {
+  margin: 0;
+  padding-left: 24px;
+  list-style: disc;
+}
+
+.modal__downloads a {
+  color: var(--color-black);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition-fast);
+}
+
+.modal__downloads a:hover,
+.modal__downloads a:focus-visible {
+  color: var(--color-accent);
+}
+
+.modal__references {
+  margin: 0;
+  padding-left: 24px;
+  list-style: decimal;
+}
 .publication-item {
   display: flex;
   flex: 1;

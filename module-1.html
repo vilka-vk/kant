@@ -87,7 +87,7 @@
           </div>
         </div>
         <div class="module-links">
-          <a href="#" class="module-link-action card-link__action">
+          <a href="#" class="module-link-action card-link__action" data-transcript-open>
             <span class="card-link__action-label">Транскрипции</span>
             <span class="btn-arrow module-link-action__arrow" aria-hidden="true">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -95,7 +95,7 @@
               </svg>
             </span>
           </a>
-          <a href="#" class="module-link-action card-link__action">
+          <a href="#" class="module-link-action card-link__action" data-literature-open>
             <span class="card-link__action-label">Список литературы</span>
             <span class="btn-arrow module-link-action__arrow" aria-hidden="true">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -122,7 +122,7 @@
           </div>
         </div>
         <div class="module-links module-links--single">
-          <a href="#" class="module-link-action card-link__action">
+          <a href="assets/files/Лекция_истоки_милитаризма_транскрипт_ARM.pdf" class="module-link-action card-link__action" download>
             <span class="card-link__action-label">Скачать файл презентации</span>
             <span class="btn-arrow module-link-action__download" aria-hidden="true">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -163,6 +163,48 @@
       </a>
     </section>
   </main>
+
+  <div class="modal" id="transcript-modal" aria-hidden="true" aria-labelledby="transcript-modal-title">
+    <div class="modal__dialog">
+      <button class="modal__close" type="button" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 6L18 18"/>
+          <path d="M18 6L6 18"/>
+        </svg>
+      </button>
+      <div class="modal__content">
+        <h3 id="transcript-modal-title" class="text-h3">Транскрипции к лекции</h3>
+        <ul class="modal__downloads">
+          <li><a href="assets/files/Лекция_истоки_милитаризма_транскрипт_РУ.pdf" download>Скачать транскрипцию (RU, PDF)</a></li>
+          <li><a href="assets/files/Лекция_истоки_милитаризма_транскрипт_ARM.pdf" download>Download the transcript (ARM, PDF)</a></li>
+          <li><a href="assets/files/Лекция_истоки_милитаризма_транскрипт_AZ.pdf" download>Download the transcript (AZ, PDF)</a></li>
+          <li><a href="assets/files/Лекция_истоки_милитаризма_транскрипт_GE.pdf" download>Download the transcript (GE, PDF)</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="literature-modal" aria-hidden="true" aria-labelledby="literature-modal-title">
+    <div class="modal__dialog">
+      <button class="modal__close" type="button" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 6L18 18"/>
+          <path d="M18 6L6 18"/>
+        </svg>
+      </button>
+      <div class="modal__content">
+        <h3 id="literature-modal-title" class="text-h3">Список литературы</h3>
+        <ol class="modal__references">
+          <li>Герц, Дж. Истоки войн и международная политика. Москва: Изд-во МГУ, 2018.</li>
+          <li>Клаузевиц, К. О войне. Пер. с нем. Москва: Эксмо, 2020.</li>
+          <li>Хобсбаум, Э. Век крайностей: Короткий двадцатый век, 1914-1991. Москва: АСТ, 2021.</li>
+          <li>Keegan, J. A History of Warfare. New York: Vintage Books, 1994.</li>
+          <li>Mann, M. The Sources of Social Power. Vol. 4: Globalizations, 1945-2011. Cambridge: Cambridge University Press, 2013.</li>
+          <li>Oxford Research Encyclopedia of International Studies. "Militarism and Society." Oxford University Press, 2022.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
 
   <div class="footer-decore">
     <img class="logo-page-decore" src="assets/logo-page-decore.svg" alt="KANT">
@@ -205,6 +247,8 @@
 <script src="js/lang-switcher.js"></script>
 <script src="js/tabs.js"></script>
 <script src="js/mobile-menu.js"></script>
+<script src="js/transcript-modal.js"></script>
+<script src="js/literature-modal.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="js/section-reveal.js"></script>

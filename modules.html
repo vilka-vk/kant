@@ -98,7 +98,7 @@
             <div class="perforated-card_top"></div>
             <p class="about__sticker-text text-paragraph-caps">People have always dreamed of peace but constantly waged war. Will it ever be possible to achieve a lasting peace? The German philosopher Immanuel Kant proposed an answer to this question in his treatise Perpetual Peace. The 300th anniversary of Kant's birth is an opportunity to consider how relevant the ideas of this thinker from Königsberg still are today.</p>
           </div>
-          <a href="#" class="btn btn-primary" style="width:100%;">Read more</a>
+          <a href="#" class="btn btn-primary about__read-more" style="width:100%;">Read more</a>
         </div>
       </div>
     </section>
@@ -152,6 +152,25 @@
     </section>
   </main>
 
+  <div class="modal" id="about-modal" aria-hidden="true" aria-labelledby="about-modal-title">
+    <div class="modal__dialog">
+      <button class="modal__close" type="button" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 6L18 18" />
+          <path d="M18 6L6 18" />
+        </svg>
+      </button>
+      <div class="modal__content">
+        <p id="about-modal-title" class="text-paragraph">
+          People have always dreamed of peace but constantly waged war. Will it ever be possible to achieve a lasting peace?
+        </p>
+        <p class="text-paragraph">
+          The German philosopher Immanuel Kant proposed an answer to this question in his treatise Perpetual Peace. The 300th anniversary of Kant's birth is an opportunity to consider how relevant the ideas of this thinker from Königsberg still are today.
+        </p>
+      </div>
+    </div>
+  </div>
+
   <div class="footer-decore">
     <img class="logo-page-decore" src="assets/logo-page-decore.svg" alt="KANT">
   </div>
@@ -172,5 +191,6 @@
 <script src="js/tabs.js"></script>
 <script src="js/lang-switcher.js"></script>
 <script src="js/mobile-menu.js"></script>
+<script src="js/about-modal.js"></script>
 </body>
 </html>

@@ -1,54 +1,78 @@
 (function () {
   'use strict';
 
-  var switcher = document.querySelector('.lang-switcher');
-  if (!switcher) return;
+  var switchers = document.querySelectorAll('.lang-switcher');
+  if (!switchers.length) return;
+  var STORAGE_KEY = 'kant-locale';
+  var localeConfig = window.KANT_LOCALES || {};
+  var allOptions = document.querySelectorAll('.lang-switcher__option[data-lang]');
+  if (!allOptions.length) return;
+  var supportedLocales = Array.from(allOptions).map(function (option) {
+    return String(option.getAttribute('data-lang')).toUpperCase();
+  }).filter(function (locale, index, list) {
+    return !!locale && list.indexOf(locale) === index;
+  });
+  if (!supportedLocales.length) return;
+  var configuredDefault = String(localeConfig.defaultLocale || '').toUpperCase();
+  var DEFAULT_LOCALE = supportedLocales.indexOf(configuredDefault) >= 0 ? configuredDefault : supportedLocales[0];
+  var localeLabels = localeConfig.labels || {};
 
-  var trigger = switcher.querySelector('.lang-switcher__trigger');
-  var label = switcher.querySelector('.lang-switcher__label');
-  var options = switcher.querySelectorAll('.lang-switcher__option');
-
-  if (!trigger || !label || !options.length) return;
-
-  function setOpenState(isOpen) {
-    switcher.classList.toggle('is-open', isOpen);
-    trigger.setAttribute('aria-expanded', String(isOpen));
+  function normalizeLocale(value) {
+    if (!value) return null;
+    var locale = String(value).toUpperCase();
+    return supportedLocales.indexOf(locale) >= 0 ? locale : null;
   }
 
-  function selectLanguage(option) {
-    var lang = option.getAttribute('data-lang');
-    if (!lang) return;
+  function getLocaleFromUrl() {
+    var params = new URLSearchParams(window.location.search);
+    return normalizeLocale(params.get('lang'));
+  }
 
-    label.textContent = lang;
-    options.forEach(function (item) {
-      var isActive = item === option;
-      item.classList.toggle('is-active', isActive);
-      item.setAttribute('aria-selected', String(isActive));
+  function getInitialLocale() {
+    return getLocaleFromUrl() || normalizeLocale(localStorage.getItem(STORAGE_KEY)) || DEFAULT_LOCALE;
+  }
+
+  function setLocaleInUrl(locale) {
+    var url = new URL(window.location.href);
+    if (locale === DEFAULT_LOCALE) {
+      url.searchParams.delete('lang');
+    } else {
+      url.searchParams.set('lang', locale.toLowerCase());
+    }
+    window.history.replaceState({}, '', url.toString());
+  }
+
+  function applyLocale(locale) {
+    document.documentElement.setAttribute('lang', locale.toLowerCase());
+    localStorage.setItem(STORAGE_KEY, locale);
+    setLocaleInUrl(locale);
+
+    switchers.forEach(function (switcher) {
+      var options = switcher.querySelectorAll('.lang-switcher__option');
+      options.forEach(function (item) {
+        var optionLocale = String(item.getAttribute('data-lang') || '').toUpperCase();
+        var isActive = optionLocale === locale;
+        item.classList.toggle('is-active', isActive);
+        item.setAttribute('aria-pressed', String(isActive));
+        if (localeLabels[optionLocale]) {
+          item.setAttribute('title', localeLabels[optionLocale]);
+        }
+      });
     });
   }
 
-  trigger.addEventListener('click', function (event) {
-    event.stopPropagation();
-    setOpenState(!switcher.classList.contains('is-open'));
-  });
+  switchers.forEach(function (switcher) {
+    var options = switcher.querySelectorAll('.lang-switcher__option');
+    if (!options.length) return;
 
-  options.forEach(function (option) {
-    option.addEventListener('click', function (event) {
-      event.stopPropagation();
-      selectLanguage(option);
-      setOpenState(false);
+    options.forEach(function (option) {
+      option.addEventListener('click', function () {
+        var selectedLocale = normalizeLocale(option.getAttribute('data-lang'));
+        if (!selectedLocale) return;
+        applyLocale(selectedLocale);
+      });
     });
   });
 
-  document.addEventListener('click', function (event) {
-    if (!switcher.contains(event.target)) {
-      setOpenState(false);
-    }
-  });
-
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-      setOpenState(false);
-    }
-  });
+  applyLocale(getInitialLocale());
 })();

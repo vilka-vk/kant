@@ -28,17 +28,10 @@
           <a href="publications.html" class="nav__link" data-figma-node="628:304">Publications</a>
           <a href="#about" class="nav__link" data-figma-node="628:302">About</a>
         </nav>
-        <div class="lang-switcher" data-figma-node="628:305">
-          <button class="lang-switcher__trigger" type="button" aria-expanded="false" aria-haspopup="listbox" aria-label="Choose language">
-            <span class="lang-switcher__label" data-figma-node="628:306">EN</span>
-            <span class="lang-switcher__chevron">
-              <span class="icon icon--sm" data-figma-node="628:307"><img src="assets/icons/chevron-up.svg" alt=""></span>
-            </span>
-          </button>
-          <div class="lang-switcher__menu" role="listbox" aria-label="Site language">
-            <button class="lang-switcher__option is-active" type="button" role="option" aria-selected="true" data-lang="EN">EN</button>
-            <button class="lang-switcher__option" type="button" role="option" aria-selected="false" data-lang="RU">RU</button>
-          </div>
+        <div class="lang-switcher" role="group" aria-label="Site language" data-figma-node="628:305">
+          <button class="lang-switcher__option is-active" type="button" aria-pressed="true" data-lang="EN">EN</button>
+          <span class="lang-switcher__divider" aria-hidden="true">/</span>
+          <button class="lang-switcher__option" type="button" aria-pressed="false" data-lang="RU">RU</button>
         </div>
         <button class="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu" data-figma-node="694:1653">
           <span class="hamburger__bar"></span>
@@ -509,7 +502,7 @@
     <a href="/" class="footer__logo logo">
       <img src="assets/logo.svg" alt="KANT" width="76" height="24">
     </a>
-    <p class="footer__copyright">Copyright © 2026 KANT. All rights reserved.</p>
+    <p class="footer__copyright">Copyright © 2026 KANT Project. All rights reserved.</p>
     <div class="footer__socials" data-figma-node="694:1365">
       <a href="#" class="footer__social" aria-label="YouTube">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -541,6 +534,7 @@
 
 <script src="js/tabs.js"></script>
 <script src="js/slider.js"></script>
+<script src="js/locales-config.js"></script>
 <script src="js/lang-switcher.js"></script>
 <script src="js/mobile-menu.js"></script>
 <script src="js/about-modal.js"></script>

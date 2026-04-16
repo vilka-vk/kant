@@ -531,67 +531,13 @@ ul, ol {
 
 /* Figma: Lang (node 628:305) */
 .lang-switcher {
-  position: relative;
   display: flex;
   align-items: center;
-}
-
-.lang-switcher__trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  height: 40px;
-  width: 60px;
-  padding: var(--space-xs) 6px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-
-.lang-switcher__label {
-  font-family: var(--font-body);
-  font-size: var(--text-h4-size);
-  font-weight: var(--weight-semibold);
-  line-height: normal;
-  color: var(--color-black);
-}
-
-.lang-switcher__chevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(180deg);
-}
-
-.lang-switcher__chevron .icon {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-}
-
-.lang-switcher__menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  display: none;
-  flex-direction: column;
-  min-width: 64px;
-  border: 1px solid var(--color-black);
-  background-color: var(--color-white);
-  z-index: 20;
-}
-
-.lang-switcher.is-open .lang-switcher__menu {
-  display: flex;
-}
-
-.lang-switcher.is-open .lang-switcher__chevron {
-  transform: rotate(0deg);
+  gap: 8px;
 }
 
 .lang-switcher__option {
-  display: block;
-  width: 100%;
-  padding: 8px 10px;
+  padding: 0;
   border: none;
   background: transparent;
   font-family: var(--font-body);
@@ -599,8 +545,28 @@ ul, ol {
   font-weight: var(--weight-semibold);
   line-height: normal;
   color: var(--color-black);
-  text-align: left;
   cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.lang-switcher__option:not(.is-active) {
+  opacity: 0.45;
+}
+
+.lang-switcher__option:hover {
+  opacity: 0.75;
+}
+
+.lang-switcher__option.is-active:hover {
+  opacity: 1;
+}
+
+.lang-switcher__divider {
+  font-family: var(--font-body);
+  font-size: var(--text-h4-size);
+  font-weight: var(--weight-semibold);
+  color: var(--color-black);
+  opacity: 0.6;
 }
 
 /* ===================== CARD LINK ===================== */
@@ -1645,7 +1611,8 @@ ul, ol {
   .header__menu { gap: 32px; }
   .nav          { gap: 24px; }
   .nav__link    { font-size: 16px; }
-  .lang-switcher__label { font-size: 16px; }
+  .lang-switcher__option,
+  .lang-switcher__divider { font-size: 16px; }
 
   /* --- Hero --- */
   .hero          { padding-left: 32px; padding-right: 32px; }

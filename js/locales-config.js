@@ -2,7 +2,7 @@
   'use strict';
 
   window.KANT_LOCALES = window.KANT_LOCALES || {
-    defaultLocale: 'EN',
+    defaultLocale: 'RU',
     labels: {
       EN: 'English',
       RU: 'Russian'

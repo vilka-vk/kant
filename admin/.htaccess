@@ -1,0 +1,11 @@
+DirectoryIndex login.php
+
+<Files "lib/config.php">
+  Require all denied
+</Files>
+<Files "lib/config.local.php">
+  Require all denied
+</Files>
+<FilesMatch "\.(sql|env|ini)$">
+  Require all denied
+</FilesMatch>

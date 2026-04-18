@@ -29,7 +29,25 @@
   }
 
   function getInitialLocale() {
-    return getLocaleFromUrl() || normalizeLocale(localStorage.getItem(STORAGE_KEY)) || DEFAULT_LOCALE;
+    var fromUrl = getLocaleFromUrl();
+    if (fromUrl) return fromUrl;
+    var fromStorage = normalizeLocale(localStorage.getItem(STORAGE_KEY));
+    if (fromStorage) return fromStorage;
+
+    var browserLocales = [];
+    if (Array.isArray(navigator.languages) && navigator.languages.length) {
+      browserLocales = navigator.languages.slice();
+    } else if (navigator.language) {
+      browserLocales = [navigator.language];
+    }
+    var hasRussian = browserLocales.some(function (value) {
+      return String(value || '').toLowerCase().indexOf('ru') === 0;
+    });
+    if (!hasRussian) {
+      var enLocale = normalizeLocale('EN');
+      if (enLocale) return enLocale;
+    }
+    return DEFAULT_LOCALE;
   }
 
   function setLocaleInUrl(locale) {

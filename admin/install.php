@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/db.php';
+require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/layout.php';
 
 $error = '';
@@ -28,31 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $pdo->exec($schema);
             $pdo->exec($seed);
-            $pdo->exec("ALTER TABLE modules_translations ADD COLUMN IF NOT EXISTS literature_html MEDIUMTEXT");
-            $pdo->exec("CREATE TABLE IF NOT EXISTS about_project_videos (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                about_project_id INT NOT NULL DEFAULT 1,
-                language_code VARCHAR(20) NOT NULL,
-                video_url VARCHAR(500) NOT NULL,
-                video_alt VARCHAR(500) DEFAULT '',
-                sort_order INT NOT NULL DEFAULT 0
-            )");
-            $pdo->exec("CREATE TABLE IF NOT EXISTS module_lecture_videos (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                module_id INT NOT NULL,
-                language_code VARCHAR(20) NOT NULL,
-                video_url VARCHAR(500) NOT NULL,
-                video_alt VARCHAR(500) DEFAULT '',
-                sort_order INT NOT NULL DEFAULT 0
-            )");
-            $pdo->exec("CREATE TABLE IF NOT EXISTS module_presentation_videos (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                module_id INT NOT NULL,
-                language_code VARCHAR(20) NOT NULL,
-                video_url VARCHAR(500) NOT NULL,
-                video_alt VARCHAR(500) DEFAULT '',
-                sort_order INT NOT NULL DEFAULT 0
-            )");
 
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare('INSERT INTO admin_users (email, password_hash) VALUES (:email, :password_hash)

@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS modules_translations (
   presentation_label VARCHAR(255) DEFAULT '',
   presentation_title VARCHAR(255) DEFAULT '',
   presentation_video_title_primary VARCHAR(255) DEFAULT '',
-  literature_html MEDIUMTEXT DEFAULT '',
+  literature_html MEDIUMTEXT NULL,
   UNIQUE KEY uniq_modules_locale (module_id, locale),
   CONSTRAINT fk_modules_tr_modules
     FOREIGN KEY (module_id) REFERENCES modules(id)
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS publications_translations (
   publication_id INT NOT NULL,
   locale VARCHAR(10) NOT NULL,
   title VARCHAR(255) NOT NULL,
-  description MEDIUMTEXT DEFAULT '',
+  description MEDIUMTEXT NULL,
   UNIQUE KEY uniq_publication_locale (publication_id, locale),
   CONSTRAINT fk_publications_tr_publications
     FOREIGN KEY (publication_id) REFERENCES publications(id)

@@ -117,7 +117,7 @@
     if (!list) return;
     list.innerHTML = '';
     modules.slice(0, limit).forEach(function (m) {
-      var href = 'module-1.html?slug=' + encodeURIComponent(m.slug);
+      var href = 'module.html?slug=' + encodeURIComponent(m.slug);
       var item = document.createElement('a');
       item.className = 'card-link perforated_row';
       item.setAttribute('href', href);
@@ -154,15 +154,18 @@
     });
   }
 
-  function renderPublicationTabs(types) {
+  function renderPublicationTabs(types, locale) {
     var tabsRoot = document.querySelector('.publications-tabs');
     if (!tabsRoot) return;
     tabsRoot.innerHTML = '';
+    var localeUpper = String(locale || DEFAULT_LOCALE).toUpperCase();
+    var ui = (window.KANT_LOCALES && window.KANT_LOCALES.ui) ? window.KANT_LOCALES.ui : {};
+    var allLabel = (ui.publicationsAllTab && ui.publicationsAllTab[localeUpper]) ? ui.publicationsAllTab[localeUpper] : 'All';
     var allTab = document.createElement('button');
     allTab.className = 'tab tab--active';
     allTab.type = 'button';
     allTab.setAttribute('data-tab', 'all');
-    allTab.textContent = 'All';
+    allTab.textContent = allLabel;
     tabsRoot.appendChild(allTab);
 
     types.forEach(function (t) {
@@ -211,7 +214,7 @@
 
   function renderModuleDetail(moduleItem, transcripts, readings) {
     if (!moduleItem) return;
-    setText('.module-hero__kicker', moduleItem.hero_kicker || ('Module ' + (moduleItem.module_number || '')));
+    setText('.module-hero__kicker', 'Module ' + (moduleItem.module_number || ''));
     setText('.module-hero__headline', moduleItem.title || '');
     setText('.module-hero__subtitle', moduleItem.hero_subtitle || '');
     setImg('.module-hero .hero__bg', moduleItem.hero_background_image_path || '');
@@ -391,12 +394,12 @@
         setText('.hero__headline', heroPublications.title || 'Publications');
         setText('.hero__subtitle', heroPublications.subtitle || '');
         setImg('.hero .hero__bg', heroPublications.background_image_path || '');
-        renderPublicationTabs(publicationTypes);
+        renderPublicationTabs(publicationTypes, locale);
         renderPublications(pubs);
         return;
       }
 
-      if (path.endsWith('/module-1.html')) {
+      if (path.endsWith('/module.html') || path.endsWith('/module-1.html')) {
         var params = new URLSearchParams(window.location.search);
         var slug = params.get('slug');
         var moduleItem = null;

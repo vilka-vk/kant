@@ -59,6 +59,22 @@
       homeAuthorsTitle: {
         RU: 'Наши авторы',
         EN: 'Our Authors'
+      },
+      navModules: {
+        RU: 'Модули',
+        EN: 'Modules'
+      },
+      navPublications: {
+        RU: 'Публикации',
+        EN: 'Publications'
+      },
+      navAbout: {
+        RU: 'О проекте',
+        EN: 'About'
+      },
+      publicationsAllTab: {
+        RU: 'Все',
+        EN: 'All'
       }
     }
   };

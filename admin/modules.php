@@ -310,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'locale' => $locale,
                 'title' => trim((string) ($_POST['title_' . $locale] ?? '[empty]')),
                 'short_description' => trim((string) ($_POST['short_description_' . $locale] ?? '')),
-                'hero_kicker' => trim((string) ($_POST['hero_kicker_' . $locale] ?? '')),
+                'hero_kicker' => '',
                 'hero_subtitle' => trim((string) ($_POST['hero_subtitle_' . $locale] ?? '')),
                 'lecture_title' => trim((string) ($_POST['lecture_title_' . $locale] ?? '')),
                 'presentation_title' => trim((string) ($_POST['presentation_title_' . $locale] ?? '')),
@@ -440,7 +440,6 @@ admin_header('Modules');
         $translationFields = [
           'title' => 'Title',
           'short_description' => 'Short Description',
-          'hero_kicker' => 'Hero kicker',
           'hero_subtitle' => 'Hero subtitle',
           'lecture_title' => 'Lecture title',
           'presentation_title' => 'Presentation title',

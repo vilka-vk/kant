@@ -9,7 +9,6 @@ function admin_nav_items(): array
         ['href' => '/admin/site-settings.php', 'label' => t('nav.site_settings')],
         ['href' => '/admin/about-project.php', 'label' => t('nav.about_project')],
         ['href' => '/admin/our-position.php', 'label' => t('nav.our_position')],
-        ['href' => '/admin/publication-types.php', 'label' => t('nav.publication_types')],
         ['href' => '/admin/publications.php', 'label' => t('nav.publications')],
         ['href' => '/admin/authors.php', 'label' => t('nav.authors')],
         ['href' => '/admin/migrate.php', 'label' => t('nav.migrations')],

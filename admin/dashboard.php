@@ -33,10 +33,6 @@ admin_header(t('dashboard.title'));
     <h3><?= h(t('nav.our_position')) ?></h3>
     <p class="muted"><?= h(t('dashboard.position_desc')) ?></p>
   </a>
-  <a class="card kant-quick-card" href="/admin/publication-types.php">
-    <h3><?= h(t('nav.publication_types')) ?></h3>
-    <p class="muted"><?= h(t('dashboard.types_desc')) ?></p>
-  </a>
   <a class="card kant-quick-card" href="/admin/site-settings.php">
     <h3><?= h(t('nav.site_settings')) ?></h3>
     <p class="muted"><?= h(t('dashboard.settings_desc')) ?></p>

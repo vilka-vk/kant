@@ -9,6 +9,10 @@ require __DIR__ . '/lib/uploads.php';
 require_auth();
 $pdo = db();
 $locales = $config['app']['supported_locales'];
+$tab = (string) ($_GET['tab'] ?? 'publications');
+if (!in_array($tab, ['publications', 'types'], true)) {
+    $tab = 'publications';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_check($_POST['_csrf'] ?? null)) {
@@ -16,6 +20,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Bad CSRF token');
     }
     $action = (string) ($_POST['action'] ?? 'save_publication');
+    if ($action === 'save_publication_type') {
+        $typeId = (int) ($_POST['type_id'] ?? 0);
+        $slug = trim((string) ($_POST['type_slug'] ?? ''));
+        $sort = (int) ($_POST['type_sort_order'] ?? 0);
+        if ($typeId > 0) {
+            $stmt = $pdo->prepare('UPDATE publication_types SET slug=:slug, sort_order=:sort_order WHERE id=:id');
+            $stmt->execute(['id' => $typeId, 'slug' => $slug, 'sort_order' => $sort]);
+        } else {
+            $stmt = $pdo->prepare('INSERT INTO publication_types (slug, sort_order) VALUES (:slug, :sort_order)');
+            $stmt->execute(['slug' => $slug, 'sort_order' => $sort]);
+            $typeId = (int) $pdo->lastInsertId();
+        }
+        foreach ($locales as $locale) {
+            $name = trim((string) ($_POST['type_name_' . $locale] ?? ''));
+            $stmt = $pdo->prepare('INSERT INTO publication_types_translations (publication_type_id, locale, name)
+              VALUES (:id, :locale, :name) ON DUPLICATE KEY UPDATE name = VALUES(name)');
+            $stmt->execute(['id' => $typeId, 'locale' => $locale, 'name' => $name !== '' ? $name : '[empty]']);
+        }
+        redirect('/admin/publications.php?tab=types&edit_type=' . $typeId . '&saved_type=1');
+    }
+
     if ($action === 'save_publications_page_hero') {
         $heroRow = $pdo->prepare('SELECT id, background_image_path, subtitle_enabled FROM hero_sections WHERE page_key = :page_key LIMIT 1');
         $heroRow->execute(['page_key' => 'publications']);
@@ -57,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'subtitle' => trim((string) ($_POST['hero_publications_subtitle_' . $locale] ?? '')),
                 ]);
         }
-        redirect('/admin/publications.php?saved_hero=1');
+        redirect('/admin/publications.php?tab=publications&saved_hero=1');
     }
 
     $id = (int) ($_POST['id'] ?? 0);
@@ -75,10 +100,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $cover = $uploadedCover;
         }
     } catch (Throwable $e) {
-        redirect('/admin/publications.php?error=' . urlencode($e->getMessage()));
+        redirect('/admin/publications.php?tab=publications&error=' . urlencode($e->getMessage()));
     }
     if (($file === '' && $url === '') || ($file !== '' && $url !== '')) {
-        redirect('/admin/publications.php?error=xor');
+        redirect('/admin/publications.php?tab=publications&error=xor');
     }
     $payload = [
         'publication_type_id' => (int) ($_POST['publication_type_id'] ?? 0),
@@ -109,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'description' => trim((string) ($_POST['description_' . $locale] ?? '')),
         ]);
     }
-    redirect('/admin/publications.php?edit=' . $id . '&saved=1');
+    redirect('/admin/publications.php?tab=publications&edit=' . $id . '&saved=1');
 }
 
 $types = $pdo->query('SELECT id, slug FROM publication_types ORDER BY sort_order ASC, id ASC')->fetchAll();
@@ -140,9 +165,31 @@ if (!empty($heroPublications['id'])) {
 $rows = $pdo->query('SELECT p.id, p.display_order, p.published_at, p.file_path, p.external_url, pt.slug as type_slug
   FROM publications p LEFT JOIN publication_types pt ON pt.id = p.publication_type_id
   ORDER BY p.display_order ASC, p.published_at DESC, p.id ASC')->fetchAll();
+$typeEditId = (int) ($_GET['edit_type'] ?? 0);
+$typeEdit = null;
+$typeTrMap = [];
+if ($typeEditId > 0) {
+    $stmt = $pdo->prepare('SELECT * FROM publication_types WHERE id = :id');
+    $stmt->execute(['id' => $typeEditId]);
+    $typeEdit = $stmt->fetch();
+    $trs = $pdo->prepare('SELECT locale, name FROM publication_types_translations WHERE publication_type_id = :id');
+    $trs->execute(['id' => $typeEditId]);
+    foreach ($trs->fetchAll() as $r) {
+        $typeTrMap[$r['locale']] = $r['name'];
+    }
+}
+$typeRows = $pdo->query('SELECT * FROM publication_types ORDER BY sort_order ASC, id ASC')->fetchAll();
 
 admin_header(tr('Публикации', 'Publications'));
 ?>
+<div class="card">
+  <div class="actions">
+    <a class="btn <?= $tab === 'publications' ? '' : 'btn-secondary' ?>" href="/admin/publications.php?tab=publications"><?= h(tr('Публикации', 'Publications')) ?></a>
+    <a class="btn <?= $tab === 'types' ? '' : 'btn-secondary' ?>" href="/admin/publications.php?tab=types"><?= h(tr('Типы публикаций', 'Publication types')) ?></a>
+  </div>
+</div>
+
+<?php if ($tab === 'publications'): ?>
 <div class="card">
   <h2><?= h(tr('Hero блока "Публикации"', 'Publications hero block')) ?></h2>
   <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero сохранен.', 'Hero saved.')) ?></p><?php endif; ?>
@@ -197,7 +244,7 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     <div class="actions">
       <button type="submit"><?= $edit ? h(tr('Обновить публикацию', 'Update publication')) : h(tr('Создать публикацию', 'Create publication')) ?></button>
-      <a class="btn btn-secondary" href="/admin/publications.php"><?= h(tr('Новая', 'New')) ?></a>
+      <a class="btn btn-secondary" href="/admin/publications.php?tab=publications"><?= h(tr('Новая', 'New')) ?></a>
     </div>
   </form>
 </div>
@@ -212,10 +259,51 @@ admin_header(tr('Публикации', 'Publications'));
         <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['published_at']) ?></td>
         <td><?= h($r['file_path'] !== '' ? $r['file_path'] : (string) $r['external_url']) ?></td>
-        <td><a class="btn btn-secondary" href="/admin/publications.php?edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
+        <td><a class="btn btn-secondary" href="/admin/publications.php?tab=publications&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>
     <?php endforeach; ?>
     </tbody>
   </table>
 </div>
+<?php else: ?>
+<div class="card">
+  <h1><?= h(tr('Типы публикаций', 'Publication types')) ?></h1>
+  <?php if (!empty($_GET['saved_type'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
+  <form method="post">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="save_publication_type">
+    <input type="hidden" name="type_id" value="<?= h((string) ($typeEdit['id'] ?? 0)) ?>">
+    <div class="grid">
+      <div><label>Slug</label><input name="type_slug" required value="<?= h((string) ($typeEdit['slug'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="type_sort_order" value="<?= h((string) ($typeEdit['sort_order'] ?? 0)) ?>"></div>
+    </div>
+    <hr style="margin:16px 0">
+    <?php foreach ($locales as $locale): ?>
+      <div style="margin-bottom:12px">
+        <label><?= h(tr('Название', 'Name')) ?> (<?= h(strtoupper($locale)) ?>)</label>
+        <input name="type_name_<?= h($locale) ?>" value="<?= h((string) ($typeTrMap[$locale] ?? '')) ?>">
+      </div>
+    <?php endforeach; ?>
+    <div class="actions">
+      <button type="submit"><?= $typeEdit ? h(tr('Обновить тип', 'Update type')) : h(tr('Создать тип', 'Create type')) ?></button>
+      <a class="btn btn-secondary" href="/admin/publications.php?tab=types"><?= h(tr('Новый', 'New')) ?></a>
+    </div>
+  </form>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <tbody>
+    <?php foreach ($typeRows as $row): ?>
+      <tr>
+        <td><?= h((string) $row['id']) ?></td>
+        <td><?= h($row['slug']) ?></td>
+        <td><?= h((string) $row['sort_order']) ?></td>
+        <td><a class="btn btn-secondary" href="/admin/publications.php?tab=types&edit_type=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
+      </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
+<?php endif; ?>
 <?php admin_footer();

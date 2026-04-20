@@ -4,16 +4,29 @@ declare(strict_types=1);
 function admin_nav_items(): array
 {
     return [
-        ['href' => '/admin/dashboard.php', 'label' => 'Dashboard'],
-        ['href' => '/admin/modules.php', 'label' => 'Modules'],
-        ['href' => '/admin/site-settings.php', 'label' => 'Site settings'],
-        ['href' => '/admin/about-project.php', 'label' => 'About project'],
-        ['href' => '/admin/our-position.php', 'label' => 'Our position'],
-        ['href' => '/admin/publication-types.php', 'label' => 'Publication types'],
-        ['href' => '/admin/publications.php', 'label' => 'Publications'],
-        ['href' => '/admin/authors.php', 'label' => 'Authors'],
-        ['href' => '/admin/migrate.php', 'label' => 'Migrations'],
+        ['href' => '/admin/dashboard.php', 'label' => t('nav.dashboard')],
+        ['href' => '/admin/modules.php', 'label' => t('nav.modules')],
+        ['href' => '/admin/site-settings.php', 'label' => t('nav.site_settings')],
+        ['href' => '/admin/about-project.php', 'label' => t('nav.about_project')],
+        ['href' => '/admin/our-position.php', 'label' => t('nav.our_position')],
+        ['href' => '/admin/publication-types.php', 'label' => t('nav.publication_types')],
+        ['href' => '/admin/publications.php', 'label' => t('nav.publications')],
+        ['href' => '/admin/authors.php', 'label' => t('nav.authors')],
+        ['href' => '/admin/migrate.php', 'label' => t('nav.migrations')],
     ];
+}
+
+function admin_lang_url(string $lang): string
+{
+    $uri = $_SERVER['REQUEST_URI'] ?? '/admin/dashboard.php';
+    $parts = parse_url($uri);
+    $path = (string) ($parts['path'] ?? '/admin/dashboard.php');
+    $query = [];
+    if (!empty($parts['query'])) {
+        parse_str((string) $parts['query'], $query);
+    }
+    $query['lang'] = $lang;
+    return $path . '?' . http_build_query($query);
 }
 
 function admin_header(string $title): void
@@ -44,8 +57,10 @@ function admin_header(string $title): void
         echo '<header class="kant-topbar">';
         echo '<div><h1 class="kant-page-title">' . h($title) . '</h1></div>';
         echo '<div class="kant-topbar-actions">';
+        echo '<a class="btn btn-secondary' . (admin_locale() === 'ru' ? ' is-active-lang' : '') . '" href="' . h(admin_lang_url('ru')) . '">RU</a>';
+        echo '<a class="btn btn-secondary' . (admin_locale() === 'en' ? ' is-active-lang' : '') . '" href="' . h(admin_lang_url('en')) . '">EN</a>';
         echo '<span class="kant-user">' . h($user['email']) . '</span>';
-        echo '<a class="btn btn-secondary" href="/admin/logout.php">Logout</a>';
+        echo '<a class="btn btn-secondary" href="/admin/logout.php">' . h(t('ui.logout')) . '</a>';
         echo '</div></header>';
         echo '<div class="wrap">';
         return;
@@ -54,7 +69,11 @@ function admin_header(string $title): void
     echo '<main class="content kant-content kant-content--single">';
     echo '<header class="kant-topbar">';
     echo '<div><h1 class="kant-page-title">' . h($title) . '</h1></div>';
-    echo '<div class="kant-topbar-actions"><a class="btn btn-secondary" href="/admin/login.php">Login</a></div>';
+    echo '<div class="kant-topbar-actions">';
+    echo '<a class="btn btn-secondary' . (admin_locale() === 'ru' ? ' is-active-lang' : '') . '" href="' . h(admin_lang_url('ru')) . '">RU</a>';
+    echo '<a class="btn btn-secondary' . (admin_locale() === 'en' ? ' is-active-lang' : '') . '" href="' . h(admin_lang_url('en')) . '">EN</a>';
+    echo '<a class="btn btn-secondary" href="/admin/login.php">' . h(t('ui.login')) . '</a>';
+    echo '</div>';
     echo '</header><div class="wrap">';
 }
 

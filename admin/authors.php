@@ -69,44 +69,44 @@ if ($editId > 0) {
 }
 $rows = $pdo->query('SELECT * FROM authors ORDER BY display_order ASC, id ASC')->fetchAll();
 
-admin_header('Authors');
+admin_header(tr('Авторы', 'Authors'));
 ?>
 <div class="card">
-  <h1>Authors</h1>
-  <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
+  <h1><?= h(tr('Авторы', 'Authors')) ?></h1>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($edit['id'] ?? 0)) ?>">
     <div class="grid">
-      <div><label>Photo path</label><input name="photo_path" required value="<?= h((string) ($edit['photo_path'] ?? '')) ?>"></div>
-      <div><label>Upload photo</label><input type="file" name="photo_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label>Display order</label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? 0)) ?>"></div>
+      <div><label><?= h(tr('Путь к фото', 'Photo path')) ?></label><input name="photo_path" required value="<?= h((string) ($edit['photo_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Загрузить фото', 'Upload photo')) ?></label><input type="file" name="photo_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label><?= h(tr('Порядок отображения', 'Display order')) ?></label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? 0)) ?>"></div>
     </div>
     <hr style="margin:16px 0">
     <?php foreach ($locales as $locale): ?>
       <div class="grid" style="margin-bottom:12px">
-        <div><label>First name (<?= h(strtoupper($locale)) ?>)</label><input name="first_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['first_name'] ?? '')) ?>"></div>
-        <div><label>Last name (<?= h(strtoupper($locale)) ?>)</label><input name="last_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['last_name'] ?? '')) ?>"></div>
-        <div><label>Affiliation (<?= h(strtoupper($locale)) ?>)</label><input name="affiliation_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['affiliation'] ?? '')) ?>"></div>
+        <div><label><?= h(tr('Имя', 'First name')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="first_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['first_name'] ?? '')) ?>"></div>
+        <div><label><?= h(tr('Фамилия', 'Last name')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="last_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['last_name'] ?? '')) ?>"></div>
+        <div><label><?= h(tr('Аффилиация', 'Affiliation')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="affiliation_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['affiliation'] ?? '')) ?>"></div>
       </div>
     <?php endforeach; ?>
     <div class="actions">
-      <button type="submit"><?= $edit ? 'Update author' : 'Create author' ?></button>
-      <a class="btn btn-secondary" href="/admin/authors.php">New</a>
+      <button type="submit"><?= $edit ? h(tr('Обновить автора', 'Update author')) : h(tr('Создать автора', 'Create author')) ?></button>
+      <a class="btn btn-secondary" href="/admin/authors.php"><?= h(tr('Новый', 'New')) ?></a>
     </div>
   </form>
 </div>
 <div class="card">
   <table>
-    <thead><tr><th>ID</th><th>Photo</th><th>Order</th><th>Action</th></tr></thead>
+    <thead><tr><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $r): ?>
       <tr>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h($r['photo_path']) ?></td>
         <td><?= h((string) $r['display_order']) ?></td>
-        <td><a class="btn btn-secondary" href="/admin/authors.php?edit=<?= h((string) $r['id']) ?>">Edit</a></td>
+        <td><a class="btn btn-secondary" href="/admin/authors.php?edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>
     <?php endforeach; ?>
     </tbody>

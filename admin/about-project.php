@@ -104,19 +104,19 @@ foreach ($defaultTranslations as $locale => $defaults) {
     }
 }
 
-admin_header('About Project');
+admin_header(tr('О проекте', 'About Project'));
 ?>
 <div class="card">
-  <h1>About project</h1>
-  <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
+  <h1><?= h(tr('О проекте', 'About project')) ?></h1>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="save_about">
     <hr style="margin:16px 0">
-    <p class="muted">Таблица локализации: слева <?= h(strtoupper($leftLocale)) ?>, справа <?= h(strtoupper($rightLocale)) ?>.</p>
+    <p class="muted"><?= h(tr('Таблица локализации: слева', 'Localization table: left column is')) ?> <?= h(strtoupper($leftLocale)) ?>, <?= h(tr('справа', 'right column is')) ?> <?= h(strtoupper($rightLocale)) ?>.</p>
     <table>
-      <thead><tr><th>Поле</th><th><?= h(strtoupper($leftLocale)) ?></th><th><?= h(strtoupper($rightLocale)) ?></th></tr></thead>
+      <thead><tr><th><?= h(tr('Поле', 'Field')) ?></th><th><?= h(strtoupper($leftLocale)) ?></th><th><?= h(strtoupper($rightLocale)) ?></th></tr></thead>
       <tbody>
         <?php
           $aboutFields = [
@@ -150,25 +150,25 @@ admin_header('About Project');
         <?php endforeach; ?>
       </tbody>
     </table>
-    <button type="submit">Save</button>
+    <button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button>
   </form>
 </div>
 <div class="card">
-  <h2>About project videos by language (dynamic tabs)</h2>
+  <h2><?= h(tr('Видео блока "О проекте" по языкам (динамические вкладки)', 'About project videos by language (dynamic tabs)')) ?></h2>
   <form method="post" style="margin-bottom:14px" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="add_about_video">
     <div class="grid">
-      <div><label>Language code</label><input name="video_language_code" placeholder="en / ru / arm / kz / de / ge / az" required></div>
-      <div><label>Video URL (embed or file path)</label><input name="video_url"></div>
-      <div><label>Upload video file</label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
-      <div><label>Video Alt (optional)</label><input name="video_alt"></div>
-      <div><label>Sort order</label><input type="number" name="video_sort_order" value="0"></div>
+      <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm / kz / de / ge / az" required></div>
+      <div><label><?= h(tr('Video URL (embed или путь к файлу)', 'Video URL (embed or file path)')) ?></label><input name="video_url"></div>
+      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Alt видео (необязательно)', 'Video Alt (optional)')) ?></label><input name="video_alt"></div>
+      <div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="video_sort_order" value="0"></div>
     </div>
-    <div class="actions" style="margin-top:10px"><button type="submit">Add about video</button></div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить видео', 'Add about video')) ?></button></div>
   </form>
   <table>
-    <thead><tr><th>Lang</th><th>URL</th><th>Alt</th><th>Order</th><th>Action</th></tr></thead>
+    <thead><tr><th><?= h(tr('Язык', 'Lang')) ?></th><th>URL</th><th>Alt</th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
       <?php foreach ($aboutVideos as $video): ?>
       <tr>
@@ -177,11 +177,11 @@ admin_header('About Project');
         <td><?= h((string) $video['video_alt']) ?></td>
         <td><?= h((string) $video['sort_order']) ?></td>
         <td>
-          <form method="post" onsubmit="return confirm('Delete this video?')">
+          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить это видео?', 'Delete this video?')) ?>')">
             <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
             <input type="hidden" name="action" value="delete_about_video">
             <input type="hidden" name="video_id" value="<?= h((string) $video['id']) ?>">
-            <button type="submit">Delete</button>
+            <button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
           </form>
         </td>
       </tr>

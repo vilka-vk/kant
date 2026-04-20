@@ -138,6 +138,10 @@ button,
   color: #fff;
 }
 
+.btn.is-active-lang {
+  background: #0757c9;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

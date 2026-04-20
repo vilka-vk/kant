@@ -49,41 +49,41 @@ if ($editId > 0) {
 }
 
 $rows = $pdo->query('SELECT * FROM publication_types ORDER BY sort_order ASC, id ASC')->fetchAll();
-admin_header('Publication Types');
+admin_header(tr('Типы публикаций', 'Publication Types'));
 ?>
 <div class="card">
-  <h1>Publication types</h1>
-  <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
+  <h1><?= h(tr('Типы публикаций', 'Publication types')) ?></h1>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <form method="post">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($edit['id'] ?? 0)) ?>">
     <div class="grid">
       <div><label>Slug</label><input name="slug" required value="<?= h((string) ($edit['slug'] ?? '')) ?>"></div>
-      <div><label>Sort order</label><input type="number" name="sort_order" value="<?= h((string) ($edit['sort_order'] ?? 0)) ?>"></div>
+      <div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="sort_order" value="<?= h((string) ($edit['sort_order'] ?? 0)) ?>"></div>
     </div>
     <hr style="margin:16px 0">
     <?php foreach ($locales as $locale): ?>
       <div style="margin-bottom:12px">
-        <label>Name (<?= h(strtoupper($locale)) ?>)</label>
+        <label><?= h(tr('Название', 'Name')) ?> (<?= h(strtoupper($locale)) ?>)</label>
         <input name="name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale] ?? '')) ?>">
       </div>
     <?php endforeach; ?>
     <div class="actions">
-      <button type="submit"><?= $edit ? 'Update type' : 'Create type' ?></button>
-      <a class="btn btn-secondary" href="/admin/publication-types.php">New</a>
+      <button type="submit"><?= $edit ? h(tr('Обновить тип', 'Update type')) : h(tr('Создать тип', 'Create type')) ?></button>
+      <a class="btn btn-secondary" href="/admin/publication-types.php"><?= h(tr('Новый', 'New')) ?></a>
     </div>
   </form>
 </div>
 <div class="card">
   <table>
-    <thead><tr><th>ID</th><th>Slug</th><th>Order</th><th>Action</th></tr></thead>
+    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $row): ?>
       <tr>
         <td><?= h((string) $row['id']) ?></td>
         <td><?= h($row['slug']) ?></td>
         <td><?= h((string) $row['sort_order']) ?></td>
-        <td><a class="btn btn-secondary" href="/admin/publication-types.php?edit=<?= h((string) $row['id']) ?>">Edit</a></td>
+        <td><a class="btn btn-secondary" href="/admin/publication-types.php?edit=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>
     <?php endforeach; ?>
     </tbody>

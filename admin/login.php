@@ -19,30 +19,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
 
     if (!$user || !password_verify($password, (string) $user['password_hash'])) {
-        $error = 'Invalid credentials.';
+        $error = t('login.invalid_credentials');
     } else {
         login_user($user);
         redirect('/admin/dashboard.php');
     }
 }
 
-admin_header('KANT Admin Login');
+admin_header(t('login.title'));
 ?>
 <div class="card" style="max-width:520px">
-  <h1>Admin Login</h1>
+  <h1><?= h(t('login.heading')) ?></h1>
   <?php if ($error): ?><p class="err"><?= h($error) ?></p><?php endif; ?>
   <form method="post">
     <div>
-      <label>Email</label>
+      <label><?= h(t('ui.email')) ?></label>
       <input type="email" name="email" required>
     </div>
     <div style="margin-top:12px">
-      <label>Password</label>
+      <label><?= h(t('ui.password')) ?></label>
       <input type="password" name="password" required>
     </div>
     <div style="margin-top:16px" class="actions">
-      <button type="submit">Login</button>
-      <a class="btn btn-secondary" href="/admin/install.php">Install</a>
+      <button type="submit"><?= h(t('ui.login')) ?></button>
+      <a class="btn btn-secondary" href="/admin/install.php"><?= h(t('ui.install')) ?></a>
     </div>
   </form>
 </div>

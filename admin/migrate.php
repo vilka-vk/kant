@@ -22,26 +22,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($migrations as $migrationPath) {
             $sql = file_get_contents($migrationPath);
             if ($sql === false) {
-                throw new RuntimeException('Migration file not found: ' . basename($migrationPath));
+                throw new RuntimeException(t('migrate.file_not_found') . ': ' . basename($migrationPath));
             }
             db()->exec($sql);
         }
-        $ok = 'Migrations applied.';
+        $ok = t('migrate.applied');
     } catch (Throwable $e) {
         $err = $e->getMessage();
     }
 }
 
-admin_header('Run Migration');
+admin_header(t('migrate.title'));
 ?>
 <div class="card">
-  <h1>Database Migrations</h1>
-  <p class="muted">Applies idempotent migrations: legacy video cleanup and Our Position tables.</p>
+  <h1><?= h(t('migrate.heading')) ?></h1>
+  <p class="muted"><?= h(t('migrate.description')) ?></p>
   <?php if ($ok): ?><p class="ok"><?= h($ok) ?></p><?php endif; ?>
   <?php if ($err): ?><p class="err"><?= h($err) ?></p><?php endif; ?>
-  <form method="post" onsubmit="return confirm('Apply migration now?')">
+  <form method="post" onsubmit="return confirm('<?= h(t('migrate.confirm')) ?>')">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <button type="submit">Run migrations</button>
+    <button type="submit"><?= h(t('migrate.run')) ?></button>
   </form>
 </div>
 <?php admin_footer();

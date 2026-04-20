@@ -369,7 +369,7 @@ if (!empty($heroModules['id'])) {
     }
 }
 
-admin_header('Modules');
+admin_header(tr('Модули', 'Modules'));
 ?>
 <style>
 .module-section{margin-top:14px}
@@ -385,15 +385,15 @@ admin_header('Modules');
 .filter-row input{max-width:140px}
 </style>
 <div class="card">
-  <h2>Hero блока "Модули"</h2>
-  <?php if (!empty($_GET['saved_hero'])): ?><p class="ok">Hero сохранен.</p><?php endif; ?>
+  <h2><?= h(tr('Hero блока "Модули"', 'Modules hero block')) ?></h2>
+  <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero сохранен.', 'Hero saved.')) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="save_modules_page_hero">
     <div class="grid">
-      <div><label>Фон hero (путь)</label><input name="hero_modules_background_image_path" value="<?= h((string) ($heroModules['background_image_path'] ?? '')) ?>"></div>
-      <div><label>Загрузить фон hero</label><input type="file" name="hero_modules_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label>Показывать subtitle</label><select name="hero_modules_subtitle_enabled"><option value="1" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>>Да</option><option value="0" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>>Нет</option></select></div>
+      <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input name="hero_modules_background_image_path" value="<?= h((string) ($heroModules['background_image_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Загрузить фон hero', 'Upload hero background')) ?></label><input type="file" name="hero_modules_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_modules_subtitle_enabled"><option value="1" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
     </div>
     <hr style="margin:12px 0">
     <?php foreach ($locales as $locale): ?>
@@ -402,39 +402,39 @@ admin_header('Modules');
         <div><label>Hero subtitle (<?= h(strtoupper($locale)) ?>)</label><input name="hero_modules_subtitle_<?= h($locale) ?>" value="<?= h((string) ($heroModulesTrRows[$locale]['subtitle'] ?? '')) ?>"></div>
       </div>
     <?php endforeach; ?>
-    <div class="actions"><button type="submit">Сохранить hero для страницы модулей</button></div>
+    <div class="actions"><button type="submit"><?= h(tr('Сохранить hero для страницы модулей', 'Save modules hero')) ?></button></div>
   </form>
 </div>
 
 <div class="card">
-  <h1>Modules</h1>
-  <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
-  <?php if (!empty($_GET['error']) && $_GET['error'] === 'invalid_lang'): ?><p class="err">Language code format is invalid. Use only letters, 2-5 chars (e.g. en, ru, arm).</p><?php endif; ?>
-  <?php if (!empty($_GET['error']) && $_GET['error'] === 'reading_xor'): ?><p class="err">For reading without linked publication, exactly one of URL or file path is required.</p><?php endif; ?>
+  <h1><?= h(tr('Модули', 'Modules')) ?></h1>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error']) && $_GET['error'] === 'invalid_lang'): ?><p class="err"><?= h(tr('Неверный формат кода языка. Используйте только буквы, 2-5 символов (например: en, ru, arm).', 'Language code format is invalid. Use only letters, 2-5 chars (e.g. en, ru, arm).')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error']) && $_GET['error'] === 'reading_xor'): ?><p class="err"><?= h(tr('Для материала без связанной публикации нужно указать только одно: URL или путь к файлу.', 'For reading without linked publication, exactly one of URL or file path is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && !in_array((string) $_GET['error'], ['invalid_lang', 'reading_xor'], true)): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($editRow['id'] ?? 0)) ?>">
     <div class="grid">
       <div><label>Slug</label><input name="slug" required value="<?= h((string) ($editRow['slug'] ?? '')) ?>"></div>
-      <div><label>Module Number</label><input type="number" name="module_number" required value="<?= h((string) ($editRow['module_number'] ?? 1)) ?>"></div>
-      <div><label>Sort Order</label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
+      <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="module_number" required value="<?= h((string) ($editRow['module_number'] ?? 1)) ?>"></div>
+      <div><label><?= h(tr('Порядок сортировки', 'Sort Order')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
       <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
-      <div><label>Duration</label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
-      <div><label>Hero background image path</label><input name="hero_background_image_path" value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>"></div>
-      <div><label>Presentation file path (optional)</label><input name="presentation_file_path" value="<?= h((string) ($editRow['presentation_file_path'] ?? '')) ?>"></div>
-      <div><label>Upload hero image</label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label>Upload presentation PDF/PPT (optional)</label><input type="file" name="presentation_file_upload" accept=".pdf,.ppt,.pptx"></div>
+      <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input name="hero_background_image_path" value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Путь к файлу презентации (необязательно)', 'Presentation file path (optional)')) ?></label><input name="presentation_file_path" value="<?= h((string) ($editRow['presentation_file_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Загрузить hero-изображение', 'Upload hero image')) ?></label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label><?= h(tr('Загрузить PDF/PPT презентации (необязательно)', 'Upload presentation PDF/PPT (optional)')) ?></label><input type="file" name="presentation_file_upload" accept=".pdf,.ppt,.pptx"></div>
     </div>
     <hr style="margin:16px 0">
     <?php
       $leftLocale = $locales[0] ?? 'ru';
       $rightLocale = $locales[1] ?? ($locales[0] ?? 'en');
     ?>
-    <p class="muted">Localization table: left column is <?= h(strtoupper($leftLocale)) ?>, right column is <?= h(strtoupper($rightLocale)) ?>.</p>
+    <p class="muted"><?= h(tr('Таблица локализации: слева', 'Localization table: left column is')) ?> <?= h(strtoupper($leftLocale)) ?>, <?= h(tr('справа', 'right column is')) ?> <?= h(strtoupper($rightLocale)) ?>.</p>
     <table style="margin-bottom:12px">
-      <thead><tr><th>Field</th><th><?= h(strtoupper($leftLocale)) ?></th><th><?= h(strtoupper($rightLocale)) ?></th></tr></thead>
+      <thead><tr><th><?= h(tr('Поле', 'Field')) ?></th><th><?= h(strtoupper($leftLocale)) ?></th><th><?= h(strtoupper($rightLocale)) ?></th></tr></thead>
       <tbody>
         <?php
         $translationFields = [
@@ -472,17 +472,17 @@ admin_header('Modules');
       </tbody>
     </table>
     <div class="actions">
-      <button type="submit"><?= $editRow ? 'Update module' : 'Create module' ?></button>
-      <a class="btn btn-secondary" href="/admin/modules.php">New</a>
+      <button type="submit"><?= $editRow ? h(tr('Обновить модуль', 'Update module')) : h(tr('Создать модуль', 'Create module')) ?></button>
+      <a class="btn btn-secondary" href="/admin/modules.php"><?= h(tr('Новый', 'New')) ?></a>
     </div>
   </form>
 </div>
 
 <?php if ($editRow): ?>
 <details class="module-section card" open>
-  <summary>Lecture Videos</summary>
+  <summary><?= h(tr('Видео лекции', 'Lecture Videos')) ?></summary>
   <div class="module-section__body">
-  <p class="inline-help">URL hint: use embed URL, e.g. https://www.youtube.com/embed/... or Vimeo player URL.</p>
+  <p class="inline-help"><?= h(tr('Подсказка: используйте embed URL, например https://www.youtube.com/embed/... или Vimeo player URL.', 'URL hint: use embed URL, e.g. https://www.youtube.com/embed/... or Vimeo player URL.')) ?></p>
   <form method="post" style="margin-bottom:12px" class="compact-inputs" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="add_lecture_video">
@@ -490,18 +490,18 @@ admin_header('Modules');
     <div class="grid">
       <div><label>language_code</label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}"></div>
       <div><label>video_url (embed or file path)</label><input name="video_url"></div>
-      <div><label>Upload video file</label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
       <div><label>video_alt</label><input name="video_alt"></div>
       <div><label>sort_order</label><input type="number" name="video_sort_order" value="0"></div>
     </div>
-    <div class="actions" style="margin-top:10px"><button type="submit">Add video</button></div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить видео', 'Add video')) ?></button></div>
   </form>
   <div class="filter-row">
-    <label for="lecture-filter"><strong>Filter language_code:</strong></label>
-    <input id="lecture-filter" type="text" placeholder="e.g. ru, en">
+    <label for="lecture-filter"><strong><?= h(tr('Фильтр language_code:', 'Filter language_code:')) ?></strong></label>
+    <input id="lecture-filter" type="text" placeholder="<?= h(tr('например: ru, en', 'e.g. ru, en')) ?>">
   </div>
   <div class="table-scroll">
-  <table id="lecture-table"><thead><tr><th>language_code</th><th>video_url</th><th>video_alt</th><th>sort_order</th><th>Actions</th></tr></thead><tbody>
+  <table id="lecture-table"><thead><tr><th>language_code</th><th>video_url</th><th>video_alt</th><th>sort_order</th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody>
     <?php foreach ($lectureVideos as $video): ?>
       <tr data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
         <td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td><td><?= h((string) $video['sort_order']) ?></td>
@@ -513,40 +513,40 @@ admin_header('Modules');
             <input type="file" name="video_file" accept=".mp4,.webm,.ogg">
             <input name="video_alt" value="<?= h((string) $video['video_alt']) ?>" style="max-width:160px">
             <input name="video_sort_order" type="number" value="<?= h((string) $video['sort_order']) ?>" style="max-width:70px">
-            <button type="submit">Edit</button>
+            <button type="submit"><?= h(tr('Изменить', 'Edit')) ?></button>
           </form>
-          <form method="post" onsubmit="return confirm('Delete lecture video?')">
-            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_lecture_video"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="video_id" value="<?= h((string) $video['id']) ?>"><button type="submit">Delete</button>
+          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить видео лекции?', 'Delete lecture video?')) ?>')">
+            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_lecture_video"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="video_id" value="<?= h((string) $video['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
           </form>
         </td>
       </tr>
     <?php endforeach; ?>
   </tbody></table>
   </div>
-  <p class="muted">Preview tabs: <?php foreach ($lectureVideos as $v): ?><span style="display:inline-block;padding:2px 8px;border:1px solid #ccc;border-radius:14px;margin-right:6px"><?= h(strtoupper((string) $v['language_code'])) ?></span><?php endforeach; ?></p>
+  <p class="muted"><?= h(tr('Предпросмотр вкладок:', 'Preview tabs:')) ?> <?php foreach ($lectureVideos as $v): ?><span style="display:inline-block;padding:2px 8px;border:1px solid #ccc;border-radius:14px;margin-right:6px"><?= h(strtoupper((string) $v['language_code'])) ?></span><?php endforeach; ?></p>
   </div>
 </details>
 
 <details class="module-section card" open>
-  <summary>Presentation Videos</summary>
+  <summary><?= h(tr('Видео презентации', 'Presentation Videos')) ?></summary>
   <div class="module-section__body">
   <form method="post" style="margin-bottom:12px" class="compact-inputs" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="add_presentation_video"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <div class="grid">
       <div><label>language_code</label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}"></div>
       <div><label>video_url (embed or file path)</label><input name="video_url"></div>
-      <div><label>Upload video file</label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
       <div><label>video_alt</label><input name="video_alt"></div>
       <div><label>sort_order</label><input type="number" name="video_sort_order" value="0"></div>
     </div>
-    <div class="actions" style="margin-top:10px"><button type="submit">Add video</button></div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить видео', 'Add video')) ?></button></div>
   </form>
   <div class="filter-row">
-    <label for="presentation-filter"><strong>Filter language_code:</strong></label>
-    <input id="presentation-filter" type="text" placeholder="e.g. ru, en">
+    <label for="presentation-filter"><strong><?= h(tr('Фильтр language_code:', 'Filter language_code:')) ?></strong></label>
+    <input id="presentation-filter" type="text" placeholder="<?= h(tr('например: ru, en', 'e.g. ru, en')) ?>">
   </div>
   <div class="table-scroll">
-  <table id="presentation-table"><thead><tr><th>language_code</th><th>video_url</th><th>video_alt</th><th>sort_order</th><th>Actions</th></tr></thead><tbody>
+  <table id="presentation-table"><thead><tr><th>language_code</th><th>video_url</th><th>video_alt</th><th>sort_order</th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody>
     <?php foreach ($presentationVideos as $video): ?>
       <tr data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
         <td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td><td><?= h((string) $video['sort_order']) ?></td>
@@ -558,32 +558,32 @@ admin_header('Modules');
             <input type="file" name="video_file" accept=".mp4,.webm,.ogg">
             <input name="video_alt" value="<?= h((string) $video['video_alt']) ?>" style="max-width:160px">
             <input name="video_sort_order" type="number" value="<?= h((string) $video['sort_order']) ?>" style="max-width:70px">
-            <button type="submit">Edit</button>
+            <button type="submit"><?= h(tr('Изменить', 'Edit')) ?></button>
           </form>
-          <form method="post" onsubmit="return confirm('Delete presentation video?')">
-            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_presentation_video"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="video_id" value="<?= h((string) $video['id']) ?>"><button type="submit">Delete</button>
+          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить видео презентации?', 'Delete presentation video?')) ?>')">
+            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_presentation_video"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="video_id" value="<?= h((string) $video['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
           </form>
         </td>
       </tr>
     <?php endforeach; ?>
   </tbody></table>
   </div>
-  <p class="muted">Preview tabs: <?php foreach ($presentationVideos as $v): ?><span style="display:inline-block;padding:2px 8px;border:1px solid #ccc;border-radius:14px;margin-right:6px"><?= h(strtoupper((string) $v['language_code'])) ?></span><?php endforeach; ?></p>
+  <p class="muted"><?= h(tr('Предпросмотр вкладок:', 'Preview tabs:')) ?> <?php foreach ($presentationVideos as $v): ?><span style="display:inline-block;padding:2px 8px;border:1px solid #ccc;border-radius:14px;margin-right:6px"><?= h(strtoupper((string) $v['language_code'])) ?></span><?php endforeach; ?></p>
   </div>
 </details>
 
 <details class="module-section card">
-  <summary>Transcripts (for this module)</summary>
+  <summary><?= h(tr('Транскрипции (для этого модуля)', 'Transcripts (for this module)')) ?></summary>
   <div class="module-section__body">
   <form method="post" style="margin-bottom:12px" class="compact-inputs" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
-    <div class="grid"><div><label>file_path</label><input name="file_path"></div><div><label>Upload transcript file</label><input type="file" name="transcript_file" accept=".pdf,.doc,.docx,.txt"></div><div><label>sort_order</label><input type="number" name="sort_order" value="0"></div></div>
+    <div class="grid"><div><label>file_path</label><input name="file_path"></div><div><label><?= h(tr('Загрузить файл транскрипции', 'Upload transcript file')) ?></label><input type="file" name="transcript_file" accept=".pdf,.doc,.docx,.txt"></div><div><label>sort_order</label><input type="number" name="sort_order" value="0"></div></div>
     <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label>display_name (<?= h(strtoupper($locale)) ?>)</label><input name="display_name_<?= h($locale) ?>"></div><?php endforeach; ?>
-    <div class="actions" style="margin-top:10px"><button type="submit">Add transcript</button></div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить транскрипцию', 'Add transcript')) ?></button></div>
   </form>
-  <table><thead><tr><th>file_path</th><th>sort_order</th><th>Action</th></tr></thead><tbody>
+  <table><thead><tr><th>file_path</th><th>sort_order</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody>
   <?php foreach ($transcripts as $t): ?>
-    <tr><td><?= h((string) $t['file_path']) ?></td><td><?= h((string) $t['sort_order']) ?></td><td><form method="post" onsubmit="return confirm('Delete transcript?')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit">Delete</button></form></td></tr>
+    <tr><td><?= h((string) $t['file_path']) ?></td><td><?= h((string) $t['sort_order']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить транскрипцию?', 'Delete transcript?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
   </div>
@@ -610,7 +610,7 @@ admin_header('Modules');
 </details>
 
 <details class="module-section card">
-  <summary>Readings (for this module)</summary>
+  <summary><?= h(tr('Материалы для чтения (для этого модуля)', 'Readings (for this module)')) ?></summary>
   <div class="module-section__body">
   <form method="post" style="margin-bottom:12px" class="compact-inputs" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
@@ -618,19 +618,19 @@ admin_header('Modules');
       <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>">#<?= h((string) $p['id']) ?></option><?php endforeach; ?></select></div>
       <div><label>custom_url</label><input name="custom_url" id="reading-custom-url"></div>
       <div><label>custom_file_path</label><input name="custom_file_path" id="reading-custom-file-path"></div>
-      <div><label>Upload reading file</label><input type="file" name="custom_file_upload" id="reading-custom-file-upload" accept=".pdf,.doc,.docx,.txt"></div>
+      <div><label><?= h(tr('Загрузить файл материала', 'Upload reading file')) ?></label><input type="file" name="custom_file_upload" id="reading-custom-file-upload" accept=".pdf,.doc,.docx,.txt"></div>
       <div><label>custom_cover_image_path</label><input name="custom_cover_image_path" id="reading-custom-cover-path"></div>
-      <div><label>Upload cover image</label><input type="file" name="custom_cover_upload" id="reading-custom-cover-upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label><?= h(tr('Загрузить изображение обложки', 'Upload cover image')) ?></label><input type="file" name="custom_cover_upload" id="reading-custom-cover-upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label>sort_order</label><input type="number" name="sort_order" value="0"></div>
     </div>
     <div id="reading-custom-titles">
       <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label>custom_title (<?= h(strtoupper($locale)) ?>)</label><input name="custom_title_<?= h($locale) ?>"></div><?php endforeach; ?>
     </div>
-    <div class="actions" style="margin-top:10px"><button type="submit">Add reading</button></div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить материал', 'Add reading')) ?></button></div>
   </form>
-  <table><thead><tr><th>linked_pub</th><th>target</th><th>sort_order</th><th>Action</th></tr></thead><tbody>
+  <table><thead><tr><th>linked_pub</th><th>target</th><th>sort_order</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody>
   <?php foreach ($readings as $r): ?>
-    <tr><td><?= h((string) ($r['linked_publication_id'] ?: '-')) ?></td><td><?= h((string) ($r['custom_file_path'] ?: $r['custom_url'])) ?></td><td><?= h((string) $r['sort_order']) ?></td><td><form method="post" onsubmit="return confirm('Delete reading?')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="reading_id" value="<?= h((string) $r['id']) ?>"><button type="submit">Delete</button></form></td></tr>
+    <tr><td><?= h((string) ($r['linked_publication_id'] ?: '-')) ?></td><td><?= h((string) ($r['custom_file_path'] ?: $r['custom_url'])) ?></td><td><?= h((string) $r['sort_order']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить материал?', 'Delete reading?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="reading_id" value="<?= h((string) $r['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
   </div>
@@ -638,9 +638,9 @@ admin_header('Modules');
 <?php endif; ?>
 
 <div class="card">
-  <h2>Existing modules</h2>
+  <h2><?= h(tr('Существующие модули', 'Existing modules')) ?></h2>
   <table>
-    <thead><tr><th>ID</th><th>Slug</th><th>Number</th><th>Order</th><th>Languages</th><th>Actions</th></tr></thead>
+    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $row): ?>
       <tr>
@@ -650,9 +650,9 @@ admin_header('Modules');
         <td><?= h((string) $row['sort_order']) ?></td>
         <td><?= h($row['languages']) ?></td>
         <td class="actions">
-          <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $row['id']) ?>">Edit</a>
-          <form method="post" onsubmit="return confirm('Delete module?')">
-            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= h((string) $row['id']) ?>"><button type="submit">Delete</button>
+          <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a>
+          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить модуль?', 'Delete module?')) ?>')">
+            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= h((string) $row['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
           </form>
         </td>
       </tr>

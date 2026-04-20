@@ -27,6 +27,14 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+require_once __DIR__ . '/i18n.php';
+if (isset($_GET['lang'])) {
+    set_admin_locale((string) $_GET['lang']);
+}
+if (!isset($_SESSION['admin_locale'])) {
+    set_admin_locale((string) ($config['app']['default_locale'] ?? 'ru'));
+}
+
 function h(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');

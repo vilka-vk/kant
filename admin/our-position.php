@@ -95,35 +95,35 @@ foreach ($trs as $row) {
 $leftLocale = $locales[0] ?? 'ru';
 $rightLocale = $locales[1] ?? ($locales[0] ?? 'en');
 
-admin_header('Our position');
+admin_header(tr('Наша позиция', 'Our position'));
 ?>
 <div class="card">
-  <h1>Our position</h1>
-  <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
+  <h1><?= h(tr('Наша позиция', 'Our position')) ?></h1>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
 
     <div class="grid">
       <div>
-        <label>Image 1 path</label>
+        <label><?= h(tr('Путь к изображению 1', 'Image 1 path')) ?></label>
         <input name="image_primary_path" value="<?= h((string) ($base['image_primary_path'] ?? '')) ?>">
-        <label style="margin-top:8px">Upload image 1</label>
+        <label style="margin-top:8px"><?= h(tr('Загрузить изображение 1', 'Upload image 1')) ?></label>
         <input type="file" name="image_primary_file" accept=".jpg,.jpeg,.png,.webp,.gif">
       </div>
       <div>
-        <label>Image 2 path</label>
+        <label><?= h(tr('Путь к изображению 2', 'Image 2 path')) ?></label>
         <input name="image_secondary_path" value="<?= h((string) ($base['image_secondary_path'] ?? '')) ?>">
-        <label style="margin-top:8px">Upload image 2</label>
+        <label style="margin-top:8px"><?= h(tr('Загрузить изображение 2', 'Upload image 2')) ?></label>
         <input type="file" name="image_secondary_file" accept=".jpg,.jpeg,.png,.webp,.gif">
       </div>
     </div>
 
     <hr style="margin:16px 0">
-    <p class="muted">Localization table: left column is <?= h(strtoupper($leftLocale)) ?>, right column is <?= h(strtoupper($rightLocale)) ?>.</p>
+    <p class="muted"><?= h(tr('Таблица локализации: слева', 'Localization table: left column is')) ?> <?= h(strtoupper($leftLocale)) ?>, <?= h(tr('справа', 'right column is')) ?> <?= h(strtoupper($rightLocale)) ?>.</p>
     <table>
       <thead>
-        <tr><th>Field</th><th><?= h(strtoupper($leftLocale)) ?></th><th><?= h(strtoupper($rightLocale)) ?></th></tr>
+        <tr><th><?= h(tr('Поле', 'Field')) ?></th><th><?= h(strtoupper($leftLocale)) ?></th><th><?= h(strtoupper($rightLocale)) ?></th></tr>
       </thead>
       <tbody>
         <?php
@@ -166,7 +166,7 @@ admin_header('Our position');
       </tbody>
     </table>
     <div class="actions" style="margin-top:12px">
-      <button type="submit">Save our position</button>
+      <button type="submit"><?= h(tr('Сохранить блок "Наша позиция"', 'Save our position')) ?></button>
     </div>
   </form>
 </div>

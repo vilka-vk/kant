@@ -44,11 +44,11 @@ foreach ($tr as $row) {
     $trMap[$row['locale']] = $row['footer_copyright'];
 }
 
-admin_header('Site Settings');
+admin_header(tr('Настройки сайта', 'Site Settings'));
 ?>
 <div class="card">
-  <h1>Site settings</h1>
-  <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
+  <h1><?= h(tr('Настройки сайта', 'Site settings')) ?></h1>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <form method="post">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <div class="grid">
@@ -60,11 +60,11 @@ admin_header('Site Settings');
     <hr style="margin:16px 0">
     <?php foreach ($locales as $locale): ?>
       <div style="margin-bottom:12px">
-        <label>Footer text (<?= h(strtoupper($locale)) ?>)</label>
+        <label><?= h(tr('Текст футера', 'Footer text')) ?> (<?= h(strtoupper($locale)) ?>)</label>
         <textarea rows="2" name="footer_copyright_<?= h($locale) ?>"><?= h((string) ($trMap[$locale] ?? '')) ?></textarea>
       </div>
     <?php endforeach; ?>
-    <button type="submit">Save</button>
+    <button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button>
   </form>
 </div>
 <?php

@@ -141,18 +141,18 @@ $rows = $pdo->query('SELECT p.id, p.display_order, p.published_at, p.file_path, 
   FROM publications p LEFT JOIN publication_types pt ON pt.id = p.publication_type_id
   ORDER BY p.display_order ASC, p.published_at DESC, p.id ASC')->fetchAll();
 
-admin_header('Publications');
+admin_header(tr('Публикации', 'Publications'));
 ?>
 <div class="card">
-  <h2>Hero блока "Публикации"</h2>
-  <?php if (!empty($_GET['saved_hero'])): ?><p class="ok">Hero сохранен.</p><?php endif; ?>
+  <h2><?= h(tr('Hero блока "Публикации"', 'Publications hero block')) ?></h2>
+  <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero сохранен.', 'Hero saved.')) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="save_publications_page_hero">
     <div class="grid">
-      <div><label>Фон hero (путь)</label><input name="hero_publications_background_image_path" value="<?= h((string) ($heroPublications['background_image_path'] ?? '')) ?>"></div>
-      <div><label>Загрузить фон hero</label><input type="file" name="hero_publications_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label>Показывать subtitle</label><select name="hero_publications_subtitle_enabled"><option value="1" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>>Да</option><option value="0" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>>Нет</option></select></div>
+      <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input name="hero_publications_background_image_path" value="<?= h((string) ($heroPublications['background_image_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Загрузить фон hero', 'Upload hero background')) ?></label><input type="file" name="hero_publications_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_publications_subtitle_enabled"><option value="1" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
     </div>
     <hr style="margin:12px 0">
     <?php foreach ($locales as $locale): ?>
@@ -161,34 +161,34 @@ admin_header('Publications');
         <div><label>Hero subtitle (<?= h(strtoupper($locale)) ?>)</label><input name="hero_publications_subtitle_<?= h($locale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$locale]['subtitle'] ?? '')) ?>"></div>
       </div>
     <?php endforeach; ?>
-    <div class="actions"><button type="submit">Сохранить hero для страницы публикаций</button></div>
+    <div class="actions"><button type="submit"><?= h(tr('Сохранить hero для страницы публикаций', 'Save publications hero')) ?></button></div>
   </form>
 </div>
 
 <div class="card">
-  <h1>Publications</h1>
-  <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
-  <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err">Exactly one of file path or external URL is required.</p><?php endif; ?>
+  <h1><?= h(tr('Публикации', 'Publications')) ?></h1>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($edit['id'] ?? 0)) ?>">
     <div class="grid">
-      <div><label>Type</label>
+      <div><label><?= h(tr('Тип', 'Type')) ?></label>
         <select name="publication_type_id" required>
-          <option value="">Select</option>
+          <option value=""><?= h(tr('Выберите', 'Select')) ?></option>
           <?php foreach ($types as $t): ?>
             <option value="<?= h((string) $t['id']) ?>" <?= ((int) ($edit['publication_type_id'] ?? 0) === (int) $t['id']) ? 'selected' : '' ?>><?= h($t['slug']) ?></option>
           <?php endforeach; ?>
         </select>
       </div>
-      <div><label>Published at</label><input name="published_at" value="<?= h((string) ($edit['published_at'] ?? date('Y-m-d 00:00:00'))) ?>"></div>
-      <div><label>Display order</label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? 0)) ?>"></div>
-      <div><label>Cover image path</label><input name="cover_image_path" value="<?= h((string) ($edit['cover_image_path'] ?? '')) ?>"></div>
-      <div><label>Upload cover image</label><input type="file" name="cover_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label>File path</label><input name="file_path" value="<?= h((string) ($edit['file_path'] ?? '')) ?>"></div>
-      <div><label>Upload file</label><input type="file" name="file_upload" accept=".pdf,.doc,.docx"></div>
-      <div><label>External URL</label><input name="external_url" value="<?= h((string) ($edit['external_url'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Дата публикации', 'Published at')) ?></label><input name="published_at" value="<?= h((string) ($edit['published_at'] ?? date('Y-m-d 00:00:00'))) ?>"></div>
+      <div><label><?= h(tr('Порядок отображения', 'Display order')) ?></label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? 0)) ?>"></div>
+      <div><label><?= h(tr('Путь к обложке', 'Cover image path')) ?></label><input name="cover_image_path" value="<?= h((string) ($edit['cover_image_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Загрузить обложку', 'Upload cover image')) ?></label><input type="file" name="cover_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label><?= h(tr('Путь к файлу', 'File path')) ?></label><input name="file_path" value="<?= h((string) ($edit['file_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Загрузить файл', 'Upload file')) ?></label><input type="file" name="file_upload" accept=".pdf,.doc,.docx"></div>
+      <div><label><?= h(tr('Внешняя ссылка', 'External URL')) ?></label><input name="external_url" value="<?= h((string) ($edit['external_url'] ?? '')) ?>"></div>
     </div>
     <hr style="margin:16px 0">
     <?php foreach ($locales as $locale): ?>
@@ -196,14 +196,14 @@ admin_header('Publications');
       <div style="margin-bottom:12px"><label>Description (<?= h(strtoupper($locale)) ?>)</label><textarea rows="3" name="description_<?= h($locale) ?>"><?= h((string) ($trMap[$locale]['description'] ?? '')) ?></textarea></div>
     <?php endforeach; ?>
     <div class="actions">
-      <button type="submit"><?= $edit ? 'Update publication' : 'Create publication' ?></button>
-      <a class="btn btn-secondary" href="/admin/publications.php">New</a>
+      <button type="submit"><?= $edit ? h(tr('Обновить публикацию', 'Update publication')) : h(tr('Создать публикацию', 'Create publication')) ?></button>
+      <a class="btn btn-secondary" href="/admin/publications.php"><?= h(tr('Новая', 'New')) ?></a>
     </div>
   </form>
 </div>
 <div class="card">
   <table>
-    <thead><tr><th>ID</th><th>Type</th><th>Order</th><th>Date</th><th>Target</th><th>Action</th></tr></thead>
+    <thead><tr><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $r): ?>
       <tr>
@@ -212,7 +212,7 @@ admin_header('Publications');
         <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['published_at']) ?></td>
         <td><?= h($r['file_path'] !== '' ? $r['file_path'] : (string) $r['external_url']) ?></td>
-        <td><a class="btn btn-secondary" href="/admin/publications.php?edit=<?= h((string) $r['id']) ?>">Edit</a></td>
+        <td><a class="btn btn-secondary" href="/admin/publications.php?edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>
     <?php endforeach; ?>
     </tbody>

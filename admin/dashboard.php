@@ -18,7 +18,7 @@ admin_header('KANT Admin Dashboard');
     <li><a href="/admin/modules.php">Modules (dynamic lecture tabs by language)</a></li>
     <li><a href="/admin/site-settings.php">Site settings</a></li>
     <li><a href="/admin/about-project.php">About project</a></li>
-    <li><a href="/admin/hero-sections.php">Hero sections</a></li>
+    <li><a href="/admin/our-position.php">Our position</a></li>
     <li><a href="/admin/publication-types.php">Publication types</a></li>
     <li><a href="/admin/publications.php">Publications</a></li>
     <li><a href="/admin/authors.php">Authors</a></li>

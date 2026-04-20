@@ -4,6 +4,7 @@ require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/layout.php';
+require __DIR__ . '/lib/uploads.php';
 
 require_auth();
 $pdo = db();
@@ -14,15 +15,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         http_response_code(400);
         exit('Bad CSRF token');
     }
+    $action = (string) ($_POST['action'] ?? 'save_publication');
+    if ($action === 'save_publications_page_hero') {
+        $heroRow = $pdo->prepare('SELECT id, background_image_path, subtitle_enabled FROM hero_sections WHERE page_key = :page_key LIMIT 1');
+        $heroRow->execute(['page_key' => 'publications']);
+        $hero = $heroRow->fetch() ?: null;
+        $heroBg = trim((string) ($_POST['hero_publications_background_image_path'] ?? ($hero['background_image_path'] ?? '')));
+        try {
+            $uploadedHero = upload_public_file('hero_publications_background_file', 'hero', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
+            if ($uploadedHero) {
+                $heroBg = $uploadedHero;
+            }
+        } catch (Throwable $e) {
+            redirect('/admin/publications.php?error=' . urlencode($e->getMessage()));
+        }
+        if ($hero && (int) $hero['id'] > 0) {
+            $heroId = (int) $hero['id'];
+            $pdo->prepare('UPDATE hero_sections SET subtitle_enabled = :subtitle_enabled, background_image_path = :background_image_path WHERE id = :id')
+                ->execute([
+                    'id' => $heroId,
+                    'subtitle_enabled' => (int) ($_POST['hero_publications_subtitle_enabled'] ?? 1) > 0 ? 1 : 0,
+                    'background_image_path' => $heroBg,
+                ]);
+        } else {
+            $pdo->prepare('INSERT INTO hero_sections (page_key, subtitle_enabled, background_image_path) VALUES (:page_key, :subtitle_enabled, :background_image_path)')
+                ->execute([
+                    'page_key' => 'publications',
+                    'subtitle_enabled' => (int) ($_POST['hero_publications_subtitle_enabled'] ?? 1) > 0 ? 1 : 0,
+                    'background_image_path' => $heroBg,
+                ]);
+            $heroId = (int) $pdo->lastInsertId();
+        }
+        foreach ($locales as $locale) {
+            $pdo->prepare('INSERT INTO hero_sections_translations (hero_section_id, locale, title, subtitle)
+              VALUES (:hero_section_id, :locale, :title, :subtitle)
+              ON DUPLICATE KEY UPDATE title = VALUES(title), subtitle = VALUES(subtitle)')
+                ->execute([
+                    'hero_section_id' => $heroId,
+                    'locale' => $locale,
+                    'title' => trim((string) ($_POST['hero_publications_title_' . $locale] ?? '')),
+                    'subtitle' => trim((string) ($_POST['hero_publications_subtitle_' . $locale] ?? '')),
+                ]);
+        }
+        redirect('/admin/publications.php?saved_hero=1');
+    }
+
     $id = (int) ($_POST['id'] ?? 0);
     $file = trim((string) ($_POST['file_path'] ?? ''));
     $url = trim((string) ($_POST['external_url'] ?? ''));
+    $cover = trim((string) ($_POST['cover_image_path'] ?? ''));
+    try {
+        $uploadedFile = upload_public_file('file_upload', 'publications/files', ['pdf', 'doc', 'docx']);
+        if ($uploadedFile) {
+            $file = $uploadedFile;
+            $url = '';
+        }
+        $uploadedCover = upload_public_file('cover_upload', 'publications/covers', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
+        if ($uploadedCover) {
+            $cover = $uploadedCover;
+        }
+    } catch (Throwable $e) {
+        redirect('/admin/publications.php?error=' . urlencode($e->getMessage()));
+    }
     if (($file === '' && $url === '') || ($file !== '' && $url !== '')) {
         redirect('/admin/publications.php?error=xor');
     }
     $payload = [
         'publication_type_id' => (int) ($_POST['publication_type_id'] ?? 0),
-        'cover_image_path' => trim((string) ($_POST['cover_image_path'] ?? '')),
+        'cover_image_path' => $cover,
         'file_path' => $file,
         'external_url' => $url,
         'published_at' => (string) ($_POST['published_at'] ?? date('Y-m-d H:i:s')),
@@ -66,6 +126,17 @@ if ($editId > 0) {
         $trMap[$tr['locale']] = $tr;
     }
 }
+$heroPublicationsStmt = $pdo->prepare('SELECT * FROM hero_sections WHERE page_key = :page_key LIMIT 1');
+$heroPublicationsStmt->execute(['page_key' => 'publications']);
+$heroPublications = $heroPublicationsStmt->fetch() ?: [];
+$heroPublicationsTrRows = [];
+if (!empty($heroPublications['id'])) {
+    $heroTrStmt = $pdo->prepare('SELECT locale, title, subtitle FROM hero_sections_translations WHERE hero_section_id = :hero_section_id');
+    $heroTrStmt->execute(['hero_section_id' => (int) $heroPublications['id']]);
+    foreach ($heroTrStmt->fetchAll() as $row) {
+        $heroPublicationsTrRows[$row['locale']] = $row;
+    }
+}
 $rows = $pdo->query('SELECT p.id, p.display_order, p.published_at, p.file_path, p.external_url, pt.slug as type_slug
   FROM publications p LEFT JOIN publication_types pt ON pt.id = p.publication_type_id
   ORDER BY p.display_order ASC, p.published_at DESC, p.id ASC')->fetchAll();
@@ -73,10 +144,33 @@ $rows = $pdo->query('SELECT p.id, p.display_order, p.published_at, p.file_path, 
 admin_header('Publications');
 ?>
 <div class="card">
+  <h2>Hero блока "Публикации"</h2>
+  <?php if (!empty($_GET['saved_hero'])): ?><p class="ok">Hero сохранен.</p><?php endif; ?>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="save_publications_page_hero">
+    <div class="grid">
+      <div><label>Фон hero (путь)</label><input name="hero_publications_background_image_path" value="<?= h((string) ($heroPublications['background_image_path'] ?? '')) ?>"></div>
+      <div><label>Загрузить фон hero</label><input type="file" name="hero_publications_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label>Показывать subtitle</label><select name="hero_publications_subtitle_enabled"><option value="1" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>>Да</option><option value="0" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>>Нет</option></select></div>
+    </div>
+    <hr style="margin:12px 0">
+    <?php foreach ($locales as $locale): ?>
+      <div class="grid" style="margin-bottom:8px">
+        <div><label>Hero title (<?= h(strtoupper($locale)) ?>)</label><input name="hero_publications_title_<?= h($locale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$locale]['title'] ?? '')) ?>"></div>
+        <div><label>Hero subtitle (<?= h(strtoupper($locale)) ?>)</label><input name="hero_publications_subtitle_<?= h($locale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$locale]['subtitle'] ?? '')) ?>"></div>
+      </div>
+    <?php endforeach; ?>
+    <div class="actions"><button type="submit">Сохранить hero для страницы публикаций</button></div>
+  </form>
+</div>
+
+<div class="card">
   <h1>Publications</h1>
   <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err">Exactly one of file path or external URL is required.</p><?php endif; ?>
-  <form method="post">
+  <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
+  <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($edit['id'] ?? 0)) ?>">
     <div class="grid">
@@ -91,7 +185,9 @@ admin_header('Publications');
       <div><label>Published at</label><input name="published_at" value="<?= h((string) ($edit['published_at'] ?? date('Y-m-d 00:00:00'))) ?>"></div>
       <div><label>Display order</label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? 0)) ?>"></div>
       <div><label>Cover image path</label><input name="cover_image_path" value="<?= h((string) ($edit['cover_image_path'] ?? '')) ?>"></div>
+      <div><label>Upload cover image</label><input type="file" name="cover_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label>File path</label><input name="file_path" value="<?= h((string) ($edit['file_path'] ?? '')) ?>"></div>
+      <div><label>Upload file</label><input type="file" name="file_upload" accept=".pdf,.doc,.docx"></div>
       <div><label>External URL</label><input name="external_url" value="<?= h((string) ($edit['external_url'] ?? '')) ?>"></div>
     </div>
     <hr style="margin:16px 0">

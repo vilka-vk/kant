@@ -16,6 +16,7 @@
   var configuredDefault = String(localeConfig.defaultLocale || '').toUpperCase();
   var DEFAULT_LOCALE = supportedLocales.indexOf(configuredDefault) >= 0 ? configuredDefault : supportedLocales[0];
   var localeLabels = localeConfig.labels || {};
+  var localeUi = localeConfig.ui || {};
 
   function normalizeLocale(value) {
     if (!value) return null;
@@ -76,6 +77,15 @@
           item.setAttribute('title', localeLabels[optionLocale]);
         }
       });
+    });
+
+    document.querySelectorAll('[data-i18n-key]').forEach(function (node) {
+      var key = String(node.getAttribute('data-i18n-key') || '');
+      if (!key || !localeUi[key]) return;
+      var value = localeUi[key][locale];
+      if (value) {
+        node.textContent = value;
+      }
     });
   }
 

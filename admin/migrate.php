@@ -15,12 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Bad CSRF token');
     }
     try {
-        $sql = file_get_contents(__DIR__ . '/../database/migrations/2026-04-17-remove-legacy-video-columns.sql');
-        if ($sql === false) {
-            throw new RuntimeException('Migration file not found.');
+        $migrations = [
+            __DIR__ . '/../database/migrations/2026-04-17-remove-legacy-video-columns.sql',
+            __DIR__ . '/../database/migrations/2026-04-20-add-our-position.sql',
+        ];
+        foreach ($migrations as $migrationPath) {
+            $sql = file_get_contents($migrationPath);
+            if ($sql === false) {
+                throw new RuntimeException('Migration file not found: ' . basename($migrationPath));
+            }
+            db()->exec($sql);
         }
-        db()->exec($sql);
-        $ok = 'Migration applied.';
+        $ok = 'Migrations applied.';
     } catch (Throwable $e) {
         $err = $e->getMessage();
     }
@@ -29,13 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 admin_header('Run Migration');
 ?>
 <div class="card">
-  <h1>Legacy Video Cleanup</h1>
-  <p class="muted">Drops unused legacy video columns from `modules` and `modules_translations`.</p>
+  <h1>Database Migrations</h1>
+  <p class="muted">Applies idempotent migrations: legacy video cleanup and Our Position tables.</p>
   <?php if ($ok): ?><p class="ok"><?= h($ok) ?></p><?php endif; ?>
   <?php if ($err): ?><p class="err"><?= h($err) ?></p><?php endif; ?>
   <form method="post" onsubmit="return confirm('Apply migration now?')">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <button type="submit">Run migration</button>
+    <button type="submit">Run migrations</button>
   </form>
 </div>
 <?php admin_footer();

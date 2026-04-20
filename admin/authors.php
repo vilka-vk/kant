@@ -4,6 +4,7 @@ require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/layout.php';
+require __DIR__ . '/lib/uploads.php';
 
 require_auth();
 $pdo = db();
@@ -15,8 +16,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Bad CSRF token');
     }
     $id = (int) ($_POST['id'] ?? 0);
+    $photoPath = trim((string) ($_POST['photo_path'] ?? ''));
+    try {
+        $uploadedPhoto = upload_public_file('photo_upload', 'authors', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
+        if ($uploadedPhoto) {
+            $photoPath = $uploadedPhoto;
+        }
+    } catch (Throwable $e) {
+        redirect('/admin/authors.php?error=' . urlencode($e->getMessage()));
+    }
     $payload = [
-        'photo_path' => trim((string) ($_POST['photo_path'] ?? '')),
+        'photo_path' => $photoPath,
         'display_order' => (int) ($_POST['display_order'] ?? 0),
     ];
     if ($id > 0) {
@@ -37,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'locale' => $locale,
             'first_name' => trim((string) ($_POST['first_name_' . $locale] ?? '')),
             'last_name' => trim((string) ($_POST['last_name_' . $locale] ?? '')),
-            'full_name' => trim((string) ($_POST['full_name_' . $locale] ?? '')),
+            'full_name' => '',
             'affiliation' => trim((string) ($_POST['affiliation_' . $locale] ?? '')),
         ]);
     }
@@ -64,11 +74,13 @@ admin_header('Authors');
 <div class="card">
   <h1>Authors</h1>
   <?php if (!empty($_GET['saved'])): ?><p class="ok">Saved.</p><?php endif; ?>
-  <form method="post">
+  <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
+  <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($edit['id'] ?? 0)) ?>">
     <div class="grid">
       <div><label>Photo path</label><input name="photo_path" required value="<?= h((string) ($edit['photo_path'] ?? '')) ?>"></div>
+      <div><label>Upload photo</label><input type="file" name="photo_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label>Display order</label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? 0)) ?>"></div>
     </div>
     <hr style="margin:16px 0">
@@ -76,7 +88,6 @@ admin_header('Authors');
       <div class="grid" style="margin-bottom:12px">
         <div><label>First name (<?= h(strtoupper($locale)) ?>)</label><input name="first_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['first_name'] ?? '')) ?>"></div>
         <div><label>Last name (<?= h(strtoupper($locale)) ?>)</label><input name="last_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['last_name'] ?? '')) ?>"></div>
-        <div><label>Full name (<?= h(strtoupper($locale)) ?>)</label><input name="full_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['full_name'] ?? '')) ?>"></div>
         <div><label>Affiliation (<?= h(strtoupper($locale)) ?>)</label><input name="affiliation_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['affiliation'] ?? '')) ?>"></div>
       </div>
     <?php endforeach; ?>

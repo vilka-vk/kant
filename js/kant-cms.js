@@ -48,6 +48,29 @@
     }
   }
 
+  function escapeAttr(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function renderVideoMarkup(url, title) {
+    var safeUrl = String(url || '').trim();
+    var safeTitle = escapeAttr(title || 'Video');
+    if (!safeUrl) return '';
+    var lower = safeUrl.toLowerCase();
+    var isFile = /\.(mp4|webm|ogg)(\?.*)?$/.test(lower);
+    if (isFile) {
+      return '<video controls preload="metadata" title="' + safeTitle + '">' +
+        '<source src="' + escapeAttr(safeUrl) + '">' +
+        '</video>';
+    }
+    return '<iframe src="' + escapeAttr(safeUrl) + '" title="' + safeTitle + '"' +
+      ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+  }
+
   function renderFooter(settings) {
     setText('.footer__copyright', settings.footer_copyright || '');
     var links = document.querySelectorAll('.footer__socials a.footer__social');
@@ -58,7 +81,6 @@
   }
 
   function renderAbout(about) {
-    setText('#about .section__title', about.section_title || '');
     setText('.about__sticker-text', about.sticker_text || '');
     setHtml('#about-modal .modal__content', about.modal_body || '');
     var tabsWrap = document.querySelector('#about .about__left .tabs');
@@ -78,9 +100,7 @@
       var panel = document.createElement('div');
       panel.className = 'about__player-panel' + (idx === 0 ? ' is-active' : '');
       panel.setAttribute('data-panel', String(idx));
-      panel.innerHTML =
-        '<iframe src="' + (video.video_url || '') + '" title="' + (video.video_alt || ('About video ' + lang)) + '"' +
-        ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+      panel.innerHTML = renderVideoMarkup(video.video_url, video.video_alt || ('About video ' + lang));
       playerWrap.appendChild(panel);
 
       tab.addEventListener('click', function () {
@@ -180,7 +200,7 @@
     items.forEach(function (a) {
       var card = document.createElement('article');
       card.className = 'author-card';
-      var name = a.full_name || ((a.first_name || '') + ' ' + (a.last_name || '')).trim();
+      var name = ((a.first_name || '') + ' ' + (a.last_name || '')).trim() || a.full_name || '';
       card.innerHTML =
         '<img class="author-card__photo" src="' + (a.photo_path || 'assets/images/author-paper.svg') + '" alt="">' +
         '<h3 class="author-card__name text-h3">' + name + '</h3>' +
@@ -216,9 +236,7 @@
         var panel = document.createElement('div');
         panel.className = 'about__player-panel' + (idx === 0 ? ' is-active' : '');
         panel.setAttribute('data-panel', String(idx));
-        panel.innerHTML =
-          '<iframe src="' + (video.video_url || '') + '" title="' + (video.video_alt || ('Lecture video ' + lang)) + '"' +
-          ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+        panel.innerHTML = renderVideoMarkup(video.video_url, video.video_alt || ('Lecture video ' + lang));
         lecturePlayerWrap.appendChild(panel);
 
         tab.addEventListener('click', function () {
@@ -253,9 +271,7 @@
         var panel = document.createElement('div');
         panel.className = 'about__player-panel' + (idx === 0 ? ' is-active' : '');
         panel.setAttribute('data-panel', String(idx));
-        panel.innerHTML =
-          '<iframe src="' + (video.video_url || '') + '" title="' + (video.video_alt || ('Presentation video ' + lang)) + '"' +
-          ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+        panel.innerHTML = renderVideoMarkup(video.video_url, video.video_alt || ('Presentation video ' + lang));
         presentationPlayerWrap.appendChild(panel);
 
         tab.addEventListener('click', function () {
@@ -306,6 +322,35 @@
     }
   }
 
+  function renderOurPosition(position) {
+    var section = document.querySelector('.position');
+    if (!section || !position) return;
+
+    var titles = section.querySelectorAll('.position__block-title');
+    if (titles[0] && position.concept_title) titles[0].textContent = position.concept_title;
+    if (titles[1] && position.principles_title) titles[1].textContent = position.principles_title;
+    if (titles[2] && position.objectives_title) titles[2].textContent = position.objectives_title;
+
+    var bodies = section.querySelectorAll('.position__block-body');
+    if (bodies[0] && position.concept_body) bodies[0].textContent = position.concept_body;
+    if (bodies[1] && position.principles_body) bodies[1].textContent = position.principles_body;
+
+    var objectives = Array.isArray(position.objectives) ? position.objectives : [];
+    var list = section.querySelector('.position__objectives-list');
+    if (list && objectives.length) {
+      list.innerHTML = '';
+      objectives.forEach(function (item) {
+        var li = document.createElement('li');
+        li.textContent = item;
+        list.appendChild(li);
+      });
+    }
+
+    var images = section.querySelectorAll('.position__block-image');
+    if (images[0] && position.image_primary_path) images[0].setAttribute('src', position.image_primary_path);
+    if (images[1] && position.image_secondary_path) images[1].setAttribute('src', position.image_secondary_path);
+  }
+
   async function hydratePage() {
     var locale = currentLocale();
     try {
@@ -315,10 +360,12 @@
       var path = window.location.pathname.toLowerCase();
       if (path.endsWith('/index.html') || path === '/' || path.endsWith('/kant/')) {
         var about = (await apiGet('about-project', locale)).data || {};
+        var position = (await apiGet('our-position', locale)).data || {};
         var modules = (await apiGet('modules', locale)).data || [];
         var publications = (await apiGet('publications', locale)).data || [];
         var authors = (await apiGet('authors', locale)).data || [];
         renderAbout(about);
+        renderOurPosition(position);
         renderModulesList(modules, 5);
         renderPublications(publications.slice(0, 3));
         renderAuthors(authors);

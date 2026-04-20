@@ -44,6 +44,21 @@ if ($route === 'about-project') {
     out($payload, $locale);
 }
 
+if ($route === 'our-position') {
+    $base = $pdo->query('SELECT * FROM our_position WHERE id = 1')->fetch() ?: [];
+    $tr = translated_row($pdo, 'our_position_translations', 'our_position_id', 1, $locale, $defaultLocale) ?: [];
+    $payload = array_merge($base, $tr);
+    $payload['objectives'] = array_values(array_filter([
+        trim((string) ($payload['objective_1'] ?? '')),
+        trim((string) ($payload['objective_2'] ?? '')),
+        trim((string) ($payload['objective_3'] ?? '')),
+        trim((string) ($payload['objective_4'] ?? '')),
+        trim((string) ($payload['objective_5'] ?? '')),
+        trim((string) ($payload['objective_6'] ?? '')),
+    ], static fn ($value): bool => $value !== ''));
+    out($payload, $locale);
+}
+
 if ($route === 'modules') {
     $rows = $pdo->query('SELECT * FROM modules ORDER BY sort_order ASC, id ASC')->fetchAll();
     $result = [];

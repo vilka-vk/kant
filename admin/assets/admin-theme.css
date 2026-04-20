@@ -30,7 +30,6 @@ body {
 }
 
 .kant-content {
-  margin-left: var(--kant-sidebar-width);
   width: calc(100% - var(--kant-sidebar-width));
   background: #f4f6fb;
 }
@@ -220,8 +219,7 @@ textarea {
   }
 
   .kant-content {
-    margin-left: 240px;
-    width: calc(100% - 240px);
+    width: 100%;
   }
 }
 

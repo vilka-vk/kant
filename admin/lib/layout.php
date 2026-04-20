@@ -61,7 +61,10 @@ function admin_header(string $title): void
 function admin_footer(): void
 {
     if (current_user()) {
-        echo '</div></main></div></body></html>';
+        echo '</div></main></div>';
+        echo '<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>';
+        echo '<script>if(window.tinymce){tinymce.init({selector:"textarea.wysiwyg",menubar:false,height:220,plugins:"link lists code",toolbar:"undo redo | bold italic underline | bullist numlist | link | code"});}</script>';
+        echo '</body></html>';
         return;
     }
     echo '</div></main></body></html>';

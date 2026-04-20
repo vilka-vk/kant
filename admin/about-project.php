@@ -134,14 +134,14 @@ admin_header('About Project');
           <td><strong><?= h($label) ?></strong></td>
           <td>
             <?php if ($isLong): ?>
-              <textarea rows="4" name="<?= h($key . '_' . $leftLocale) ?>"><?= h($leftValue) ?></textarea>
+              <textarea class="wysiwyg" rows="4" name="<?= h($key . '_' . $leftLocale) ?>"><?= h($leftValue) ?></textarea>
             <?php else: ?>
               <input name="<?= h($key . '_' . $leftLocale) ?>" value="<?= h($leftValue) ?>">
             <?php endif; ?>
           </td>
           <td>
             <?php if ($isLong): ?>
-              <textarea rows="4" name="<?= h($key . '_' . $rightLocale) ?>"><?= h($rightValue) ?></textarea>
+              <textarea class="wysiwyg" rows="4" name="<?= h($key . '_' . $rightLocale) ?>"><?= h($rightValue) ?></textarea>
             <?php else: ?>
               <input name="<?= h($key . '_' . $rightLocale) ?>" value="<?= h($rightValue) ?>">
             <?php endif; ?>

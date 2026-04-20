@@ -661,12 +661,7 @@ admin_header('Modules');
   </table>
 </div>
 
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-if (window.tinymce) {
-  tinymce.init({ selector: '.wysiwyg', menubar: false, height: 180, plugins: 'link lists code', toolbar: 'undo redo | bold italic | bullist numlist | link | code' });
-}
-
 function applyLanguageFilter(inputId, tableId) {
   var input = document.getElementById(inputId);
   var table = document.getElementById(tableId);

@@ -184,8 +184,8 @@ admin_header(tr('Публикации', 'Publications'));
 ?>
 <div class="card">
   <div class="actions">
-    <a class="btn <?= $tab === 'publications' ? '' : 'btn-secondary' ?>" href="/admin/publications.php?tab=publications"><?= h(tr('Публикации', 'Publications')) ?></a>
-    <a class="btn <?= $tab === 'types' ? '' : 'btn-secondary' ?>" href="/admin/publications.php?tab=types"><?= h(tr('Типы публикаций', 'Publication types')) ?></a>
+    <a class="kant-tab <?= $tab === 'publications' ? 'is-active' : '' ?>" href="/admin/publications.php?tab=publications"><?= h(tr('Публикации', 'Publications')) ?></a>
+    <a class="kant-tab <?= $tab === 'types' ? 'is-active' : '' ?>" href="/admin/publications.php?tab=types"><?= h(tr('Типы публикаций', 'Publication types')) ?></a>
   </div>
 </div>
 

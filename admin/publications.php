@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ->execute([
                     'hero_section_id' => $heroId,
                     'locale' => $locale,
-                    'title' => trim((string) ($_POST['hero_publications_title_' . $locale] ?? '')),
+                    'title' => $locale === 'ru' ? 'Публикации' : 'Publications',
                     'subtitle' => trim((string) ($_POST['hero_publications_subtitle_' . $locale] ?? '')),
                 ]);
         }
@@ -226,12 +226,14 @@ admin_header(tr('Публикации', 'Publications'));
       <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_publications_subtitle_enabled"><option value="1" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
     </div>
     <hr style="margin:12px 0">
-    <?php foreach ($locales as $locale): ?>
-      <div class="grid" style="margin-bottom:8px">
-        <div><label>Hero title (<?= h(strtoupper($locale)) ?>)</label><input name="hero_publications_title_<?= h($locale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$locale]['title'] ?? '')) ?>"></div>
-        <div><label>Hero subtitle (<?= h(strtoupper($locale)) ?>)</label><input name="hero_publications_subtitle_<?= h($locale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$locale]['subtitle'] ?? '')) ?>"></div>
-      </div>
-    <?php endforeach; ?>
+    <?php
+      $heroLeftLocale = $locales[0] ?? 'ru';
+      $heroRightLocale = $locales[1] ?? ($locales[0] ?? 'en');
+    ?>
+    <div class="grid" style="margin-bottom:8px">
+      <div><label>Hero subtitle (<?= h(strtoupper($heroLeftLocale)) ?>)</label><input name="hero_publications_subtitle_<?= h($heroLeftLocale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$heroLeftLocale]['subtitle'] ?? '')) ?>"></div>
+      <div><label>Hero subtitle (<?= h(strtoupper($heroRightLocale)) ?>)</label><input name="hero_publications_subtitle_<?= h($heroRightLocale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$heroRightLocale]['subtitle'] ?? '')) ?>"></div>
+    </div>
     <div class="actions"><button type="submit"><?= h(tr('Сохранить hero для страницы публикаций', 'Save publications hero')) ?></button></div>
   </form>
 </div>

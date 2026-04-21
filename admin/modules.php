@@ -188,27 +188,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/admin/modules.php?edit=' . $moduleId);
     }
 
-    if ($action === 'regenerate_slugs') {
-        $mods = $pdo->query('SELECT id, module_number FROM modules ORDER BY id ASC')->fetchAll();
-        foreach ($mods as $mod) {
-            $modId = (int) $mod['id'];
-            $title = '';
-            foreach ($locales as $locale) {
-                $trStmt = $pdo->prepare('SELECT title FROM modules_translations WHERE module_id = :module_id AND locale = :locale LIMIT 1');
-                $trStmt->execute(['module_id' => $modId, 'locale' => $locale]);
-                $tr = $trStmt->fetch();
-                $candidate = trim((string) ($tr['title'] ?? ''));
-                if ($candidate !== '') {
-                    $title = $candidate;
-                    break;
-                }
-            }
-            $slug = makeModuleSlug((int) $mod['module_number'], $locales, ['title_' . ($locales[0] ?? 'ru') => $title]);
-            $pdo->prepare('UPDATE modules SET slug = :slug WHERE id = :id')->execute(['slug' => $slug, 'id' => $modId]);
-        }
-        redirect('/admin/modules.php?saved=1');
-    }
-
     if (in_array($action, ['add_lecture_video', 'update_lecture_video', 'add_presentation_video', 'update_presentation_video'], true)) {
         $languageCode = strtolower(trim((string) ($_POST['video_language_code'] ?? '')));
         if (!assertLanguageCode($languageCode, $languageCodePattern)) {
@@ -564,14 +543,7 @@ admin_header(tr('Модули', 'Modules'));
 <div class="card">
   <div class="kant-section-head">
     <h2><?= h(tr('Модули', 'Modules')) ?></h2>
-    <div class="actions">
-      <form method="post">
-        <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-        <input type="hidden" name="action" value="regenerate_slugs">
-        <button type="submit" class="btn btn-secondary"><?= h(tr('Обновить slug', 'Regenerate slugs')) ?></button>
-      </form>
-      <a class="btn" href="/admin/modules.php?form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
-    </div>
+    <a class="btn" href="/admin/modules.php?form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
   </div>
   <table>
     <thead><tr><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Лекция', 'Lecture')) ?></th><th><?= h(tr('Презентация', 'Presentation')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>

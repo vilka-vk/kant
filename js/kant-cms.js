@@ -402,7 +402,7 @@
         var heroPublications = (await apiGet('hero-sections?page_key=publications', locale)).data || {};
         var publicationTypes = (await apiGet('publication-types', locale)).data || [];
         var pubs = (await apiGet('publications', locale)).data || [];
-        setText('.hero__headline', heroPublications.title || 'Publications');
+        setText('.hero__headline', heroPublications.title || (locale === 'ru' ? 'Публикации' : 'Publications'));
         setText('.hero__subtitle', heroPublications.subtitle || '');
         setImg('.hero .hero__bg', heroPublications.background_image_path || '');
         renderPublicationTabs(publicationTypes, locale);

@@ -78,8 +78,16 @@
         '<source src="' + escapeAttr(safeUrl) + '">' +
         '</video>';
     }
-    return '<iframe src="' + escapeAttr(safeUrl) + '" title="' + safeTitle + '"' +
+    return '<iframe src="' + escapeAttr(safeUrl) + '" title="' + safeTitle + '" loading="lazy"' +
       ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+  }
+
+  function refreshScrollAnimations() {
+    if (window.ScrollTrigger && typeof window.ScrollTrigger.refresh === 'function') {
+      window.requestAnimationFrame(function () {
+        window.ScrollTrigger.refresh();
+      });
+    }
   }
 
   function renderFooter(settings) {
@@ -429,6 +437,7 @@
           })
         ];
         await Promise.allSettled(homeRequests);
+        refreshScrollAnimations();
         return;
       }
 
@@ -449,6 +458,7 @@
         setImg('.hero .hero__bg', heroModules.background_image_path || '');
         renderAbout(aboutModules);
         renderModulesList(listModules, listModules.length);
+        refreshScrollAnimations();
         return;
       }
 
@@ -469,6 +479,7 @@
         setImg('.hero .hero__bg', heroPublications.background_image_path || '');
         renderPublicationTabs(publicationTypes, locale);
         renderPublications(pubs, '.publications.publications--grid');
+        refreshScrollAnimations();
         return;
       }
 
@@ -493,6 +504,7 @@
           }
           var readings = (await apiGet('modules/' + moduleItem.id + '/readings', locale)).data || [];
           renderModuleDetail(moduleItem, transcripts, readings, locale);
+          refreshScrollAnimations();
         }
       }
     } catch (err) {

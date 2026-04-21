@@ -200,7 +200,13 @@ if ($typeEditId > 0) {
         $typeTrMap[$r['locale']] = $r['name'];
     }
 }
-$typeRows = $pdo->query('SELECT * FROM publication_types ORDER BY sort_order ASC, id ASC')->fetchAll();
+$typeRowsStmt = $pdo->prepare('SELECT pt.*, COALESCE(ptt.name, \'\') AS localized_name
+  FROM publication_types pt
+  LEFT JOIN publication_types_translations ptt
+    ON ptt.publication_type_id = pt.id AND ptt.locale = :locale
+  ORDER BY pt.sort_order ASC, pt.id ASC');
+$typeRowsStmt->execute(['locale' => admin_locale()]);
+$typeRows = $typeRowsStmt->fetchAll();
 $isPublicationFormOpen = $tab === 'publications' && ($edit || (string) ($_GET['form'] ?? '') === '1');
 $isTypeFormOpen = $tab === 'types' && ($typeEdit || (string) ($_GET['form'] ?? '') === '1');
 
@@ -319,12 +325,13 @@ admin_header(tr('Публикации', 'Publications'));
   </div>
   <?php if (!empty($_GET['saved_type'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <table>
-    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th>Slug</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Название', 'Name')) ?></th><th>Slug</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody id="publication-types-sortable">
     <?php foreach ($typeRows as $row): ?>
       <tr draggable="true" data-id="<?= h((string) $row['id']) ?>">
         <td><?= h((string) $row['sort_order']) ?></td>
         <td><?= h((string) $row['id']) ?></td>
+        <td><?= h((string) $row['localized_name']) ?></td>
         <td><?= h($row['slug']) ?></td>
         <td><a class="btn btn-secondary" href="/admin/publications.php?tab=types&form=1&edit_type=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>

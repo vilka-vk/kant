@@ -44,7 +44,11 @@
   function setImg(selector, value) {
     var el = document.querySelector(selector);
     if (el && value) {
-      el.setAttribute('src', value);
+      var src = String(value || '').trim();
+      if (src && !/^([a-z]+:)?\/\//i.test(src) && src.charAt(0) !== '/' && src.indexOf('data:') !== 0) {
+        src = '/' + src;
+      }
+      el.setAttribute('src', src);
     }
   }
 
@@ -305,13 +309,17 @@
     if (transcriptsList) {
       transcriptsList.innerHTML = '';
       var downloadTranscriptLabel = locale === 'ru' ? 'Скачать транскрипцию' : 'Download transcript';
-      transcripts.forEach(function (t) {
+      var effectiveTranscripts = Array.isArray(transcripts) ? transcripts : [];
+      if (!effectiveTranscripts.length && Array.isArray(moduleItem.transcripts)) {
+        effectiveTranscripts = moduleItem.transcripts;
+      }
+      effectiveTranscripts.forEach(function (t) {
         var languageCode = String(t.display_name || '').trim().toUpperCase();
         var li = document.createElement('li');
-        li.innerHTML = '<a href="' + (t.file_path || '#') + '" download>' + downloadTranscriptLabel + (languageCode ? ' (' + languageCode + ')' : '') + '</a>';
+        li.innerHTML = '<a href="' + (t.file_path || '#') + '" download>' + downloadTranscriptLabel + (languageCode ? ' (' + languageCode + ', PDF)' : ' (PDF)') + '</a>';
         transcriptsList.appendChild(li);
       });
-      if (transcriptLink) transcriptLink.style.display = transcripts.length ? '' : 'none';
+      if (transcriptLink) transcriptLink.style.display = effectiveTranscripts.length ? '' : 'none';
     }
 
     var readingsGrid = document.querySelector('.module-publications');

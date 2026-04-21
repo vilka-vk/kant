@@ -390,7 +390,7 @@
         var heroModules = (await apiGet('hero-sections?page_key=modules', locale)).data || {};
         var aboutModules = (await apiGet('about-project', locale)).data || {};
         var listModules = (await apiGet('modules', locale)).data || [];
-        setText('.hero__headline', heroModules.title || 'Modules');
+        setText('.hero__headline', heroModules.title || (locale === 'ru' ? 'Модули' : 'Modules'));
         setText('.hero__subtitle', heroModules.subtitle || '');
         setImg('.hero .hero__bg', heroModules.background_image_path || '');
         renderAbout(aboutModules);

@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ->execute([
                     'hero_section_id' => $heroId,
                     'locale' => $locale,
-                    'title' => trim((string) ($_POST['hero_modules_title_' . $locale] ?? '')),
+                    'title' => $locale === 'ru' ? 'Модули' : 'Modules',
                     'subtitle' => trim((string) ($_POST['hero_modules_subtitle_' . $locale] ?? '')),
                 ]);
         }
@@ -449,7 +449,6 @@ admin_header(tr('Модули', 'Modules'));
     <hr style="margin:12px 0">
     <?php foreach ($locales as $locale): ?>
       <div class="grid" style="margin-bottom:8px">
-        <div><label>Hero title (<?= h(strtoupper($locale)) ?>)</label><input name="hero_modules_title_<?= h($locale) ?>" value="<?= h((string) ($heroModulesTrRows[$locale]['title'] ?? '')) ?>"></div>
         <div><label>Hero subtitle (<?= h(strtoupper($locale)) ?>)</label><input name="hero_modules_subtitle_<?= h($locale) ?>" value="<?= h((string) ($heroModulesTrRows[$locale]['subtitle'] ?? '')) ?>"></div>
       </div>
     <?php endforeach; ?>

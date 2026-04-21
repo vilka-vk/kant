@@ -405,7 +405,23 @@ if ($editId > 0) {
 }
 
 $publicationOptions = $pdo->query('SELECT id FROM publications ORDER BY display_order ASC, id ASC')->fetchAll();
-$rows = $pdo->query('SELECT id, slug, module_number, sort_order, languages FROM modules ORDER BY sort_order ASC, id ASC')->fetchAll();
+$rowsStmt = $pdo->prepare('SELECT
+    m.id,
+    m.sort_order,
+    m.languages,
+    COALESCE(mt.title, "") AS title,
+    CASE WHEN EXISTS (
+      SELECT 1 FROM module_lecture_videos lv WHERE lv.module_id = m.id LIMIT 1
+    ) THEN 1 ELSE 0 END AS has_lecture,
+    CASE WHEN EXISTS (
+      SELECT 1 FROM module_presentation_videos pv WHERE pv.module_id = m.id LIMIT 1
+    ) THEN 1 ELSE 0 END AS has_presentation
+  FROM modules m
+  LEFT JOIN modules_translations mt
+    ON mt.module_id = m.id AND mt.locale = :locale
+  ORDER BY m.sort_order ASC, m.id ASC');
+$rowsStmt->execute(['locale' => admin_locale()]);
+$rows = $rowsStmt->fetchAll();
 $heroModulesStmt = $pdo->prepare('SELECT * FROM hero_sections WHERE page_key = :page_key LIMIT 1');
 $heroModulesStmt->execute(['page_key' => 'modules']);
 $heroModules = $heroModulesStmt->fetch() ?: [];
@@ -469,21 +485,15 @@ admin_header(tr('Модули', 'Modules'));
     </div>
   </div>
   <table>
-    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th>Slug</th><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Лекция', 'Lecture')) ?></th><th><?= h(tr('Презентация', 'Presentation')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $row): ?>
       <tr>
         <td><?= h((string) $row['sort_order']) ?></td>
-        <td><?= h((string) $row['id']) ?></td>
-        <td><?= h($row['slug']) ?></td>
-        <td><?= h((string) $row['module_number']) ?></td>
+        <td><a href="/admin/modules.php?form=1&edit=<?= h((string) $row['id']) ?>"><?= h((string) $row['title']) ?></a></td>
         <td><?= h($row['languages']) ?></td>
-        <td class="actions">
-          <a class="btn btn-secondary" href="/admin/modules.php?form=1&edit=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a>
-          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить модуль?', 'Delete module?')) ?>')">
-            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= h((string) $row['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
-          </form>
-        </td>
+        <td><?= h(((int) $row['has_lecture']) > 0 ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
+        <td><?= h(((int) $row['has_presentation']) > 0 ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
       </tr>
     <?php endforeach; ?>
     </tbody>

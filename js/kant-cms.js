@@ -324,9 +324,14 @@
     }
 
     var readingsGrid = document.querySelector('.module-publications');
-    if (readingsGrid) {
+    var readingsSection = readingsGrid ? readingsGrid.closest('.module-block') : null;
+    var effectiveReadings = Array.isArray(readings) ? readings : [];
+    if (readingsSection) {
+      readingsSection.style.display = effectiveReadings.length ? '' : 'none';
+    }
+    if (readingsGrid && effectiveReadings.length) {
       readingsGrid.innerHTML = '';
-      readings.forEach(function (r) {
+      effectiveReadings.forEach(function (r) {
         var link = r.custom_file_path || r.custom_url || (r.linked_publication ? (r.linked_publication.file_path || r.linked_publication.external_url) : '#');
         var title = r.custom_title || (r.linked_publication ? r.linked_publication.title : '');
         var cover = r.custom_cover_image_path || (r.linked_publication ? r.linked_publication.cover_image_path : '') || 'assets/images/publication-3.svg';

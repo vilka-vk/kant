@@ -16,6 +16,30 @@ function assertLanguageCode(string $value, string $pattern): bool
     return (bool) preg_match($pattern, strtolower(trim($value)));
 }
 
+function makeModuleSlug(int $moduleNumber, array $locales, array $post): string
+{
+    $title = '';
+    foreach ($locales as $locale) {
+        $candidate = trim((string) ($post['title_' . $locale] ?? ''));
+        if ($candidate !== '') {
+            $title = $candidate;
+            break;
+        }
+    }
+    $raw = trim((string) $moduleNumber) . ' ' . $title;
+    $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $raw);
+    if ($ascii === false) {
+        $ascii = $raw;
+    }
+    $slug = strtolower((string) $ascii);
+    $slug = preg_replace('/[^a-z0-9]+/', '-', $slug) ?? '';
+    $slug = trim($slug, '-');
+    if ($slug === '') {
+        return 'module-' . max(1, $moduleNumber);
+    }
+    return $slug;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_check($_POST['_csrf'] ?? null)) {
         http_response_code(400);
@@ -278,9 +302,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode($e->getMessage()));
     }
 
+    $moduleNumber = (int) ($_POST['module_number'] ?? 0);
     $base = [
-        'slug' => trim((string) ($_POST['slug'] ?? '')),
-        'module_number' => (int) ($_POST['module_number'] ?? 0),
+        'slug' => makeModuleSlug($moduleNumber, $locales, $_POST),
+        'module_number' => $moduleNumber,
         'sort_order' => (int) ($_POST['sort_order'] ?? 0),
         'languages' => trim((string) ($_POST['languages'] ?? '')),
         'formats' => trim((string) ($_POST['formats'] ?? '')),
@@ -386,6 +411,7 @@ admin_header(tr('Модули', 'Modules'));
 .filter-row{display:flex;gap:8px;align-items:center;margin:8px 0 10px}
 .filter-row input{max-width:140px}
 </style>
+<?php if (!$isModuleFormOpen): ?>
 <div class="card">
   <h2><?= h(tr('Hero блока "Модули"', 'Modules hero block')) ?></h2>
   <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero сохранен.', 'Hero saved.')) ?></p><?php endif; ?>
@@ -434,14 +460,14 @@ admin_header(tr('Модули', 'Modules'));
     </tbody>
   </table>
 </div>
+<?php endif; ?>
 
 <?php if ($isModuleFormOpen): ?>
-<aside class="kant-drawer" aria-label="Module form drawer">
+<div class="card">
   <div class="kant-drawer-actions">
     <h2><?= h($editRow ? tr('Редактирование модуля', 'Edit module') : tr('Добавление модуля', 'Add module')) ?></h2>
-    <a class="btn btn-secondary" href="/admin/modules.php" data-close-drawer><?= h(tr('Закрыть', 'Close')) ?></a>
+    <a class="btn btn-secondary" href="/admin/modules.php"><?= h(tr('Назад к списку', 'Back to list')) ?></a>
   </div>
-<div class="card">
   <h1><?= h(tr('Модули', 'Modules')) ?></h1>
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'invalid_lang'): ?><p class="err"><?= h(tr('Неверный формат кода языка. Используйте только буквы, 2-5 символов (например: en, ru, arm).', 'Language code format is invalid. Use only letters, 2-5 chars (e.g. en, ru, arm).')) ?></p><?php endif; ?>
@@ -451,7 +477,7 @@ admin_header(tr('Модули', 'Modules'));
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($editRow['id'] ?? 0)) ?>">
     <div class="grid">
-      <div><label>Slug</label><input name="slug" required value="<?= h((string) ($editRow['slug'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Slug (автоматически)', 'Slug (auto)')) ?></label><input name="slug" readonly value="<?= h((string) ($editRow['slug'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="module_number" required value="<?= h((string) ($editRow['module_number'] ?? 1)) ?>"></div>
       <div><label><?= h(tr('Порядок сортировки', 'Sort Order')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
@@ -473,8 +499,8 @@ admin_header(tr('Модули', 'Modules'));
       <tbody>
         <?php
         $translationFields = [
-          'title' => 'Title',
-          'short_description' => 'Short Description',
+          'title' => tr('Название модуля', 'Module title'),
+          'short_description' => tr('Короткое описание', 'Short description'),
           'lecture_title' => 'Lecture title',
           'presentation_title' => 'Presentation title',
           'literature_html' => 'Literature text (WYSIWYG)',
@@ -687,31 +713,8 @@ admin_header(tr('Модули', 'Modules'));
 </details>
 <?php endif; ?>
 <?php endif; ?>
-</aside>
-
-<div class="kant-confirm-overlay" id="modules-close-confirm">
-  <div class="kant-confirm-modal">
-    <h3><?= h(tr('Есть несохранённые изменения', 'Unsaved changes')) ?></h3>
-    <p class="muted"><?= h(tr('Сохранить изменения перед закрытием формы?', 'Save changes before closing the form?')) ?></p>
-    <div class="actions">
-      <button type="button" id="modules-confirm-save"><?= h(tr('Сохранить', 'Save')) ?></button>
-      <button type="button" class="btn btn-secondary" id="modules-confirm-discard"><?= h(tr('Не сохранять', 'Discard')) ?></button>
-      <button type="button" class="btn btn-secondary" id="modules-confirm-cancel"><?= h(tr('Отмена', 'Cancel')) ?></button>
-    </div>
-  </div>
-</div>
 
 <script>
-window.initKantDrawerCloseGuard({
-  formSelector: '.kant-drawer form[method="post"][enctype="multipart/form-data"]',
-  closeSelector: '[data-close-drawer]',
-  overlaySelector: '#modules-close-confirm',
-  saveSelector: '#modules-confirm-save',
-  discardSelector: '#modules-confirm-discard',
-  cancelSelector: '#modules-confirm-cancel',
-  fallbackHref: '/admin/modules.php'
-});
-
 function applyLanguageFilter(inputId, tableId) {
   var input = document.getElementById(inputId);
   var table = document.getElementById(tableId);
@@ -802,6 +805,37 @@ function applyReadingMode() {
 if (linkedPublicationSelect) {
   linkedPublicationSelect.addEventListener('change', applyReadingMode);
   applyReadingMode();
+}
+
+function moduleSlugify(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+var slugInput = document.querySelector('input[name="slug"]');
+var moduleNumberInput = document.querySelector('input[name="module_number"]');
+var moduleTitleInputs = document.querySelectorAll('input[name^="title_"]');
+function refreshModuleSlug() {
+  if (!slugInput || !moduleNumberInput) return;
+  var moduleNumber = String(moduleNumberInput.value || '').trim();
+  var title = '';
+  moduleTitleInputs.forEach(function (input) {
+    if (!title && String(input.value || '').trim() !== '') {
+      title = String(input.value || '').trim();
+    }
+  });
+  var combined = [moduleNumber, title].filter(Boolean).join(' ');
+  var slug = moduleSlugify(combined);
+  slugInput.value = slug || ('module-' + (moduleNumber || '1'));
+}
+if (slugInput && moduleNumberInput) {
+  moduleNumberInput.addEventListener('input', refreshModuleSlug);
+  moduleTitleInputs.forEach(function (input) {
+    input.addEventListener('input', refreshModuleSlug);
+  });
+  refreshModuleSlug();
 }
 </script>
 <?php

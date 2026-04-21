@@ -57,6 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $heroRow->execute(['page_key' => 'publications']);
         $hero = $heroRow->fetch() ?: null;
         $heroBg = trim((string) ($_POST['hero_publications_background_image_path'] ?? ($hero['background_image_path'] ?? '')));
+        $heroBg = str_replace('\\', '/', $heroBg);
+        $uploadsPos = stripos($heroBg, '/uploads/');
+        if ($uploadsPos !== false) {
+            $heroBg = substr($heroBg, $uploadsPos);
+        } elseif ($heroBg !== '' && !preg_match('#^([a-z]+:)?//#i', $heroBg) && !str_starts_with($heroBg, '/')) {
+            $heroBg = '/' . $heroBg;
+        }
         try {
             $uploadedHero = upload_public_file('hero_publications_background_file', 'hero', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
             if ($uploadedHero) {

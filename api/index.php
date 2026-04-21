@@ -27,6 +27,24 @@ function out(array $data, string $lang, bool $fallbackUsed = false): void
     exit;
 }
 
+function normalize_public_asset_path(string $path): string
+{
+    $value = trim(str_replace('\\', '/', $path));
+    if ($value === '') {
+        return '';
+    }
+    if (preg_match('#^([a-z]+:)?//#i', $value) || str_starts_with($value, 'data:')) {
+        return $value;
+    }
+    $uploadsPos = stripos($value, '/uploads/');
+    if ($uploadsPos !== false) {
+        $value = substr($value, $uploadsPos);
+    } elseif (!str_starts_with($value, '/')) {
+        $value = '/' . $value;
+    }
+    return $value;
+}
+
 if ($route === 'site-settings') {
     $base = $pdo->query('SELECT * FROM site_settings WHERE id = 1')->fetch() ?: [];
     $tr = translated_row($pdo, 'site_settings_translations', 'site_settings_id', 1, $locale, $defaultLocale) ?: [];
@@ -198,7 +216,9 @@ if ($route === 'hero-sections') {
         out([], $locale);
     }
     $tr = translated_row($pdo, 'hero_sections_translations', 'hero_section_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
-    out(array_merge($row, $tr), $locale);
+    $payload = array_merge($row, $tr);
+    $payload['background_image_path'] = normalize_public_asset_path((string) ($payload['background_image_path'] ?? ''));
+    out($payload, $locale);
 }
 
 http_response_code(404);

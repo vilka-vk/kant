@@ -92,6 +92,10 @@
         RU: 'Показать всю программу',
         EN: 'Show full program'
       },
+      morePublicationsBtn: {
+        RU: 'Больше публикаций',
+        EN: 'More publications'
+      },
       moduleLearnAction: {
         RU: 'Изучить модуль',
         EN: 'Learn the module'

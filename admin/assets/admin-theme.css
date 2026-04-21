@@ -228,6 +228,28 @@ td {
   text-align: left;
 }
 
+.drag-col {
+  width: 38px;
+  text-align: center;
+}
+
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  cursor: grab;
+  user-select: none;
+  color: #5f6b85;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
 .muted {
   color: #6b7280;
 }

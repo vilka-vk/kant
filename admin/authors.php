@@ -111,10 +111,11 @@ admin_header(tr('Авторы', 'Authors'));
 </div>
 <div class="card">
   <table>
-    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody id="authors-sortable">
     <?php foreach ($rows as $r): ?>
-      <tr draggable="true" data-id="<?= h((string) $r['id']) ?>">
+      <tr data-id="<?= h((string) $r['id']) ?>">
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
         <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h($r['photo_path']) ?></td>
@@ -134,10 +135,19 @@ admin_header(tr('Авторы', 'Authors'));
   var tbody = document.getElementById('authors-sortable');
   var form = document.getElementById('authors-reorder-form');
   var idsWrap = document.getElementById('authors-reorder-ids');
+  var scrollKey = 'kantAuthorsScrollY';
+  var savedY = sessionStorage.getItem(scrollKey);
+  if (savedY !== null) {
+    window.scrollTo(0, parseInt(savedY, 10) || 0);
+    sessionStorage.removeItem(scrollKey);
+  }
   if (!tbody || !form || !idsWrap) return;
   var dragged = null;
-  tbody.querySelectorAll('tr[draggable="true"]').forEach(function (row) {
-    row.addEventListener('dragstart', function () { dragged = row; });
+  tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
+    var handle = row.querySelector('.drag-handle');
+    if (handle) {
+      handle.addEventListener('dragstart', function () { dragged = row; });
+    }
     row.addEventListener('dragover', function (e) { e.preventDefault(); });
     row.addEventListener('drop', function (e) {
       e.preventDefault();
@@ -151,6 +161,7 @@ admin_header(tr('Авторы', 'Authors'));
         input.value = tr.getAttribute('data-id') || '';
         idsWrap.appendChild(input);
       });
+      sessionStorage.setItem(scrollKey, String(window.scrollY || 0));
       form.submit();
     });
   });

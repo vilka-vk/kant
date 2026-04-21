@@ -20,6 +20,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Bad CSRF token');
     }
     $action = (string) ($_POST['action'] ?? 'save_publication');
+    if ($action === 'reorder_publications') {
+        $ids = $_POST['ids'] ?? [];
+        if (is_array($ids)) {
+            $order = 1;
+            $stmt = $pdo->prepare('UPDATE publications SET display_order = :display_order WHERE id = :id');
+            foreach ($ids as $id) {
+                $stmt->execute(['display_order' => $order++, 'id' => (int) $id]);
+            }
+        }
+        redirect('/admin/publications.php?tab=publications');
+    }
     if ($action === 'reorder_publication_types') {
         $ids = $_POST['ids'] ?? [];
         if (is_array($ids)) {
@@ -290,10 +301,11 @@ admin_header(tr('Публикации', 'Publications'));
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <table style="table-layout: fixed; width: 100%;">
-    <thead><tr><th style="width: 64px;">ID</th><th style="width: 180px;"><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th style="width: 180px;"><?= h(tr('Дата', 'Date')) ?></th><th style="width: 90px; text-align: center;"><?= h(tr('Цель', 'Target')) ?></th><th style="width: 150px;"><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
-    <tbody>
+    <thead><tr><th class="drag-col"></th><th style="width: 64px;">ID</th><th style="width: 180px;"><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th style="width: 180px;"><?= h(tr('Дата', 'Date')) ?></th><th style="width: 90px; text-align: center;"><?= h(tr('Цель', 'Target')) ?></th><th style="width: 150px;"><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <tbody id="publications-sortable">
     <?php foreach ($rows as $r): ?>
-      <tr>
+      <tr data-id="<?= h((string) $r['id']) ?>">
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h((string) $r['type_name']) ?></td>
         <td style="width: auto;"><?= h((string) $r['title']) ?></td>
@@ -314,6 +326,11 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     </tbody>
   </table>
+  <form method="post" id="publications-reorder-form" style="display:none">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="reorder_publications">
+    <div id="publications-reorder-ids"></div>
+  </form>
 </div>
 
 <?php if ($isPublicationFormOpen): ?>
@@ -365,10 +382,11 @@ admin_header(tr('Публикации', 'Publications'));
   </div>
   <?php if (!empty($_GET['saved_type'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <table>
-    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Название', 'Name')) ?></th><th>Slug</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Название', 'Name')) ?></th><th>Slug</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody id="publication-types-sortable">
     <?php foreach ($typeRows as $row): ?>
-      <tr draggable="true" data-id="<?= h((string) $row['id']) ?>">
+      <tr data-id="<?= h((string) $row['id']) ?>">
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
         <td><?= h((string) $row['sort_order']) ?></td>
         <td><?= h((string) $row['id']) ?></td>
         <td><?= h((string) $row['localized_name']) ?></td>
@@ -442,14 +460,23 @@ window.initKantDrawerCloseGuard({
 });
 
 (function () {
+  var scrollKey = 'kantPublicationsScrollY';
+  var savedY = sessionStorage.getItem(scrollKey);
+  if (savedY !== null) {
+    window.scrollTo(0, parseInt(savedY, 10) || 0);
+    sessionStorage.removeItem(scrollKey);
+  }
   function initSortable(tbodyId, formId, idsWrapId) {
     var tbody = document.getElementById(tbodyId);
     var form = document.getElementById(formId);
     var idsWrap = document.getElementById(idsWrapId);
     if (!tbody || !form || !idsWrap) return;
     var dragged = null;
-    tbody.querySelectorAll('tr[draggable="true"]').forEach(function (row) {
-      row.addEventListener('dragstart', function () { dragged = row; });
+    tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
+      var handle = row.querySelector('.drag-handle');
+      if (handle) {
+        handle.addEventListener('dragstart', function () { dragged = row; });
+      }
       row.addEventListener('dragover', function (e) { e.preventDefault(); });
       row.addEventListener('drop', function (e) {
         e.preventDefault();
@@ -463,10 +490,12 @@ window.initKantDrawerCloseGuard({
           input.value = tr.getAttribute('data-id') || '';
           idsWrap.appendChild(input);
         });
+        sessionStorage.setItem(scrollKey, String(window.scrollY || 0));
         form.submit();
       });
     });
   }
+  initSortable('publications-sortable', 'publications-reorder-form', 'publications-reorder-ids');
   initSortable('publication-types-sortable', 'publication-types-reorder-form', 'publication-types-reorder-ids');
 })();
 </script>

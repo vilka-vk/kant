@@ -183,10 +183,11 @@ admin_header(tr('О проекте', 'About Project'));
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить видео', 'Add about video')) ?></button></div>
   </form>
   <table>
-    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Lang')) ?></th><th>URL</th><th>Alt</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Lang')) ?></th><th>URL</th><th>Alt</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody id="about-videos-sortable">
       <?php foreach ($aboutVideos as $video): ?>
-      <tr draggable="true" data-id="<?= h((string) $video['id']) ?>">
+      <tr data-id="<?= h((string) $video['id']) ?>">
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
         <td><?= h((string) $video['sort_order']) ?></td>
         <td><?= h((string) $video['language_code']) ?></td>
         <td><?= h((string) $video['video_url']) ?></td>
@@ -214,10 +215,19 @@ admin_header(tr('О проекте', 'About Project'));
   var tbody = document.getElementById('about-videos-sortable');
   var form = document.getElementById('about-videos-reorder-form');
   var idsWrap = document.getElementById('about-videos-reorder-ids');
+  var scrollKey = 'kantAboutVideosScrollY';
+  var savedY = sessionStorage.getItem(scrollKey);
+  if (savedY !== null) {
+    window.scrollTo(0, parseInt(savedY, 10) || 0);
+    sessionStorage.removeItem(scrollKey);
+  }
   if (!tbody || !form || !idsWrap) return;
   var dragged = null;
-  tbody.querySelectorAll('tr[draggable="true"]').forEach(function (row) {
-    row.addEventListener('dragstart', function () { dragged = row; });
+  tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
+    var handle = row.querySelector('.drag-handle');
+    if (handle) {
+      handle.addEventListener('dragstart', function () { dragged = row; });
+    }
     row.addEventListener('dragover', function (e) { e.preventDefault(); });
     row.addEventListener('drop', function (e) {
       e.preventDefault();
@@ -231,6 +241,7 @@ admin_header(tr('О проекте', 'About Project'));
         input.value = tr.getAttribute('data-id') || '';
         idsWrap.appendChild(input);
       });
+      sessionStorage.setItem(scrollKey, String(window.scrollY || 0));
       form.submit();
     });
   });

@@ -711,10 +711,10 @@ admin_header(tr('Модули', 'Modules'));
     <button type="button" class="btn" data-toggle-form="lecture-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
   <div class="table-scroll">
-  <table id="lecture-table"><thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody id="lecture-sortable">
+  <table id="lecture-table"><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody id="lecture-sortable">
     <?php foreach ($lectureVideos as $video): ?>
-      <tr draggable="true" data-id="<?= h((string) $video['id']) ?>" data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
-        <td><?= h((string) $video['sort_order']) ?></td><td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td>
+      <tr data-id="<?= h((string) $video['id']) ?>" data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $video['sort_order']) ?></td><td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td>
         <td class="actions compact-inputs">
           <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&lecture_video=<?= h((string) $video['id']) ?>"><?= h(tr('Изменить', 'Edit')) ?></a>
           <form method="post" onsubmit="return confirm('<?= h(tr('Удалить видео лекции?', 'Delete lecture video?')) ?>')">
@@ -780,10 +780,10 @@ admin_header(tr('Модули', 'Modules'));
     <button type="button" class="btn" data-toggle-form="presentation-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
   <div class="table-scroll">
-  <table id="presentation-table"><thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody id="presentation-sortable">
+  <table id="presentation-table"><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody id="presentation-sortable">
     <?php foreach ($presentationVideos as $video): ?>
-      <tr draggable="true" data-id="<?= h((string) $video['id']) ?>" data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
-        <td><?= h((string) $video['sort_order']) ?></td><td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td>
+      <tr data-id="<?= h((string) $video['id']) ?>" data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $video['sort_order']) ?></td><td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td>
         <td class="actions compact-inputs">
           <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&presentation_video=<?= h((string) $video['id']) ?>"><?= h(tr('Изменить', 'Edit')) ?></a>
           <form method="post" onsubmit="return confirm('<?= h(tr('Удалить видео презентации?', 'Delete presentation video?')) ?>')">
@@ -822,9 +822,9 @@ admin_header(tr('Модули', 'Modules'));
     <h3><?= h(tr('Список транскрипций', 'Transcripts list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="transcript-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
-  <table><thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Файл', 'File')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody id="transcripts-sortable">
+  <table><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Файл', 'File')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody id="transcripts-sortable">
   <?php foreach ($transcripts as $t): ?>
-    <tr draggable="true" data-id="<?= h((string) $t['id']) ?>"><td><?= h((string) $t['sort_order']) ?></td><td><?= h(strtoupper((string) ($t['display_name'] ?? ''))) ?></td><td><?= h((string) $t['file_path']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить транскрипцию?', 'Delete transcript?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
+    <tr data-id="<?= h((string) $t['id']) ?>"><td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $t['sort_order']) ?></td><td><?= h(strtoupper((string) ($t['display_name'] ?? ''))) ?></td><td><?= h((string) $t['file_path']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить транскрипцию?', 'Delete transcript?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
   <form method="post" id="transcripts-reorder-form" style="display:none">
@@ -848,9 +848,9 @@ admin_header(tr('Модули', 'Modules'));
     <h3><?= h(tr('Список материалов', 'Readings list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="reading-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
-  <table><thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Связанная публикация', 'Linked publication')) ?></th><th><?= h(tr('Цель (файл/ссылка)', 'Target (file/link)')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody id="readings-sortable">
+  <table><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Связанная публикация', 'Linked publication')) ?></th><th><?= h(tr('Цель (файл/ссылка)', 'Target (file/link)')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody id="readings-sortable">
   <?php foreach ($readings as $r): ?>
-    <tr draggable="true" data-id="<?= h((string) $r['id']) ?>"><td><?= h((string) $r['sort_order']) ?></td><td><?= h((string) ($r['linked_publication_id'] ?: '-')) ?></td><td><?= h((string) ($r['custom_file_path'] ?: $r['custom_url'])) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить материал?', 'Delete reading?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="reading_id" value="<?= h((string) $r['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
+    <tr data-id="<?= h((string) $r['id']) ?>"><td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $r['sort_order']) ?></td><td><?= h((string) ($r['linked_publication_id'] ?: '-')) ?></td><td><?= h((string) ($r['custom_file_path'] ?: $r['custom_url'])) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить материал?', 'Delete reading?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="reading_id" value="<?= h((string) $r['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
   <form method="post" id="readings-reorder-form" style="display:none">
@@ -953,14 +953,23 @@ if (linkedPublicationSelect) {
 }
 
 (function () {
+  var pageScrollKey = 'kantModulesPageScrollY';
+  var savedPageY = sessionStorage.getItem(pageScrollKey);
+  if (savedPageY !== null) {
+    window.scrollTo(0, parseInt(savedPageY, 10) || 0);
+    sessionStorage.removeItem(pageScrollKey);
+  }
   function initSortable(tbodyId, formId, idsWrapId) {
     var tbody = document.getElementById(tbodyId);
     var form = document.getElementById(formId);
     var idsWrap = document.getElementById(idsWrapId);
     if (!tbody || !form || !idsWrap) return;
     var dragged = null;
-    tbody.querySelectorAll('tr[draggable="true"]').forEach(function (row) {
-      row.addEventListener('dragstart', function () { dragged = row; });
+    tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
+      var handle = row.querySelector('.drag-handle');
+      if (handle) {
+        handle.addEventListener('dragstart', function () { dragged = row; });
+      }
       row.addEventListener('dragover', function (e) { e.preventDefault(); });
       row.addEventListener('drop', function (e) {
         e.preventDefault();
@@ -974,6 +983,7 @@ if (linkedPublicationSelect) {
           input.value = tr.getAttribute('data-id') || '';
           idsWrap.appendChild(input);
         });
+        sessionStorage.setItem(pageScrollKey, String(window.scrollY || 0));
         form.submit();
       });
     });

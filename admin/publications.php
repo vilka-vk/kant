@@ -215,7 +215,7 @@ $rowsStmt = $pdo->prepare('SELECT p.id, p.published_at, p.file_path, p.external_
   LEFT JOIN publication_types_translations ptt ON ptt.publication_type_id = pt.id AND ptt.locale = :types_locale
   LEFT JOIN publications_translations ptr_locale ON ptr_locale.publication_id = p.id AND ptr_locale.locale = :titles_locale
   WHERE (:type_id_filter = 0 OR p.publication_type_id = :type_id_value)
-  ORDER BY p.id DESC');
+  ORDER BY p.display_order ASC, p.id ASC');
 $rowsStmt->execute([
     'types_locale' => admin_locale(),
     'titles_locale' => admin_locale(),

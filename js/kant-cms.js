@@ -333,7 +333,7 @@
       readingsGrid.innerHTML = '';
       effectiveReadings.forEach(function (r) {
         var link = r.custom_file_path || r.custom_url || (r.linked_publication ? (r.linked_publication.file_path || r.linked_publication.external_url) : '#');
-        var title = r.custom_title || (r.linked_publication ? r.linked_publication.title : '');
+        var title = r.display_title || r.custom_title || (r.linked_publication ? r.linked_publication.title : '');
         var cover = r.custom_cover_image_path || (r.linked_publication ? r.linked_publication.cover_image_path : '') || 'assets/images/publication-3.svg';
         var card = document.createElement('a');
         card.className = 'publication-item';

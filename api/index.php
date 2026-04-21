@@ -145,13 +145,35 @@ if (preg_match('#^modules/(\d+)/readings$#', $route, $m)) {
     foreach ($rows as $row) {
         $tr = translated_row($pdo, 'module_readings_translations', 'module_reading_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
         $item = array_merge($row, $tr);
+        $item['display_title'] = trim((string) ($item['custom_title'] ?? ''));
+        if ($item['display_title'] === '') {
+            $titleStmt = $pdo->prepare('SELECT custom_title FROM module_readings_translations
+              WHERE module_reading_id = :id AND TRIM(COALESCE(custom_title, \'\')) <> \'\'
+              ORDER BY locale ASC LIMIT 1');
+            $titleStmt->execute(['id' => (int) $row['id']]);
+            $anyCustomTitle = $titleStmt->fetchColumn();
+            if ($anyCustomTitle !== false) {
+                $item['display_title'] = trim((string) $anyCustomTitle);
+            }
+        }
         if ((int) ($row['linked_publication_id'] ?? 0) > 0) {
             $pubStmt = $pdo->prepare('SELECT * FROM publications WHERE id = :id LIMIT 1');
             $pubStmt->execute(['id' => (int) $row['linked_publication_id']]);
             $pubBase = $pubStmt->fetch() ?: null;
             if ($pubBase) {
                 $pubTr = translated_row($pdo, 'publications_translations', 'publication_id', (int) $pubBase['id'], $locale, $defaultLocale) ?: [];
-                $item['linked_publication'] = array_merge($pubBase, $pubTr);
+                $linkedPublication = array_merge($pubBase, $pubTr);
+                if (trim((string) ($linkedPublication['title'] ?? '')) === '') {
+                    $pubTitleStmt = $pdo->prepare('SELECT title FROM publications_translations
+                      WHERE publication_id = :id AND TRIM(COALESCE(title, \'\')) <> \'\'
+                      ORDER BY locale ASC LIMIT 1');
+                    $pubTitleStmt->execute(['id' => (int) $pubBase['id']]);
+                    $anyPubTitle = $pubTitleStmt->fetchColumn();
+                    if ($anyPubTitle !== false) {
+                        $linkedPublication['title'] = (string) $anyPubTitle;
+                    }
+                }
+                $item['linked_publication'] = $linkedPublication;
             }
         }
         $result[] = $item;

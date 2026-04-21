@@ -523,7 +523,23 @@ if ($editId > 0) {
     $readings = $readings->fetchAll();
 }
 
-$publicationOptions = $pdo->query('SELECT id FROM publications ORDER BY display_order ASC, id ASC')->fetchAll();
+$publicationOptionsStmt = $pdo->prepare('SELECT p.id,
+    COALESCE(NULLIF(ptr_locale.title, \'\'),
+      (
+        SELECT ptr_any.title
+        FROM publications_translations ptr_any
+        WHERE ptr_any.publication_id = p.id AND TRIM(COALESCE(ptr_any.title, \'\')) <> \'\'
+        ORDER BY ptr_any.locale ASC
+        LIMIT 1
+      ),
+      \'\'
+    ) AS title
+  FROM publications p
+  LEFT JOIN publications_translations ptr_locale
+    ON ptr_locale.publication_id = p.id AND ptr_locale.locale = :locale
+  ORDER BY p.display_order ASC, p.id ASC');
+$publicationOptionsStmt->execute(['locale' => admin_locale()]);
+$publicationOptions = $publicationOptionsStmt->fetchAll();
 $rowsStmt = $pdo->prepare('SELECT
     m.id,
     m.sort_order,
@@ -862,7 +878,7 @@ admin_header(tr('Модули', 'Modules'));
   <form method="post" style="margin-bottom:12px" class="compact-inputs" id="reading-add-form" enctype="multipart/form-data" hidden>
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <div class="grid">
-      <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>">#<?= h((string) $p['id']) ?></option><?php endforeach; ?></select></div>
+      <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>">#<?= h((string) $p['id']) ?><?= !empty($p['title']) ? (' - ' . h((string) $p['title'])) : '' ?></option><?php endforeach; ?></select></div>
       <div><label><?= h(tr('Ссылка на материал', 'Reading URL')) ?></label><input name="custom_url" id="reading-custom-url"></div>
       <div><label><?= h(tr('Путь к файлу материала (если без загрузки)', 'Reading file path (if no upload)')) ?></label><input name="custom_file_path" id="reading-custom-file-path"></div>
       <div><label><?= h(tr('Загрузить файл материала', 'Upload reading file')) ?></label><input type="file" name="custom_file_upload" id="reading-custom-file-upload" accept=".pdf,.doc,.docx,.txt"></div>

@@ -6,12 +6,11 @@ function admin_nav_items(): array
     return [
         ['href' => '/admin/dashboard.php', 'label' => t('nav.dashboard')],
         ['href' => '/admin/modules.php', 'label' => t('nav.modules')],
-        ['href' => '/admin/site-settings.php', 'label' => t('nav.site_settings')],
-        ['href' => '/admin/about-project.php', 'label' => t('nav.about_project')],
-        ['href' => '/admin/our-position.php', 'label' => t('nav.our_position')],
         ['href' => '/admin/publications.php', 'label' => t('nav.publications')],
         ['href' => '/admin/authors.php', 'label' => t('nav.authors')],
-        ['href' => '/admin/migrate.php', 'label' => t('nav.migrations')],
+        ['href' => '/admin/about-project.php', 'label' => t('nav.about_project')],
+        ['href' => '/admin/our-position.php', 'label' => t('nav.our_position')],
+        ['href' => '/admin/site-settings.php', 'label' => t('nav.site_settings')],
     ];
 }
 
@@ -51,6 +50,10 @@ function admin_header(string $title): void
             echo '</li>';
         }
         echo '</ul></div></nav>';
+        $migrationsActive = ($path === '/admin/migrate.php') ? ' is-active' : '';
+        echo '<div class="kant-sidebar-bottom">';
+        echo '<a class="nav-link' . $migrationsActive . '" href="/admin/migrate.php"><span class="title">' . h(t('nav.migrations')) . '</span></a>';
+        echo '</div>';
         echo '</aside>';
         echo '<main class="content kant-content">';
         echo '<header class="kant-topbar">';

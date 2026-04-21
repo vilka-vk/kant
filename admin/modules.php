@@ -304,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode($e->getMessage()));
     }
 
-    $moduleNumber = (int) ($_POST['module_number'] ?? 0);
+    $moduleNumber = (int) ($_POST['sort_order'] ?? 0);
     $base = [
         'slug' => makeModuleSlug($moduleNumber, $locales, $_POST),
         'module_number' => $moduleNumber,
@@ -463,11 +463,14 @@ admin_header(tr('Модули', 'Modules'));
       <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_modules_subtitle_enabled"><option value="1" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
     </div>
     <hr style="margin:12px 0">
-    <?php foreach ($locales as $locale): ?>
-      <div class="grid" style="margin-bottom:8px">
-        <div><label>Hero subtitle (<?= h(strtoupper($locale)) ?>)</label><input name="hero_modules_subtitle_<?= h($locale) ?>" value="<?= h((string) ($heroModulesTrRows[$locale]['subtitle'] ?? '')) ?>"></div>
-      </div>
-    <?php endforeach; ?>
+    <?php
+      $heroLeftLocale = $locales[0] ?? 'ru';
+      $heroRightLocale = $locales[1] ?? ($locales[0] ?? 'en');
+    ?>
+    <div class="grid" style="margin-bottom:8px">
+      <div><label>Hero subtitle (<?= h(strtoupper($heroLeftLocale)) ?>)</label><input name="hero_modules_subtitle_<?= h($heroLeftLocale) ?>" value="<?= h((string) ($heroModulesTrRows[$heroLeftLocale]['subtitle'] ?? '')) ?>"></div>
+      <div><label>Hero subtitle (<?= h(strtoupper($heroRightLocale)) ?>)</label><input name="hero_modules_subtitle_<?= h($heroRightLocale) ?>" value="<?= h((string) ($heroModulesTrRows[$heroRightLocale]['subtitle'] ?? '')) ?>"></div>
+    </div>
     <div class="actions"><button type="submit"><?= h(tr('Сохранить hero для страницы модулей', 'Save modules hero')) ?></button></div>
   </form>
 </div>
@@ -517,8 +520,7 @@ admin_header(tr('Модули', 'Modules'));
     <input type="hidden" name="id" value="<?= h((string) ($editRow['id'] ?? 0)) ?>">
     <div class="grid">
       <div><label><?= h(tr('Slug (автоматически)', 'Slug (auto)')) ?></label><input name="slug" readonly value="<?= h((string) ($editRow['slug'] ?? '')) ?>"></div>
-      <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="module_number" required value="<?= h((string) ($editRow['module_number'] ?? 1)) ?>"></div>
-      <div><label><?= h(tr('Порядок сортировки', 'Sort Order')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
+      <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
       <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
@@ -814,7 +816,7 @@ function moduleSlugify(value) {
 }
 
 var slugInput = document.querySelector('input[name="slug"]');
-var moduleNumberInput = document.querySelector('input[name="module_number"]');
+var moduleNumberInput = document.querySelector('input[name="sort_order"]');
 var moduleTitleInputs = document.querySelectorAll('input[name^="title_"]');
 function refreshModuleSlug() {
   if (!slugInput || !moduleNumberInput) return;

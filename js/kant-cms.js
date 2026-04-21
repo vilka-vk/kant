@@ -403,17 +403,24 @@
   async function hydratePage() {
     var locale = currentLocale();
     try {
-      var site = (await apiGet('site-settings', locale)).data || {};
-      renderFooter(site);
-
       var path = window.location.pathname.toLowerCase();
       var cleanPath = path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
       if (cleanPath.endsWith('/index.html') || cleanPath === '/' || cleanPath.endsWith('/kant')) {
-        var about = (await apiGet('about-project', locale)).data || {};
-        var position = (await apiGet('our-position', locale)).data || {};
-        var modules = (await apiGet('modules', locale)).data || [];
-        var publications = (await apiGet('publications', locale)).data || [];
-        var authors = (await apiGet('authors', locale)).data || [];
+        var homeData = await Promise.all([
+          apiGet('site-settings', locale),
+          apiGet('about-project', locale),
+          apiGet('our-position', locale),
+          apiGet('modules', locale),
+          apiGet('publications', locale),
+          apiGet('authors', locale)
+        ]);
+        var site = (homeData[0] && homeData[0].data) || {};
+        var about = (homeData[1] && homeData[1].data) || {};
+        var position = (homeData[2] && homeData[2].data) || {};
+        var modules = (homeData[3] && homeData[3].data) || [];
+        var publications = (homeData[4] && homeData[4].data) || [];
+        var authors = (homeData[5] && homeData[5].data) || [];
+        renderFooter(site);
         renderAbout(about);
         renderOurPosition(position);
         renderModulesList(modules, 5);
@@ -423,9 +430,17 @@
       }
 
       if (cleanPath.endsWith('/modules.html') || cleanPath.endsWith('/modules')) {
-        var heroModules = (await apiGet('hero-sections?page_key=modules', locale)).data || {};
-        var aboutModules = (await apiGet('about-project', locale)).data || {};
-        var listModules = (await apiGet('modules', locale)).data || [];
+        var modulesData = await Promise.all([
+          apiGet('site-settings', locale),
+          apiGet('hero-sections?page_key=modules', locale),
+          apiGet('about-project', locale),
+          apiGet('modules', locale)
+        ]);
+        var siteModules = (modulesData[0] && modulesData[0].data) || {};
+        var heroModules = (modulesData[1] && modulesData[1].data) || {};
+        var aboutModules = (modulesData[2] && modulesData[2].data) || {};
+        var listModules = (modulesData[3] && modulesData[3].data) || [];
+        renderFooter(siteModules);
         setText('.hero__headline', heroModules.title || (locale === 'ru' ? 'Модули' : 'Modules'));
         setText('.hero__subtitle', heroModules.subtitle || '');
         setImg('.hero .hero__bg', heroModules.background_image_path || '');
@@ -435,9 +450,17 @@
       }
 
       if (cleanPath.endsWith('/publications.html') || cleanPath.endsWith('/publications')) {
-        var heroPublications = (await apiGet('hero-sections?page_key=publications', locale)).data || {};
-        var publicationTypes = (await apiGet('publication-types', locale)).data || [];
-        var pubs = (await apiGet('publications', locale)).data || [];
+        var publicationsData = await Promise.all([
+          apiGet('site-settings', locale),
+          apiGet('hero-sections?page_key=publications', locale),
+          apiGet('publication-types', locale),
+          apiGet('publications', locale)
+        ]);
+        var sitePublications = (publicationsData[0] && publicationsData[0].data) || {};
+        var heroPublications = (publicationsData[1] && publicationsData[1].data) || {};
+        var publicationTypes = (publicationsData[2] && publicationsData[2].data) || [];
+        var pubs = (publicationsData[3] && publicationsData[3].data) || [];
+        renderFooter(sitePublications);
         setText('.hero__headline', heroPublications.title || (locale === 'ru' ? 'Публикации' : 'Publications'));
         setText('.hero__subtitle', heroPublications.subtitle || '');
         setImg('.hero .hero__bg', heroPublications.background_image_path || '');
@@ -447,6 +470,8 @@
       }
 
       if (cleanPath.endsWith('/module.html') || cleanPath.endsWith('/module-1.html') || cleanPath.endsWith('/module')) {
+        var siteModuleDetail = (await apiGet('site-settings', locale)).data || {};
+        renderFooter(siteModuleDetail);
         var params = new URLSearchParams(window.location.search);
         var slug = params.get('slug');
         var moduleItem = null;

@@ -27,6 +27,17 @@ function makeModuleSlug(int $moduleNumber, array $locales, array $post): string
         }
     }
     $raw = trim((string) $moduleNumber) . ' ' . $title;
+    $ruMap = [
+        'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D', 'Е' => 'E', 'Ё' => 'E', 'Ж' => 'Zh',
+        'З' => 'Z', 'И' => 'I', 'Й' => 'Y', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N', 'О' => 'O',
+        'П' => 'P', 'Р' => 'R', 'С' => 'S', 'Т' => 'T', 'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'Ts',
+        'Ч' => 'Ch', 'Ш' => 'Sh', 'Щ' => 'Sch', 'Ъ' => '', 'Ы' => 'Y', 'Ь' => '', 'Э' => 'E', 'Ю' => 'Yu', 'Я' => 'Ya',
+        'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'e', 'ж' => 'zh',
+        'з' => 'z', 'и' => 'i', 'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n', 'о' => 'o',
+        'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'ts',
+        'ч' => 'ch', 'ш' => 'sh', 'щ' => 'sch', 'ъ' => '', 'ы' => 'y', 'ь' => '', 'э' => 'e', 'ю' => 'yu', 'я' => 'ya',
+    ];
+    $raw = strtr($raw, $ruMap);
     $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $raw);
     if ($ascii === false) {
         $ascii = $raw;
@@ -181,7 +192,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'sort_order' => (int) ($_POST['video_sort_order'] ?? 0),
         ];
         if ($action === 'add_lecture_video' || $action === 'add_presentation_video') {
-            $payload['sort_order'] = nextSortOrder($pdo, $table, $moduleId);
+            if ($payload['sort_order'] <= 0) {
+                $payload['sort_order'] = nextSortOrder($pdo, $table, $moduleId);
+            }
             $pdo->prepare("INSERT INTO {$table} (module_id, language_code, video_url, video_alt, sort_order)
               VALUES (:module_id, :language_code, :video_url, :video_alt, :sort_order)")->execute($payload);
         } else {
@@ -658,6 +671,7 @@ admin_header(tr('Модули', 'Modules'));
       <div><label><?= h(tr('Ссылка на видео (embed) или путь к файлу', 'Video URL (embed) or file path')) ?></label><input name="video_url" value="<?= h((string) ($editLectureVideo['video_url'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
       <div><label><?= h(tr('Подпись к видео', 'Video caption')) ?></label><input name="video_alt" value="<?= h((string) ($editLectureVideo['video_alt'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Порядок', 'Order')) ?></label><input type="number" name="video_sort_order" min="1" value="<?= h((string) ($editLectureVideo['sort_order'] ?? (count($lectureVideos) + 1))) ?>"></div>
     </div>
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
   </form>
@@ -868,7 +882,17 @@ if (linkedPublicationSelect) {
 }
 
 function moduleSlugify(value) {
-  return String(value || '')
+  var map = {
+    'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m',
+    'н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'ts','ч':'ch','ш':'sh','щ':'sch',
+    'ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'
+  };
+  var normalized = String(value || '').replace(/[А-Яа-яЁё]/g, function (ch) {
+    var low = ch.toLowerCase();
+    var out = map[low] || '';
+    return ch === low ? out : (out.charAt(0).toUpperCase() + out.slice(1));
+  });
+  return normalized
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');

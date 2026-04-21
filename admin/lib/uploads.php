@@ -52,3 +52,31 @@ function upload_public_file(string $fieldName, string $subdir, array $allowedExt
 
     return '/' . $relativeDir . '/' . $fileName;
 }
+
+function delete_public_file(string $path): void
+{
+    $raw = trim($path);
+    if ($raw === '') {
+        return;
+    }
+
+    $normalized = str_replace('\\', '/', $raw);
+    if (!str_starts_with($normalized, '/')) {
+        $normalized = '/' . $normalized;
+    }
+    if (!str_starts_with($normalized, '/uploads/')) {
+        return;
+    }
+
+    $absolutePath = realpath(KANT_ROOT . ltrim($normalized, '/'));
+    $uploadsRoot = realpath(KANT_ROOT . 'uploads');
+    if ($absolutePath === false || $uploadsRoot === false) {
+        return;
+    }
+    if (!str_starts_with($absolutePath, $uploadsRoot . DIRECTORY_SEPARATOR) && $absolutePath !== $uploadsRoot) {
+        return;
+    }
+    if (is_file($absolutePath)) {
+        @unlink($absolutePath);
+    }
+}

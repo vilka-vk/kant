@@ -61,8 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete_about_video') {
         $videoId = (int) ($_POST['video_id'] ?? 0);
         if ($videoId > 0) {
+            $rowStmt = $pdo->prepare('SELECT video_url FROM about_project_videos WHERE id = :id LIMIT 1');
+            $rowStmt->execute(['id' => $videoId]);
+            $row = $rowStmt->fetch() ?: [];
             $stmt = $pdo->prepare('DELETE FROM about_project_videos WHERE id = :id');
             $stmt->execute(['id' => $videoId]);
+            delete_public_file((string) ($row['video_url'] ?? ''));
         }
         redirect('/admin/about-project.php');
     }

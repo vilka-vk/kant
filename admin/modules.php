@@ -113,7 +113,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'delete') {
+        $moduleFilesStmt = $pdo->prepare('SELECT hero_background_image_path, presentation_file_path FROM modules WHERE id = :id LIMIT 1');
+        $moduleFilesStmt->execute(['id' => $moduleId]);
+        $moduleFiles = $moduleFilesStmt->fetch() ?: [];
+
+        $videoRowsStmt = $pdo->prepare('SELECT video_url FROM module_lecture_videos WHERE module_id = :lecture_module_id
+          UNION ALL
+          SELECT video_url FROM module_presentation_videos WHERE module_id = :presentation_module_id');
+        $videoRowsStmt->execute([
+            'lecture_module_id' => $moduleId,
+            'presentation_module_id' => $moduleId,
+        ]);
+        $videoRows = $videoRowsStmt->fetchAll();
+
+        $transcriptRowsStmt = $pdo->prepare('SELECT file_path FROM module_transcripts WHERE module_id = :module_id');
+        $transcriptRowsStmt->execute(['module_id' => $moduleId]);
+        $transcriptRows = $transcriptRowsStmt->fetchAll();
+
+        $readingRowsStmt = $pdo->prepare('SELECT custom_file_path, custom_cover_image_path FROM module_readings WHERE module_id = :module_id');
+        $readingRowsStmt->execute(['module_id' => $moduleId]);
+        $readingRows = $readingRowsStmt->fetchAll();
+
         $pdo->prepare('DELETE FROM modules WHERE id = :id')->execute(['id' => $moduleId]);
+
+        delete_public_file((string) ($moduleFiles['hero_background_image_path'] ?? ''));
+        delete_public_file((string) ($moduleFiles['presentation_file_path'] ?? ''));
+        foreach ($videoRows as $videoRow) {
+            delete_public_file((string) ($videoRow['video_url'] ?? ''));
+        }
+        foreach ($transcriptRows as $transcriptRow) {
+            delete_public_file((string) ($transcriptRow['file_path'] ?? ''));
+        }
+        foreach ($readingRows as $readingRow) {
+            delete_public_file((string) ($readingRow['custom_file_path'] ?? ''));
+            delete_public_file((string) ($readingRow['custom_cover_image_path'] ?? ''));
+        }
         redirect('/admin/modules.php');
     }
 
@@ -125,6 +159,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $uploadedPresentation = upload_public_file('presentation_file_upload', 'module-presentations', ['pdf']);
             if ($uploadedPresentation) {
+                if ($presentationFile !== '' && $presentationFile !== $uploadedPresentation) {
+                    delete_public_file($presentationFile);
+                }
                 $presentationFile = $uploadedPresentation;
             }
         } catch (Throwable $e) {
@@ -139,8 +176,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'delete_presentation_file') {
+        $currentStmt = $pdo->prepare('SELECT presentation_file_path FROM modules WHERE id = :id LIMIT 1');
+        $currentStmt->execute(['id' => $moduleId]);
+        $current = $currentStmt->fetch() ?: [];
         $pdo->prepare('UPDATE modules SET presentation_file_path = :presentation_file_path WHERE id = :id')
             ->execute(['presentation_file_path' => '', 'id' => $moduleId]);
+        delete_public_file((string) ($current['presentation_file_path'] ?? ''));
         redirect('/admin/modules.php?edit=' . $moduleId . '&saved=1');
     }
     if ($action === 'reorder_lecture_videos') {
@@ -230,17 +271,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (in_array($action, ['delete_lecture_video', 'delete_presentation_video'], true)) {
         $videoId = (int) ($_POST['video_id'] ?? 0);
         $table = $action === 'delete_lecture_video' ? 'module_lecture_videos' : 'module_presentation_videos';
+        $videoStmt = $pdo->prepare("SELECT video_url FROM {$table} WHERE id = :id AND module_id = :module_id LIMIT 1");
+        $videoStmt->execute(['id' => $videoId, 'module_id' => $moduleId]);
+        $videoRow = $videoStmt->fetch() ?: [];
         $pdo->prepare("DELETE FROM {$table} WHERE id = :id AND module_id = :module_id")->execute([
             'id' => $videoId,
             'module_id' => $moduleId,
         ]);
+        delete_public_file((string) ($videoRow['video_url'] ?? ''));
         redirect('/admin/modules.php?edit=' . $moduleId);
     }
 
     if (in_array($action, ['save_transcript', 'delete_transcript'], true)) {
         if ($action === 'delete_transcript') {
             $id = (int) ($_POST['transcript_id'] ?? 0);
+            $transcriptStmt = $pdo->prepare('SELECT file_path FROM module_transcripts WHERE id = :id AND module_id = :module_id LIMIT 1');
+            $transcriptStmt->execute(['id' => $id, 'module_id' => $moduleId]);
+            $transcriptRow = $transcriptStmt->fetch() ?: [];
             $pdo->prepare('DELETE FROM module_transcripts WHERE id = :id AND module_id = :module_id')->execute(['id' => $id, 'module_id' => $moduleId]);
+            delete_public_file((string) ($transcriptRow['file_path'] ?? ''));
             redirect('/admin/modules.php?edit=' . $moduleId);
         }
         $id = (int) ($_POST['transcript_id'] ?? 0);
@@ -290,7 +339,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (in_array($action, ['save_reading', 'delete_reading'], true)) {
         if ($action === 'delete_reading') {
             $id = (int) ($_POST['reading_id'] ?? 0);
+            $readingStmt = $pdo->prepare('SELECT custom_file_path, custom_cover_image_path FROM module_readings WHERE id = :id AND module_id = :module_id LIMIT 1');
+            $readingStmt->execute(['id' => $id, 'module_id' => $moduleId]);
+            $readingRow = $readingStmt->fetch() ?: [];
             $pdo->prepare('DELETE FROM module_readings WHERE id = :id AND module_id = :module_id')->execute(['id' => $id, 'module_id' => $moduleId]);
+            delete_public_file((string) ($readingRow['custom_file_path'] ?? ''));
+            delete_public_file((string) ($readingRow['custom_cover_image_path'] ?? ''));
             redirect('/admin/modules.php?edit=' . $moduleId);
         }
         $id = (int) ($_POST['reading_id'] ?? 0);

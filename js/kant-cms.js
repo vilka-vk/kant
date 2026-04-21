@@ -45,6 +45,7 @@
     var el = document.querySelector(selector);
     if (el && value) {
       var src = String(value || '').trim();
+      src = src.replace(/\\/g, '/');
       if (src && !/^([a-z]+:)?\/\//i.test(src) && src.charAt(0) !== '/' && src.indexOf('data:') !== 0) {
         src = '/' + src;
       }

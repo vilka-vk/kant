@@ -162,6 +162,14 @@ if ($route === 'publications') {
         $tr = translated_row($pdo, 'publications_translations', 'publication_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
         $typeTr = translated_row($pdo, 'publication_types_translations', 'publication_type_id', (int) ($row['publication_type_id'] ?? 0), $locale, $defaultLocale) ?: [];
         $merged = array_merge($row, $tr);
+        if (trim((string) ($merged['title'] ?? '')) === '') {
+            $anyTitleStmt = $pdo->prepare('SELECT title FROM publications_translations WHERE publication_id = :id AND TRIM(COALESCE(title, \'\')) <> \'\' ORDER BY locale ASC LIMIT 1');
+            $anyTitleStmt->execute(['id' => (int) $row['id']]);
+            $anyTitle = $anyTitleStmt->fetchColumn();
+            if ($anyTitle !== false) {
+                $merged['title'] = (string) $anyTitle;
+            }
+        }
         $merged['publication_type_name'] = (string) ($typeTr['name'] ?? '');
         $result[] = $merged;
     }

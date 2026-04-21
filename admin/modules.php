@@ -127,6 +127,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/admin/modules.php?edit=' . $moduleId . '&saved=1');
     }
 
+    if ($action === 'delete_presentation_file') {
+        $pdo->prepare('UPDATE modules SET presentation_file_path = :presentation_file_path WHERE id = :id')
+            ->execute(['presentation_file_path' => '', 'id' => $moduleId]);
+        redirect('/admin/modules.php?edit=' . $moduleId . '&saved=1');
+    }
+
     if ($action === 'regenerate_slugs') {
         $mods = $pdo->query('SELECT id, module_number FROM modules ORDER BY id ASC')->fetchAll();
         foreach ($mods as $mod) {
@@ -550,7 +556,13 @@ admin_header(tr('Модули', 'Modules'));
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($editRow['id'] ?? 0)) ?>">
     <div class="grid">
-      <div><label><?= h(tr('Slug (автоматически)', 'Slug (auto)')) ?></label><input name="slug" readonly value="<?= h((string) ($editRow['slug'] ?? '')) ?>"></div>
+      <div>
+        <label><?= h(tr('Slug (автоматически)', 'Slug (auto)')) ?></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input name="slug" readonly value="<?= h((string) ($editRow['slug'] ?? '')) ?>">
+          <button type="button" class="btn btn-secondary" data-regenerate-slug title="<?= h(tr('Обновить Slug', 'Regenerate slug')) ?>" aria-label="<?= h(tr('Обновить Slug', 'Regenerate slug')) ?>">↻</button>
+        </div>
+      </div>
       <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
       <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
@@ -666,6 +678,14 @@ admin_header(tr('Модули', 'Modules'));
     </div>
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить файл презентации', 'Save presentation file')) ?></button></div>
   </form>
+  <?php if (!empty($editRow['presentation_file_path'])): ?>
+  <form method="post" style="margin-bottom:12px" onsubmit="return confirm('<?= h(tr('Удалить файл презентации?', 'Delete presentation file?')) ?>')">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="delete_presentation_file">
+    <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <button type="submit" class="btn btn-secondary"><?= h(tr('Удалить файл презентации', 'Delete presentation file')) ?></button>
+  </form>
+  <?php endif; ?>
   <div class="kant-section-head">
     <h3><?= h(tr('Список видео презентаций', 'Presentation videos list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="presentation-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
@@ -876,6 +896,12 @@ if (slugInput && moduleNumberInput) {
     input.addEventListener('input', refreshModuleSlug);
   });
   refreshModuleSlug();
+}
+var regenerateSlugBtn = document.querySelector('[data-regenerate-slug]');
+if (regenerateSlugBtn) {
+  regenerateSlugBtn.addEventListener('click', function () {
+    refreshModuleSlug();
+  });
 }
 </script>
 <?php

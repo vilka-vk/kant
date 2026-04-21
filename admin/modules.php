@@ -516,26 +516,16 @@ admin_header(tr('Модули', 'Modules'));
 <details class="module-section card" open>
   <summary><?= h(tr('Видео лекции', 'Lecture Videos')) ?></summary>
   <div class="module-section__body">
-  <p class="inline-help"><?= h(tr('Подсказка: используйте embed URL, например https://www.youtube.com/embed/... или Vimeo player URL.', 'URL hint: use embed URL, e.g. https://www.youtube.com/embed/... or Vimeo player URL.')) ?></p>
-  <form method="post" style="margin-bottom:12px" class="compact-inputs" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <input type="hidden" name="action" value="add_lecture_video">
-    <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
-    <div class="grid">
-      <div><label>language_code</label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}"></div>
-      <div><label>video_url (embed or file path)</label><input name="video_url"></div>
-      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
-      <div><label>video_alt</label><input name="video_alt"></div>
-      <div><label>sort_order</label><input type="number" name="video_sort_order" value="0"></div>
-    </div>
-    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить видео', 'Add video')) ?></button></div>
-  </form>
+  <div class="kant-section-head">
+    <h3><?= h(tr('Список видео лекций', 'Lecture videos list')) ?></h3>
+    <button type="button" class="btn" data-toggle-form="lecture-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
+  </div>
   <div class="filter-row">
-    <label for="lecture-filter"><strong><?= h(tr('Фильтр language_code:', 'Filter language_code:')) ?></strong></label>
+    <label for="lecture-filter"><strong><?= h(tr('Фильтр по языку:', 'Filter by language:')) ?></strong></label>
     <input id="lecture-filter" type="text" placeholder="<?= h(tr('например: ru, en', 'e.g. ru, en')) ?>">
   </div>
   <div class="table-scroll">
-  <table id="lecture-table"><thead><tr><th>language_code</th><th>video_url</th><th>video_alt</th><th>sort_order</th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody>
+  <table id="lecture-table"><thead><tr><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Порядок', 'Sort order')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody>
     <?php foreach ($lectureVideos as $video): ?>
       <tr data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
         <td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td><td><?= h((string) $video['sort_order']) ?></td>
@@ -557,6 +547,20 @@ admin_header(tr('Модули', 'Modules'));
     <?php endforeach; ?>
   </tbody></table>
   </div>
+  <p class="inline-help"><?= h(tr('Подсказка: используйте embed URL, например https://www.youtube.com/embed/... или Vimeo player URL.', 'URL hint: use embed URL, e.g. https://www.youtube.com/embed/... or Vimeo player URL.')) ?></p>
+  <form method="post" style="margin-bottom:12px;display:none" class="compact-inputs" id="lecture-add-form" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="add_lecture_video">
+    <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <div class="grid">
+      <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}"></div>
+      <div><label><?= h(tr('Ссылка на видео (embed) или путь к файлу', 'Video URL (embed) or file path')) ?></label><input name="video_url"></div>
+      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Подпись к видео', 'Video caption')) ?></label><input name="video_alt"></div>
+      <div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="video_sort_order" value="0"></div>
+    </div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
+  </form>
   <p class="muted"><?= h(tr('Предпросмотр вкладок:', 'Preview tabs:')) ?> <?php foreach ($lectureVideos as $v): ?><span style="display:inline-block;padding:2px 8px;border:1px solid #ccc;border-radius:14px;margin-right:6px"><?= h(strtoupper((string) $v['language_code'])) ?></span><?php endforeach; ?></p>
   </div>
 </details>
@@ -564,23 +568,16 @@ admin_header(tr('Модули', 'Modules'));
 <details class="module-section card" open>
   <summary><?= h(tr('Видео презентации', 'Presentation Videos')) ?></summary>
   <div class="module-section__body">
-  <form method="post" style="margin-bottom:12px" class="compact-inputs" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="add_presentation_video"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
-    <div class="grid">
-      <div><label>language_code</label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}"></div>
-      <div><label>video_url (embed or file path)</label><input name="video_url"></div>
-      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
-      <div><label>video_alt</label><input name="video_alt"></div>
-      <div><label>sort_order</label><input type="number" name="video_sort_order" value="0"></div>
-    </div>
-    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить видео', 'Add video')) ?></button></div>
-  </form>
+  <div class="kant-section-head">
+    <h3><?= h(tr('Список видео презентаций', 'Presentation videos list')) ?></h3>
+    <button type="button" class="btn" data-toggle-form="presentation-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
+  </div>
   <div class="filter-row">
-    <label for="presentation-filter"><strong><?= h(tr('Фильтр language_code:', 'Filter language_code:')) ?></strong></label>
+    <label for="presentation-filter"><strong><?= h(tr('Фильтр по языку:', 'Filter by language:')) ?></strong></label>
     <input id="presentation-filter" type="text" placeholder="<?= h(tr('например: ru, en', 'e.g. ru, en')) ?>">
   </div>
   <div class="table-scroll">
-  <table id="presentation-table"><thead><tr><th>language_code</th><th>video_url</th><th>video_alt</th><th>sort_order</th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody>
+  <table id="presentation-table"><thead><tr><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Порядок', 'Sort order')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody>
     <?php foreach ($presentationVideos as $video): ?>
       <tr data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
         <td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td><td><?= h((string) $video['sort_order']) ?></td>
@@ -602,6 +599,17 @@ admin_header(tr('Модули', 'Modules'));
     <?php endforeach; ?>
   </tbody></table>
   </div>
+  <form method="post" style="margin-bottom:12px;display:none" class="compact-inputs" id="presentation-add-form" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="add_presentation_video"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <div class="grid">
+      <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}"></div>
+      <div><label><?= h(tr('Ссылка на видео (embed) или путь к файлу', 'Video URL (embed) or file path')) ?></label><input name="video_url"></div>
+      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Подпись к видео', 'Video caption')) ?></label><input name="video_alt"></div>
+      <div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="video_sort_order" value="0"></div>
+    </div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
+  </form>
   <p class="muted"><?= h(tr('Предпросмотр вкладок:', 'Preview tabs:')) ?> <?php foreach ($presentationVideos as $v): ?><span style="display:inline-block;padding:2px 8px;border:1px solid #ccc;border-radius:14px;margin-right:6px"><?= h(strtoupper((string) $v['language_code'])) ?></span><?php endforeach; ?></p>
   </div>
 </details>
@@ -609,17 +617,21 @@ admin_header(tr('Модули', 'Modules'));
 <details class="module-section card">
   <summary><?= h(tr('Транскрипции (для этого модуля)', 'Transcripts (for this module)')) ?></summary>
   <div class="module-section__body">
-  <form method="post" style="margin-bottom:12px" class="compact-inputs" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
-    <div class="grid"><div><label>file_path</label><input name="file_path"></div><div><label><?= h(tr('Загрузить файл транскрипции', 'Upload transcript file')) ?></label><input type="file" name="transcript_file" accept=".pdf,.doc,.docx,.txt"></div><div><label>sort_order</label><input type="number" name="sort_order" value="0"></div></div>
-    <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label>display_name (<?= h(strtoupper($locale)) ?>)</label><input name="display_name_<?= h($locale) ?>"></div><?php endforeach; ?>
-    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить транскрипцию', 'Add transcript')) ?></button></div>
-  </form>
-  <table><thead><tr><th>file_path</th><th>sort_order</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody>
+  <div class="kant-section-head">
+    <h3><?= h(tr('Список транскрипций', 'Transcripts list')) ?></h3>
+    <button type="button" class="btn" data-toggle-form="transcript-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
+  </div>
+  <table><thead><tr><th><?= h(tr('Файл', 'File')) ?></th><th><?= h(tr('Порядок', 'Sort order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody>
   <?php foreach ($transcripts as $t): ?>
     <tr><td><?= h((string) $t['file_path']) ?></td><td><?= h((string) $t['sort_order']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить транскрипцию?', 'Delete transcript?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
+  <form method="post" style="margin-bottom:12px;display:none" class="compact-inputs" id="transcript-add-form" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <div class="grid"><div><label><?= h(tr('Путь к файлу (если без загрузки)', 'File path (if no upload)')) ?></label><input name="file_path"></div><div><label><?= h(tr('Загрузить файл транскрипции', 'Upload transcript file')) ?></label><input type="file" name="transcript_file" accept=".pdf,.doc,.docx,.txt"></div><div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="sort_order" value="0"></div></div>
+    <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label><?= h(tr('Название (', 'Title (')) ?><?= h(strtoupper($locale)) ?>)</label><input name="display_name_<?= h($locale) ?>"></div><?php endforeach; ?>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
+  </form>
   </div>
   <hr style="margin:14px 0">
   <h4>Быстро добавить несколько транскрипций</h4>
@@ -646,27 +658,31 @@ admin_header(tr('Модули', 'Modules'));
 <details class="module-section card">
   <summary><?= h(tr('Материалы для чтения (для этого модуля)', 'Readings (for this module)')) ?></summary>
   <div class="module-section__body">
-  <form method="post" style="margin-bottom:12px" class="compact-inputs" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
-    <div class="grid">
-      <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>">#<?= h((string) $p['id']) ?></option><?php endforeach; ?></select></div>
-      <div><label>custom_url</label><input name="custom_url" id="reading-custom-url"></div>
-      <div><label>custom_file_path</label><input name="custom_file_path" id="reading-custom-file-path"></div>
-      <div><label><?= h(tr('Загрузить файл материала', 'Upload reading file')) ?></label><input type="file" name="custom_file_upload" id="reading-custom-file-upload" accept=".pdf,.doc,.docx,.txt"></div>
-      <div><label>custom_cover_image_path</label><input name="custom_cover_image_path" id="reading-custom-cover-path"></div>
-      <div><label><?= h(tr('Загрузить изображение обложки', 'Upload cover image')) ?></label><input type="file" name="custom_cover_upload" id="reading-custom-cover-upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label>sort_order</label><input type="number" name="sort_order" value="0"></div>
-    </div>
-    <div id="reading-custom-titles">
-      <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label>custom_title (<?= h(strtoupper($locale)) ?>)</label><input name="custom_title_<?= h($locale) ?>"></div><?php endforeach; ?>
-    </div>
-    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить материал', 'Add reading')) ?></button></div>
-  </form>
-  <table><thead><tr><th>linked_pub</th><th>target</th><th>sort_order</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody>
+  <div class="kant-section-head">
+    <h3><?= h(tr('Список материалов', 'Readings list')) ?></h3>
+    <button type="button" class="btn" data-toggle-form="reading-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
+  </div>
+  <table><thead><tr><th><?= h(tr('Связанная публикация', 'Linked publication')) ?></th><th><?= h(tr('Цель (файл/ссылка)', 'Target (file/link)')) ?></th><th><?= h(tr('Порядок', 'Sort order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody>
   <?php foreach ($readings as $r): ?>
     <tr><td><?= h((string) ($r['linked_publication_id'] ?: '-')) ?></td><td><?= h((string) ($r['custom_file_path'] ?: $r['custom_url'])) ?></td><td><?= h((string) $r['sort_order']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить материал?', 'Delete reading?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="reading_id" value="<?= h((string) $r['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
+  <form method="post" style="margin-bottom:12px;display:none" class="compact-inputs" id="reading-add-form" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <div class="grid">
+      <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>">#<?= h((string) $p['id']) ?></option><?php endforeach; ?></select></div>
+      <div><label><?= h(tr('Ссылка на материал', 'Reading URL')) ?></label><input name="custom_url" id="reading-custom-url"></div>
+      <div><label><?= h(tr('Путь к файлу материала (если без загрузки)', 'Reading file path (if no upload)')) ?></label><input name="custom_file_path" id="reading-custom-file-path"></div>
+      <div><label><?= h(tr('Загрузить файл материала', 'Upload reading file')) ?></label><input type="file" name="custom_file_upload" id="reading-custom-file-upload" accept=".pdf,.doc,.docx,.txt"></div>
+      <div><label><?= h(tr('Путь к обложке (если без загрузки)', 'Cover image path (if no upload)')) ?></label><input name="custom_cover_image_path" id="reading-custom-cover-path"></div>
+      <div><label><?= h(tr('Загрузить изображение обложки', 'Upload cover image')) ?></label><input type="file" name="custom_cover_upload" id="reading-custom-cover-upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="sort_order" value="0"></div>
+    </div>
+    <div id="reading-custom-titles">
+      <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label><?= h(tr('Заголовок (', 'Title (')) ?><?= h(strtoupper($locale)) ?>)</label><input name="custom_title_<?= h($locale) ?>"></div><?php endforeach; ?>
+    </div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
+  </form>
   </div>
 </details>
 <?php endif; ?>
@@ -713,6 +729,29 @@ function applyLanguageFilter(inputId, tableId) {
 
 applyLanguageFilter('lecture-filter', 'lecture-table');
 applyLanguageFilter('presentation-filter', 'presentation-table');
+
+document.querySelectorAll('[data-toggle-form]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var formId = btn.getAttribute('data-toggle-form');
+    var form = formId ? document.getElementById(formId) : null;
+    if (!form) return;
+    var isOpen = form.style.display !== 'none';
+    form.style.display = isOpen ? 'none' : 'block';
+    btn.textContent = isOpen ? '<?= h(tr('Добавить +', 'Add +')) ?>' : '<?= h(tr('Скрыть форму', 'Hide form')) ?>';
+  });
+});
+
+var drawerMainForm = document.querySelector('.kant-drawer > .card form[method="post"][enctype="multipart/form-data"]');
+if (drawerMainForm) {
+  drawerMainForm.addEventListener('submit', function () {
+    sessionStorage.setItem('kantModulesDrawerScrollY', String(window.scrollY || 0));
+  });
+  var savedY = sessionStorage.getItem('kantModulesDrawerScrollY');
+  if (savedY !== null) {
+    window.scrollTo(0, parseInt(savedY, 10) || 0);
+    sessionStorage.removeItem('kantModulesDrawerScrollY');
+  }
+}
 
 var addTranscriptBtn = document.getElementById('add-transcript-row');
 var transcriptRowsWrap = document.getElementById('bulk-transcripts-rows');

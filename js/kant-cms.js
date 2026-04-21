@@ -225,7 +225,7 @@
     if (!moduleItem) return;
     setText('.module-hero__kicker', 'Module ' + (moduleItem.module_number || ''));
     setText('.module-hero__headline', moduleItem.title || '');
-    setText('.module-hero__subtitle', moduleItem.short_description || moduleItem.hero_subtitle || '');
+    setText('.module-hero__subtitle', moduleItem.short_description || '');
     setImg('.module-hero .hero__bg', moduleItem.hero_background_image_path || '');
     setText('.module-main .module-block:nth-of-type(1) .module-title', moduleItem.lecture_title || '');
     setText('.module-main .module-block:nth-of-type(2) .module-title', moduleItem.presentation_title || '');

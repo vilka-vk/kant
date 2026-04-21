@@ -20,6 +20,16 @@ body {
 
 .kant-sidebar .navbar {
   flex: 1;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.kant-sidebar .navbar .navbar-collapse {
+  align-items: flex-start;
+}
+
+.kant-sidebar .navbar-nav {
+  width: 100%;
 }
 
 .kant-sidebar-bottom {
@@ -247,6 +257,60 @@ textarea {
   color: #b00020;
 }
 
+.kant-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kant-drawer {
+  position: fixed;
+  left: var(--kant-sidebar-width);
+  right: 0;
+  top: 76px;
+  bottom: 0;
+  background: #f4f6fb;
+  z-index: 40;
+  border-left: 1px solid #dbe2ef;
+  overflow: auto;
+  padding: 20px 24px;
+}
+
+.kant-drawer .card {
+  margin-bottom: 14px;
+}
+
+.kant-drawer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.kant-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 80;
+  display: none;
+}
+
+.kant-confirm-overlay.is-open {
+  display: block;
+}
+
+.kant-confirm-modal {
+  width: min(460px, calc(100% - 32px));
+  margin: 140px auto 0;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #dbe2ef;
+  box-shadow: 0 12px 28px rgba(22, 30, 56, 0.18);
+  padding: 16px;
+}
+
 @media (max-width: 980px) {
   .kant-sidebar {
     width: 240px;
@@ -254,6 +318,10 @@ textarea {
 
   .kant-content {
     width: 100%;
+  }
+
+  .kant-drawer {
+    left: 240px;
   }
 }
 
@@ -268,6 +336,12 @@ textarea {
   .kant-content {
     margin-left: 0;
     width: 100%;
+  }
+
+  .kant-drawer {
+    left: 0;
+    top: 70px;
+    padding: 14px 16px;
   }
 
   .kant-topbar {

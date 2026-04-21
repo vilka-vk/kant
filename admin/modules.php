@@ -369,6 +369,7 @@ if (!empty($heroModules['id'])) {
     }
 }
 
+$isModuleFormOpen = $editRow || (string) ($_GET['form'] ?? '') === '1';
 admin_header(tr('Модули', 'Modules'));
 ?>
 <style>
@@ -406,6 +407,39 @@ admin_header(tr('Модули', 'Modules'));
   </form>
 </div>
 
+<div class="card">
+  <div class="kant-section-head">
+    <h2><?= h(tr('Модули', 'Modules')) ?></h2>
+    <a class="btn" href="/admin/modules.php?form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
+  </div>
+  <table>
+    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
+    <tbody>
+    <?php foreach ($rows as $row): ?>
+      <tr>
+        <td><?= h((string) $row['id']) ?></td>
+        <td><?= h($row['slug']) ?></td>
+        <td><?= h((string) $row['module_number']) ?></td>
+        <td><?= h((string) $row['sort_order']) ?></td>
+        <td><?= h($row['languages']) ?></td>
+        <td class="actions">
+          <a class="btn btn-secondary" href="/admin/modules.php?form=1&edit=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a>
+          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить модуль?', 'Delete module?')) ?>')">
+            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= h((string) $row['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
+          </form>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
+
+<?php if ($isModuleFormOpen): ?>
+<aside class="kant-drawer" aria-label="Module form drawer">
+  <div class="kant-drawer-actions">
+    <h2><?= h($editRow ? tr('Редактирование модуля', 'Edit module') : tr('Добавление модуля', 'Add module')) ?></h2>
+    <a class="btn btn-secondary" href="/admin/modules.php" data-close-drawer><?= h(tr('Закрыть', 'Close')) ?></a>
+  </div>
 <div class="card">
   <h1><?= h(tr('Модули', 'Modules')) ?></h1>
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
@@ -636,32 +670,51 @@ admin_header(tr('Модули', 'Modules'));
   </div>
 </details>
 <?php endif; ?>
+<?php endif; ?>
+</aside>
 
-<div class="card">
-  <h2><?= h(tr('Существующие модули', 'Existing modules')) ?></h2>
-  <table>
-    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
-    <tbody>
-    <?php foreach ($rows as $row): ?>
-      <tr>
-        <td><?= h((string) $row['id']) ?></td>
-        <td><?= h($row['slug']) ?></td>
-        <td><?= h((string) $row['module_number']) ?></td>
-        <td><?= h((string) $row['sort_order']) ?></td>
-        <td><?= h($row['languages']) ?></td>
-        <td class="actions">
-          <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a>
-          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить модуль?', 'Delete module?')) ?>')">
-            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= h((string) $row['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
-          </form>
-        </td>
-      </tr>
-    <?php endforeach; ?>
-    </tbody>
-  </table>
+<div class="kant-confirm-overlay" id="modules-close-confirm">
+  <div class="kant-confirm-modal">
+    <h3><?= h(tr('Есть несохранённые изменения', 'Unsaved changes')) ?></h3>
+    <p class="muted"><?= h(tr('Сохранить изменения перед закрытием формы?', 'Save changes before closing the form?')) ?></p>
+    <div class="actions">
+      <button type="button" id="modules-confirm-save"><?= h(tr('Сохранить', 'Save')) ?></button>
+      <button type="button" class="btn btn-secondary" id="modules-confirm-discard"><?= h(tr('Не сохранять', 'Discard')) ?></button>
+      <button type="button" class="btn btn-secondary" id="modules-confirm-cancel"><?= h(tr('Отмена', 'Cancel')) ?></button>
+    </div>
+  </div>
 </div>
 
 <script>
+var moduleForm = document.querySelector('.kant-drawer form[method="post"][enctype="multipart/form-data"]');
+var closeDrawerBtn = document.querySelector('[data-close-drawer]');
+var confirmOverlay = document.getElementById('modules-close-confirm');
+var dirty = false;
+var pendingCloseHref = '';
+if (moduleForm) {
+  moduleForm.addEventListener('input', function () { dirty = true; });
+  moduleForm.addEventListener('change', function () { dirty = true; });
+  moduleForm.addEventListener('submit', function () { dirty = false; });
+}
+if (closeDrawerBtn && moduleForm && confirmOverlay) {
+  closeDrawerBtn.addEventListener('click', function (e) {
+    if (!dirty) return;
+    e.preventDefault();
+    pendingCloseHref = closeDrawerBtn.getAttribute('href') || '/admin/modules.php';
+    confirmOverlay.classList.add('is-open');
+  });
+  document.getElementById('modules-confirm-save').addEventListener('click', function () {
+    moduleForm.requestSubmit();
+  });
+  document.getElementById('modules-confirm-discard').addEventListener('click', function () {
+    window.location.href = pendingCloseHref || '/admin/modules.php';
+  });
+  document.getElementById('modules-confirm-cancel').addEventListener('click', function () {
+    confirmOverlay.classList.remove('is-open');
+    pendingCloseHref = '';
+  });
+}
+
 function applyLanguageFilter(inputId, tableId) {
   var input = document.getElementById(inputId);
   var table = document.getElementById(tableId);

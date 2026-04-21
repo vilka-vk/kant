@@ -179,6 +179,8 @@ if ($typeEditId > 0) {
     }
 }
 $typeRows = $pdo->query('SELECT * FROM publication_types ORDER BY sort_order ASC, id ASC')->fetchAll();
+$isPublicationFormOpen = $tab === 'publications' && ($edit || (string) ($_GET['form'] ?? '') === '1');
+$isTypeFormOpen = $tab === 'types' && ($typeEdit || (string) ($_GET['form'] ?? '') === '1');
 
 admin_header(tr('Публикации', 'Publications'));
 ?>
@@ -213,7 +215,37 @@ admin_header(tr('Публикации', 'Publications'));
 </div>
 
 <div class="card">
-  <h1><?= h(tr('Публикации', 'Publications')) ?></h1>
+  <div class="kant-section-head">
+    <h1><?= h(tr('Публикации', 'Publications')) ?></h1>
+    <a class="btn" href="/admin/publications.php?tab=publications&form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
+  </div>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
+  <table>
+    <thead><tr><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <tbody>
+    <?php foreach ($rows as $r): ?>
+      <tr>
+        <td><?= h((string) $r['id']) ?></td>
+        <td><?= h((string) $r['type_slug']) ?></td>
+        <td><?= h((string) $r['display_order']) ?></td>
+        <td><?= h((string) $r['published_at']) ?></td>
+        <td><?= h($r['file_path'] !== '' ? $r['file_path'] : (string) $r['external_url']) ?></td>
+        <td><a class="btn btn-secondary" href="/admin/publications.php?tab=publications&form=1&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
+      </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
+
+<?php if ($isPublicationFormOpen): ?>
+<aside class="kant-drawer" aria-label="Publication form drawer">
+  <div class="kant-drawer-actions">
+    <h2><?= h($edit ? tr('Редактирование публикации', 'Edit publication') : tr('Добавление публикации', 'Add publication')) ?></h2>
+    <a class="btn btn-secondary" href="/admin/publications.php?tab=publications" data-close-drawer-publications><?= h(tr('Закрыть', 'Close')) ?></a>
+  </div>
+<div class="card">
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
@@ -244,30 +276,41 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     <div class="actions">
       <button type="submit"><?= $edit ? h(tr('Обновить публикацию', 'Update publication')) : h(tr('Создать публикацию', 'Create publication')) ?></button>
-      <a class="btn btn-secondary" href="/admin/publications.php?tab=publications"><?= h(tr('Новая', 'New')) ?></a>
+      <a class="btn btn-secondary" href="/admin/publications.php?tab=publications&form=1"><?= h(tr('Новая', 'New')) ?></a>
     </div>
   </form>
 </div>
+</aside>
+<?php endif; ?>
+<?php else: ?>
 <div class="card">
+  <div class="kant-section-head">
+    <h1><?= h(tr('Типы публикаций', 'Publication types')) ?></h1>
+    <a class="btn" href="/admin/publications.php?tab=types&form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
+  </div>
+  <?php if (!empty($_GET['saved_type'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <table>
-    <thead><tr><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
-    <?php foreach ($rows as $r): ?>
+    <?php foreach ($typeRows as $row): ?>
       <tr>
-        <td><?= h((string) $r['id']) ?></td>
-        <td><?= h((string) $r['type_slug']) ?></td>
-        <td><?= h((string) $r['display_order']) ?></td>
-        <td><?= h((string) $r['published_at']) ?></td>
-        <td><?= h($r['file_path'] !== '' ? $r['file_path'] : (string) $r['external_url']) ?></td>
-        <td><a class="btn btn-secondary" href="/admin/publications.php?tab=publications&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
+        <td><?= h((string) $row['id']) ?></td>
+        <td><?= h($row['slug']) ?></td>
+        <td><?= h((string) $row['sort_order']) ?></td>
+        <td><a class="btn btn-secondary" href="/admin/publications.php?tab=types&form=1&edit_type=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>
     <?php endforeach; ?>
     </tbody>
   </table>
 </div>
-<?php else: ?>
+
+<?php if ($isTypeFormOpen): ?>
+<aside class="kant-drawer" aria-label="Publication type form drawer">
+  <div class="kant-drawer-actions">
+    <h2><?= h($typeEdit ? tr('Редактирование типа публикации', 'Edit publication type') : tr('Добавление типа публикации', 'Add publication type')) ?></h2>
+    <a class="btn btn-secondary" href="/admin/publications.php?tab=types" data-close-drawer-types><?= h(tr('Закрыть', 'Close')) ?></a>
+  </div>
 <div class="card">
-  <h1><?= h(tr('Типы публикаций', 'Publication types')) ?></h1>
   <?php if (!empty($_GET['saved_type'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <form method="post">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
@@ -286,24 +329,49 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     <div class="actions">
       <button type="submit"><?= $typeEdit ? h(tr('Обновить тип', 'Update type')) : h(tr('Создать тип', 'Create type')) ?></button>
-      <a class="btn btn-secondary" href="/admin/publications.php?tab=types"><?= h(tr('Новый', 'New')) ?></a>
+      <a class="btn btn-secondary" href="/admin/publications.php?tab=types&form=1"><?= h(tr('Новый', 'New')) ?></a>
     </div>
   </form>
 </div>
-<div class="card">
-  <table>
-    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
-    <tbody>
-    <?php foreach ($typeRows as $row): ?>
-      <tr>
-        <td><?= h((string) $row['id']) ?></td>
-        <td><?= h($row['slug']) ?></td>
-        <td><?= h((string) $row['sort_order']) ?></td>
-        <td><a class="btn btn-secondary" href="/admin/publications.php?tab=types&edit_type=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
-      </tr>
-    <?php endforeach; ?>
-    </tbody>
-  </table>
-</div>
+</aside>
 <?php endif; ?>
+<?php endif; ?>
+
+<div class="kant-confirm-overlay" id="publications-close-confirm">
+  <div class="kant-confirm-modal">
+    <h3><?= h(tr('Есть несохранённые изменения', 'Unsaved changes')) ?></h3>
+    <p class="muted"><?= h(tr('Сохранить изменения перед закрытием формы?', 'Save changes before closing the form?')) ?></p>
+    <div class="actions">
+      <button type="button" id="publications-confirm-save"><?= h(tr('Сохранить', 'Save')) ?></button>
+      <button type="button" class="btn btn-secondary" id="publications-confirm-discard"><?= h(tr('Не сохранять', 'Discard')) ?></button>
+      <button type="button" class="btn btn-secondary" id="publications-confirm-cancel"><?= h(tr('Отмена', 'Cancel')) ?></button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var form = document.querySelector('.kant-drawer form');
+  var closeBtn = document.querySelector('[data-close-drawer-publications], [data-close-drawer-types]');
+  var overlay = document.getElementById('publications-close-confirm');
+  var dirty = false;
+  var pendingCloseHref = '';
+  if (!form || !closeBtn || !overlay) return;
+  form.addEventListener('input', function () { dirty = true; });
+  form.addEventListener('change', function () { dirty = true; });
+  form.addEventListener('submit', function () { dirty = false; });
+  closeBtn.addEventListener('click', function (e) {
+    if (!dirty) return;
+    e.preventDefault();
+    pendingCloseHref = closeBtn.getAttribute('href') || '/admin/publications.php';
+    overlay.classList.add('is-open');
+  });
+  document.getElementById('publications-confirm-save').addEventListener('click', function () { form.requestSubmit(); });
+  document.getElementById('publications-confirm-discard').addEventListener('click', function () { window.location.href = pendingCloseHref || '/admin/publications.php'; });
+  document.getElementById('publications-confirm-cancel').addEventListener('click', function () {
+    overlay.classList.remove('is-open');
+    pendingCloseHref = '';
+  });
+})();
+</script>
 <?php admin_footer();

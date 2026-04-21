@@ -99,13 +99,13 @@ admin_header(tr('Авторы', 'Authors'));
 </div>
 <div class="card">
   <table>
-    <thead><tr><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $r): ?>
       <tr>
+        <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h($r['photo_path']) ?></td>
-        <td><?= h((string) $r['display_order']) ?></td>
         <td><a class="btn btn-secondary" href="/admin/authors.php?edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>
     <?php endforeach; ?>

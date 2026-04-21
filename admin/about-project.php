@@ -168,14 +168,14 @@ admin_header(tr('О проекте', 'About Project'));
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить видео', 'Add about video')) ?></button></div>
   </form>
   <table>
-    <thead><tr><th><?= h(tr('Язык', 'Lang')) ?></th><th>URL</th><th>Alt</th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Lang')) ?></th><th>URL</th><th>Alt</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
       <?php foreach ($aboutVideos as $video): ?>
       <tr>
+        <td><?= h((string) $video['sort_order']) ?></td>
         <td><?= h((string) $video['language_code']) ?></td>
         <td><?= h((string) $video['video_url']) ?></td>
         <td><?= h((string) $video['video_alt']) ?></td>
-        <td><?= h((string) $video['sort_order']) ?></td>
         <td>
           <form method="post" onsubmit="return confirm('<?= h(tr('Удалить это видео?', 'Delete this video?')) ?>')">
             <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">

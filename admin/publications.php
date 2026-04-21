@@ -223,13 +223,13 @@ admin_header(tr('Публикации', 'Publications'));
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <table>
-    <thead><tr><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $r): ?>
       <tr>
+        <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h((string) $r['type_slug']) ?></td>
-        <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['published_at']) ?></td>
         <td><?= h($r['file_path'] !== '' ? $r['file_path'] : (string) $r['external_url']) ?></td>
         <td><a class="btn btn-secondary" href="/admin/publications.php?tab=publications&form=1&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
@@ -290,13 +290,13 @@ admin_header(tr('Публикации', 'Publications'));
   </div>
   <?php if (!empty($_GET['saved_type'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <table>
-    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th>Slug</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($typeRows as $row): ?>
       <tr>
+        <td><?= h((string) $row['sort_order']) ?></td>
         <td><?= h((string) $row['id']) ?></td>
         <td><?= h($row['slug']) ?></td>
-        <td><?= h((string) $row['sort_order']) ?></td>
         <td><a class="btn btn-secondary" href="/admin/publications.php?tab=types&form=1&edit_type=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>
     <?php endforeach; ?>

@@ -470,14 +470,14 @@ admin_header(tr('Модули', 'Modules'));
     </div>
   </div>
   <table>
-    <thead><tr><th>ID</th><th>Slug</th><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th>Slug</th><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $row): ?>
       <tr>
+        <td><?= h((string) $row['sort_order']) ?></td>
         <td><?= h((string) $row['id']) ?></td>
         <td><?= h($row['slug']) ?></td>
         <td><?= h((string) $row['module_number']) ?></td>
-        <td><?= h((string) $row['sort_order']) ?></td>
         <td><?= h($row['languages']) ?></td>
         <td class="actions">
           <a class="btn btn-secondary" href="/admin/modules.php?form=1&edit=<?= h((string) $row['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a>

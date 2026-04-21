@@ -302,9 +302,11 @@
     var transcriptsList = document.querySelector('#transcript-modal .modal__downloads');
     if (transcriptsList) {
       transcriptsList.innerHTML = '';
+      var downloadTranscriptLabel = locale === 'ru' ? 'Скачать транскрипцию' : 'Download transcript';
       transcripts.forEach(function (t) {
+        var languageCode = String(t.display_name || '').trim().toUpperCase();
         var li = document.createElement('li');
-        li.innerHTML = '<a href="' + (t.file_path || '#') + '" download>' + (t.display_name || 'Download transcript') + '</a>';
+        li.innerHTML = '<a href="' + (t.file_path || '#') + '" download>' + downloadTranscriptLabel + (languageCode ? ' (' + languageCode + ')' : '') + '</a>';
         transcriptsList.appendChild(li);
       });
     }

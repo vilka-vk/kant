@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 require __DIR__ . '/../admin/lib/bootstrap.php';
 require __DIR__ . '/../admin/lib/db.php';
-require __DIR__ . '/../admin/lib/i18n.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

@@ -140,14 +140,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'file_path' => $file,
         'external_url' => $url,
         'published_at' => (string) ($_POST['published_at'] ?? date('Y-m-d H:i:s')),
+        'display_order' => (int) ($_POST['display_order'] ?? 0),
     ];
     if ($id > 0) {
         $stmt = $pdo->prepare('UPDATE publications SET publication_type_id=:publication_type_id, cover_image_path=:cover_image_path,
-          file_path=:file_path, external_url=:external_url, published_at=:published_at WHERE id=:id');
+          file_path=:file_path, external_url=:external_url, published_at=:published_at, display_order=:display_order WHERE id=:id');
         $stmt->execute($payload + ['id' => $id]);
     } else {
-        $stmt = $pdo->prepare('INSERT INTO publications (publication_type_id, cover_image_path, file_path, external_url, published_at)
-          VALUES (:publication_type_id, :cover_image_path, :file_path, :external_url, :published_at)');
+        $stmt = $pdo->prepare('INSERT INTO publications (publication_type_id, cover_image_path, file_path, external_url, published_at, display_order)
+          VALUES (:publication_type_id, :cover_image_path, :file_path, :external_url, :published_at, :display_order)');
         $stmt->execute($payload);
         $id = (int) $pdo->lastInsertId();
     }
@@ -196,7 +197,7 @@ if (!empty($heroPublications['id'])) {
     }
 }
 $selectedTypeId = (int) ($_GET['type_id'] ?? 0);
-$rowsStmt = $pdo->prepare('SELECT p.id, p.published_at, p.file_path, p.external_url, pt.slug AS type_slug,
+$rowsStmt = $pdo->prepare('SELECT p.id, p.display_order, p.published_at, p.file_path, p.external_url, pt.slug AS type_slug,
     COALESCE(ptt.name, pt.slug) AS type_name,
     COALESCE(
       NULLIF(ptr_locale.title, \'\'),
@@ -301,11 +302,12 @@ admin_header(tr('Публикации', 'Publications'));
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <table style="table-layout: fixed; width: 100%;">
-    <thead><tr><th class="drag-col"></th><th style="width: 64px;">ID</th><th style="width: 180px;"><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th style="width: 180px;"><?= h(tr('Дата', 'Date')) ?></th><th style="width: 90px; text-align: center;"><?= h(tr('Цель', 'Target')) ?></th><th style="width: 150px;"><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th class="drag-col"></th><th style="width: 84px;"><?= h(tr('Порядок', 'Order')) ?></th><th style="width: 64px;">ID</th><th style="width: 180px;"><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th style="width: 180px;"><?= h(tr('Дата', 'Date')) ?></th><th style="width: 90px; text-align: center;"><?= h(tr('Цель', 'Target')) ?></th><th style="width: 150px;"><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody id="publications-sortable">
     <?php foreach ($rows as $r): ?>
       <tr data-id="<?= h((string) $r['id']) ?>">
         <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
+        <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h((string) $r['type_name']) ?></td>
         <td style="width: auto;"><?= h((string) $r['title']) ?></td>
@@ -356,6 +358,7 @@ admin_header(tr('Публикации', 'Publications'));
         </select>
       </div>
       <div><label><?= h(tr('Дата публикации', 'Published at')) ?></label><input name="published_at" value="<?= h((string) ($edit['published_at'] ?? date('Y-m-d 00:00:00'))) ?>"></div>
+      <div><label><?= h(tr('Порядок', 'Order')) ?></label><input type="number" name="display_order" min="1" value="<?= h((string) ($edit['display_order'] ?? (count($rows) + 1))) ?>"></div>
       <div><label><?= h(tr('Путь к обложке', 'Cover image path')) ?></label><input name="cover_image_path" value="<?= h((string) ($edit['cover_image_path'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Загрузить обложку', 'Upload cover image')) ?></label><input type="file" name="cover_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Путь к файлу', 'File path')) ?></label><input name="file_path" value="<?= h((string) ($edit['file_path'] ?? '')) ?>"></div>
@@ -449,14 +452,18 @@ admin_header(tr('Публикации', 'Publications'));
 </div>
 
 <script>
-window.initKantDrawerCloseGuard({
-  formSelector: '.kant-drawer form',
-  closeSelector: '[data-close-drawer-publications], [data-close-drawer-types]',
-  overlaySelector: '#publications-close-confirm',
-  saveSelector: '#publications-confirm-save',
-  discardSelector: '#publications-confirm-discard',
-  cancelSelector: '#publications-confirm-cancel',
-  fallbackHref: '/admin/publications.php'
+window.addEventListener('DOMContentLoaded', function () {
+  if (typeof window.initKantDrawerCloseGuard === 'function') {
+    window.initKantDrawerCloseGuard({
+      formSelector: '.kant-drawer form',
+      closeSelector: '[data-close-drawer-publications], [data-close-drawer-types]',
+      overlaySelector: '#publications-close-confirm',
+      saveSelector: '#publications-confirm-save',
+      discardSelector: '#publications-confirm-discard',
+      cancelSelector: '#publications-confirm-cancel',
+      fallbackHref: '/admin/publications.php'
+    });
+  }
 });
 
 (function () {

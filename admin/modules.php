@@ -628,7 +628,6 @@ admin_header(tr('Модули', 'Modules'));
     </table>
     <div class="actions">
       <button type="submit"><?= $editRow ? h(tr('Обновить модуль', 'Update module')) : h(tr('Создать модуль', 'Create module')) ?></button>
-      <a class="btn btn-secondary" href="/admin/modules.php"><?= h(tr('Новый', 'New')) ?></a>
     </div>
   </form>
 </div>
@@ -690,14 +689,18 @@ admin_header(tr('Модули', 'Modules'));
       <div><label><?= h(tr('Текущий файл презентации', 'Current presentation file')) ?></label><input value="<?= h((string) ($editRow['presentation_file_path'] ?? '')) ?>" readonly></div>
       <div><label><?= h(tr('Загрузить PDF презентации', 'Upload presentation PDF')) ?></label><input type="file" name="presentation_file_upload" accept=".pdf" required></div>
     </div>
-    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить файл презентации', 'Save presentation file')) ?></button></div>
+    <div class="actions" style="margin-top:10px;justify-content:space-between;width:100%">
+      <button type="submit"><?= h(tr('Сохранить файл презентации', 'Save presentation file')) ?></button>
+      <?php if (!empty($editRow['presentation_file_path'])): ?>
+      <button type="button" class="btn btn-secondary" onclick="if(confirm('<?= h(tr('Удалить файл презентации?', 'Delete presentation file?')) ?>')){var f=document.getElementById('delete-presentation-file-form');if(f)f.submit();}"><?= h(tr('Удалить файл презентации', 'Delete presentation file')) ?></button>
+      <?php endif; ?>
+    </div>
   </form>
   <?php if (!empty($editRow['presentation_file_path'])): ?>
-  <form method="post" style="margin-bottom:12px" onsubmit="return confirm('<?= h(tr('Удалить файл презентации?', 'Delete presentation file?')) ?>')">
+  <form method="post" style="display:none" id="delete-presentation-file-form">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="delete_presentation_file">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
-    <button type="submit" class="btn btn-secondary"><?= h(tr('Удалить файл презентации', 'Delete presentation file')) ?></button>
   </form>
   <?php endif; ?>
   <div class="kant-section-head">

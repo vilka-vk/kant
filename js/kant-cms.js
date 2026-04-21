@@ -300,6 +300,7 @@
     }
     setHref('.module-main .module-block:nth-of-type(2) .module-links a[download]', moduleItem.presentation_file_path || '#');
 
+    var transcriptLink = document.querySelector('[data-transcript-open]');
     var transcriptsList = document.querySelector('#transcript-modal .modal__downloads');
     if (transcriptsList) {
       transcriptsList.innerHTML = '';
@@ -310,6 +311,7 @@
         li.innerHTML = '<a href="' + (t.file_path || '#') + '" download>' + downloadTranscriptLabel + (languageCode ? ' (' + languageCode + ')' : '') + '</a>';
         transcriptsList.appendChild(li);
       });
+      if (transcriptLink) transcriptLink.style.display = transcripts.length ? '' : 'none';
     }
 
     var readingsGrid = document.querySelector('.module-publications');
@@ -329,10 +331,19 @@
       });
     }
 
-    if (moduleItem.literature_html) {
-      var literatureList = document.querySelector('#literature-modal .modal__references');
-      if (literatureList) {
-        literatureList.innerHTML = moduleItem.literature_html;
+    var literatureLink = document.querySelector('[data-literature-open]');
+    var literatureList = document.querySelector('#literature-modal .modal__references');
+    if (literatureList) {
+      var localized = moduleItem.literature_html || '';
+      if (!localized && moduleItem.translations && moduleItem.translations[locale]) {
+        localized = moduleItem.translations[locale].literature_html || '';
+      }
+      if (localized && String(localized).trim() !== '') {
+        literatureList.innerHTML = localized;
+        if (literatureLink) literatureLink.style.display = '';
+      } else {
+        literatureList.innerHTML = '';
+        if (literatureLink) literatureLink.style.display = 'none';
       }
     }
   }
@@ -373,7 +384,8 @@
       renderFooter(site);
 
       var path = window.location.pathname.toLowerCase();
-      if (path.endsWith('/index.html') || path === '/' || path.endsWith('/kant/')) {
+      var cleanPath = path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
+      if (cleanPath.endsWith('/index.html') || cleanPath === '/' || cleanPath.endsWith('/kant')) {
         var about = (await apiGet('about-project', locale)).data || {};
         var position = (await apiGet('our-position', locale)).data || {};
         var modules = (await apiGet('modules', locale)).data || [];
@@ -387,7 +399,7 @@
         return;
       }
 
-      if (path.endsWith('/modules.html') || path.endsWith('/modules')) {
+      if (cleanPath.endsWith('/modules.html') || cleanPath.endsWith('/modules')) {
         var heroModules = (await apiGet('hero-sections?page_key=modules', locale)).data || {};
         var aboutModules = (await apiGet('about-project', locale)).data || {};
         var listModules = (await apiGet('modules', locale)).data || [];
@@ -399,7 +411,7 @@
         return;
       }
 
-      if (path.endsWith('/publications.html') || path.endsWith('/publications')) {
+      if (cleanPath.endsWith('/publications.html') || cleanPath.endsWith('/publications')) {
         var heroPublications = (await apiGet('hero-sections?page_key=publications', locale)).data || {};
         var publicationTypes = (await apiGet('publication-types', locale)).data || [];
         var pubs = (await apiGet('publications', locale)).data || [];
@@ -411,7 +423,7 @@
         return;
       }
 
-      if (path.endsWith('/module.html') || path.endsWith('/module-1.html') || path.endsWith('/module')) {
+      if (cleanPath.endsWith('/module.html') || cleanPath.endsWith('/module-1.html') || cleanPath.endsWith('/module')) {
         var params = new URLSearchParams(window.location.search);
         var slug = params.get('slug');
         var moduleItem = null;

@@ -75,6 +75,26 @@
       publicationsAllTab: {
         RU: 'Все',
         EN: 'All'
+      },
+      publicationsArticlesTab: {
+        RU: 'Статьи',
+        EN: 'Articles'
+      },
+      publicationsBooksTab: {
+        RU: 'Книги',
+        EN: 'Books'
+      },
+      readMoreBtn: {
+        RU: 'Подробнее',
+        EN: 'Read more'
+      },
+      showFullProgramBtn: {
+        RU: 'Показать всю программу',
+        EN: 'Show full program'
+      },
+      moduleLearnAction: {
+        RU: 'Изучить модуль',
+        EN: 'Learn the module'
       }
     }
   };

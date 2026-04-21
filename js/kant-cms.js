@@ -127,6 +127,9 @@
     var list = document.querySelector('.modules__cards');
     if (!list) return;
     list.innerHTML = '';
+    var locale = currentLocale();
+    var learnLabel = (window.KANT_LOCALES && window.KANT_LOCALES.ui && window.KANT_LOCALES.ui.moduleLearnAction && window.KANT_LOCALES.ui.moduleLearnAction[locale.toUpperCase()]) ||
+      (locale === 'ru' ? 'Изучить модуль' : 'Learn the module');
     modules.slice(0, limit).forEach(function (m) {
       var href = 'module.html?slug=' + encodeURIComponent(m.slug);
       var item = document.createElement('a');
@@ -140,7 +143,7 @@
         '<div class="card-link__meta-action"><p class="card-link__meta text-paragraph">' +
         (m.formats || '') + '<br>' +
         (m.list_duration_display || '') + '<br><strong>' + (m.languages || '') + '</strong></p>' +
-        '<div class="card-link__action"><div class="card-link__action-label"><p>Learn<br>the module</p></div>' +
+        '<div class="card-link__action"><div class="card-link__action-label"><p>' + learnLabel + '</p></div>' +
         '<span class="icon icon--md"><img src="assets/icons/arrow-right.svg" alt=""></span></div>' +
         '</div></div></div>';
       list.appendChild(item);

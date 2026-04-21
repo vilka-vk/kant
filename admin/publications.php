@@ -282,16 +282,26 @@ admin_header(tr('Публикации', 'Publications'));
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
-  <table>
-    <thead><tr><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+  <table style="table-layout: fixed; width: 100%;">
+    <thead><tr><th style="width: 64px;">ID</th><th style="width: 180px;"><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th style="width: 180px;"><?= h(tr('Дата', 'Date')) ?></th><th style="width: 90px; text-align: center;"><?= h(tr('Цель', 'Target')) ?></th><th style="width: 150px;"><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $r): ?>
       <tr>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h((string) $r['type_name']) ?></td>
-        <td><?= h((string) $r['title']) ?></td>
+        <td style="width: auto;"><?= h((string) $r['title']) ?></td>
         <td><?= h((string) $r['published_at']) ?></td>
-        <td><?= h($r['file_path'] !== '' ? $r['file_path'] : (string) $r['external_url']) ?></td>
+        <td style="text-align: center;">
+          <?php
+            $targetUrl = (string) ($r['file_path'] !== '' ? $r['file_path'] : (string) $r['external_url']);
+            if ($targetUrl !== '' && !preg_match('/^([a-z]+:)?\/\//i', $targetUrl) && strpos($targetUrl, '/') !== 0) {
+                $targetUrl = '/' . $targetUrl;
+            }
+          ?>
+          <?php if ($targetUrl !== ''): ?>
+            <a class="btn btn-secondary" style="padding: 6px 10px;" href="<?= h($targetUrl) ?>" target="_blank" rel="noopener noreferrer" title="<?= h(tr('Открыть ссылку', 'Open link')) ?>">↗</a>
+          <?php endif; ?>
+        </td>
         <td><a class="btn btn-secondary" href="/admin/publications.php?tab=publications&form=1&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
       </tr>
     <?php endforeach; ?>

@@ -20,17 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Bad CSRF token');
     }
     $action = (string) ($_POST['action'] ?? 'save_publication');
-    if ($action === 'reorder_publications') {
-        $ids = $_POST['ids'] ?? [];
-        if (is_array($ids)) {
-            $order = 1;
-            $stmt = $pdo->prepare('UPDATE publications SET display_order = :display_order WHERE id = :id');
-            foreach ($ids as $id) {
-                $stmt->execute(['display_order' => $order++, 'id' => (int) $id]);
-            }
-        }
-        redirect('/admin/publications.php?tab=publications');
-    }
     if ($action === 'reorder_publication_types') {
         $ids = $_POST['ids'] ?? [];
         if (is_array($ids)) {
@@ -133,33 +122,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'file_path' => $file,
         'external_url' => $url,
         'published_at' => (string) ($_POST['published_at'] ?? date('Y-m-d H:i:s')),
-        'display_order' => (int) ($_POST['display_order'] ?? 0),
     ];
     if ($id > 0) {
         $stmt = $pdo->prepare('UPDATE publications SET publication_type_id=:publication_type_id, cover_image_path=:cover_image_path,
-          file_path=:file_path, external_url=:external_url, published_at=:published_at, display_order=:display_order WHERE id=:id');
+          file_path=:file_path, external_url=:external_url, published_at=:published_at WHERE id=:id');
         $stmt->execute($payload + ['id' => $id]);
     } else {
-        $stmt = $pdo->prepare('INSERT INTO publications (publication_type_id, cover_image_path, file_path, external_url, published_at, display_order)
-          VALUES (:publication_type_id, :cover_image_path, :file_path, :external_url, :published_at, :display_order)');
+        $stmt = $pdo->prepare('INSERT INTO publications (publication_type_id, cover_image_path, file_path, external_url, published_at)
+          VALUES (:publication_type_id, :cover_image_path, :file_path, :external_url, :published_at)');
         $stmt->execute($payload);
         $id = (int) $pdo->lastInsertId();
     }
     foreach ($locales as $locale) {
-        $stmt = $pdo->prepare('INSERT INTO publications_translations (publication_id, locale, title, description)
-          VALUES (:id, :locale, :title, :description)
-          ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)');
+        $stmt = $pdo->prepare('INSERT INTO publications_translations (publication_id, locale, title)
+          VALUES (:id, :locale, :title)
+          ON DUPLICATE KEY UPDATE title = VALUES(title)');
         $stmt->execute([
             'id' => $id,
             'locale' => $locale,
             'title' => trim((string) ($_POST['title_' . $locale] ?? '[empty]')),
-            'description' => trim((string) ($_POST['description_' . $locale] ?? '')),
         ]);
     }
     redirect('/admin/publications.php?tab=publications&edit=' . $id . '&saved=1');
 }
 
-$types = $pdo->query('SELECT id, slug FROM publication_types ORDER BY sort_order ASC, id ASC')->fetchAll();
+$typesStmt = $pdo->prepare('SELECT pt.id, pt.slug, COALESCE(ptt.name, pt.slug) AS localized_name
+  FROM publication_types pt
+  LEFT JOIN publication_types_translations ptt
+    ON ptt.publication_type_id = pt.id AND ptt.locale = :locale
+  ORDER BY pt.sort_order ASC, pt.id ASC');
+$typesStmt->execute(['locale' => admin_locale()]);
+$types = $typesStmt->fetchAll();
 $editId = (int) ($_GET['edit'] ?? 0);
 $edit = null;
 $trMap = [];
@@ -167,7 +160,7 @@ if ($editId > 0) {
     $stmt = $pdo->prepare('SELECT * FROM publications WHERE id = :id');
     $stmt->execute(['id' => $editId]);
     $edit = $stmt->fetch();
-    $trs = $pdo->prepare('SELECT locale, title, description FROM publications_translations WHERE publication_id = :id');
+    $trs = $pdo->prepare('SELECT locale, title FROM publications_translations WHERE publication_id = :id');
     $trs->execute(['id' => $editId]);
     foreach ($trs->fetchAll() as $tr) {
         $trMap[$tr['locale']] = $tr;
@@ -184,9 +177,22 @@ if (!empty($heroPublications['id'])) {
         $heroPublicationsTrRows[$row['locale']] = $row;
     }
 }
-$rows = $pdo->query('SELECT p.id, p.display_order, p.published_at, p.file_path, p.external_url, pt.slug as type_slug
-  FROM publications p LEFT JOIN publication_types pt ON pt.id = p.publication_type_id
-  ORDER BY p.display_order ASC, p.published_at DESC, p.id ASC')->fetchAll();
+$selectedTypeId = (int) ($_GET['type_id'] ?? 0);
+$rowsStmt = $pdo->prepare('SELECT p.id, p.published_at, p.file_path, p.external_url, pt.slug AS type_slug,
+    COALESCE(ptt.name, pt.slug) AS type_name, COALESCE(ptr.title, \'\') AS title
+  FROM publications p
+  LEFT JOIN publication_types pt ON pt.id = p.publication_type_id
+  LEFT JOIN publication_types_translations ptt ON ptt.publication_type_id = pt.id AND ptt.locale = :types_locale
+  LEFT JOIN publications_translations ptr ON ptr.publication_id = p.id AND ptr.locale = :titles_locale
+  WHERE (:type_id_filter = 0 OR p.publication_type_id = :type_id_value)
+  ORDER BY p.id DESC');
+$rowsStmt->execute([
+    'types_locale' => admin_locale(),
+    'titles_locale' => admin_locale(),
+    'type_id_filter' => $selectedTypeId,
+    'type_id_value' => $selectedTypeId,
+]);
+$rows = $rowsStmt->fetchAll();
 $typeEditId = (int) ($_GET['edit_type'] ?? 0);
 $typeEdit = null;
 $typeTrMap = [];
@@ -249,17 +255,29 @@ admin_header(tr('Публикации', 'Publications'));
     <h1><?= h(tr('Публикации', 'Publications')) ?></h1>
     <a class="btn" href="/admin/publications.php?tab=publications&form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
   </div>
+  <form method="get" class="grid" style="margin-bottom: 12px;">
+    <input type="hidden" name="tab" value="publications">
+    <div>
+      <label><?= h(tr('Фильтр по типу', 'Filter by type')) ?></label>
+      <select name="type_id" onchange="this.form.submit()">
+        <option value="0"><?= h(tr('Все типы', 'All types')) ?></option>
+        <?php foreach ($types as $t): ?>
+          <option value="<?= h((string) $t['id']) ?>" <?= $selectedTypeId === (int) $t['id'] ? 'selected' : '' ?>><?= h((string) $t['localized_name']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+  </form>
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <table>
-    <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
-    <tbody id="publications-sortable">
+    <thead><tr><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <tbody>
     <?php foreach ($rows as $r): ?>
-      <tr draggable="true" data-id="<?= h((string) $r['id']) ?>">
-        <td><?= h((string) $r['display_order']) ?></td>
+      <tr>
         <td><?= h((string) $r['id']) ?></td>
-        <td><?= h((string) $r['type_slug']) ?></td>
+        <td><?= h((string) $r['type_name']) ?></td>
+        <td><?= h((string) $r['title']) ?></td>
         <td><?= h((string) $r['published_at']) ?></td>
         <td><?= h($r['file_path'] !== '' ? $r['file_path'] : (string) $r['external_url']) ?></td>
         <td><a class="btn btn-secondary" href="/admin/publications.php?tab=publications&form=1&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
@@ -267,11 +285,6 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     </tbody>
   </table>
-  <form method="post" id="publications-reorder-form" style="display:none">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <input type="hidden" name="action" value="reorder_publications">
-    <div id="publications-reorder-ids"></div>
-  </form>
 </div>
 
 <?php if ($isPublicationFormOpen): ?>
@@ -297,7 +310,6 @@ admin_header(tr('Публикации', 'Publications'));
         </select>
       </div>
       <div><label><?= h(tr('Дата публикации', 'Published at')) ?></label><input name="published_at" value="<?= h((string) ($edit['published_at'] ?? date('Y-m-d 00:00:00'))) ?>"></div>
-      <div><label><?= h(tr('Порядок отображения', 'Display order')) ?></label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? 0)) ?>"></div>
       <div><label><?= h(tr('Путь к обложке', 'Cover image path')) ?></label><input name="cover_image_path" value="<?= h((string) ($edit['cover_image_path'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Загрузить обложку', 'Upload cover image')) ?></label><input type="file" name="cover_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Путь к файлу', 'File path')) ?></label><input name="file_path" value="<?= h((string) ($edit['file_path'] ?? '')) ?>"></div>
@@ -307,7 +319,6 @@ admin_header(tr('Публикации', 'Publications'));
     <hr style="margin:16px 0">
     <?php foreach ($locales as $locale): ?>
       <div style="margin-bottom:12px"><label>Title (<?= h(strtoupper($locale)) ?>)</label><input name="title_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['title'] ?? '')) ?>"></div>
-      <div style="margin-bottom:12px"><label>Description (<?= h(strtoupper($locale)) ?>)</label><textarea rows="3" name="description_<?= h($locale) ?>"><?= h((string) ($trMap[$locale]['description'] ?? '')) ?></textarea></div>
     <?php endforeach; ?>
     <div class="actions">
       <button type="submit"><?= $edit ? h(tr('Обновить публикацию', 'Update publication')) : h(tr('Создать публикацию', 'Create publication')) ?></button>
@@ -427,7 +438,6 @@ window.initKantDrawerCloseGuard({
       });
     });
   }
-  initSortable('publications-sortable', 'publications-reorder-form', 'publications-reorder-ids');
   initSortable('publication-types-sortable', 'publication-types-reorder-form', 'publication-types-reorder-ids');
 })();
 </script>

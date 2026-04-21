@@ -13,15 +13,20 @@ body {
 
 .kant-sidebar {
   width: var(--kant-sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
   border-right: 1px solid #e4e7f1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .kant-sidebar .navbar {
   flex: 1;
   align-items: flex-start;
   justify-content: flex-start;
+  overflow-y: auto;
 }
 
 .kant-sidebar .navbar .navbar-collapse {

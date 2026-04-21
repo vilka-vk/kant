@@ -350,28 +350,14 @@ admin_header(tr('Публикации', 'Publications'));
 </div>
 
 <script>
-(function () {
-  var form = document.querySelector('.kant-drawer form');
-  var closeBtn = document.querySelector('[data-close-drawer-publications], [data-close-drawer-types]');
-  var overlay = document.getElementById('publications-close-confirm');
-  var dirty = false;
-  var pendingCloseHref = '';
-  if (!form || !closeBtn || !overlay) return;
-  form.addEventListener('input', function () { dirty = true; });
-  form.addEventListener('change', function () { dirty = true; });
-  form.addEventListener('submit', function () { dirty = false; });
-  closeBtn.addEventListener('click', function (e) {
-    if (!dirty) return;
-    e.preventDefault();
-    pendingCloseHref = closeBtn.getAttribute('href') || '/admin/publications.php';
-    overlay.classList.add('is-open');
-  });
-  document.getElementById('publications-confirm-save').addEventListener('click', function () { form.requestSubmit(); });
-  document.getElementById('publications-confirm-discard').addEventListener('click', function () { window.location.href = pendingCloseHref || '/admin/publications.php'; });
-  document.getElementById('publications-confirm-cancel').addEventListener('click', function () {
-    overlay.classList.remove('is-open');
-    pendingCloseHref = '';
-  });
-})();
+window.initKantDrawerCloseGuard({
+  formSelector: '.kant-drawer form',
+  closeSelector: '[data-close-drawer-publications], [data-close-drawer-types]',
+  overlaySelector: '#publications-close-confirm',
+  saveSelector: '#publications-confirm-save',
+  discardSelector: '#publications-confirm-discard',
+  cancelSelector: '#publications-confirm-cancel',
+  fallbackHref: '/admin/publications.php'
+});
 </script>
 <?php admin_footer();

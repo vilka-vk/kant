@@ -85,6 +85,36 @@ function admin_footer(): void
         echo '</div></main></div>';
         echo '<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.5/tinymce.min.js" referrerpolicy="origin"></script>';
         echo '<script>if(window.tinymce){tinymce.init({selector:"textarea.wysiwyg",menubar:false,height:220,plugins:"link lists code",toolbar:"undo redo | bold italic underline | bullist numlist | link | code"});}else{console.warn("TinyMCE is not loaded");}</script>';
+        echo '<script>
+window.initKantDrawerCloseGuard = function (opts) {
+  if (!opts) return;
+  var form = document.querySelector(opts.formSelector || "");
+  var closeBtn = document.querySelector(opts.closeSelector || "");
+  var overlay = document.querySelector(opts.overlaySelector || "");
+  if (!form || !closeBtn || !overlay) return;
+  var saveBtn = document.querySelector(opts.saveSelector || "");
+  var discardBtn = document.querySelector(opts.discardSelector || "");
+  var cancelBtn = document.querySelector(opts.cancelSelector || "");
+  if (!saveBtn || !discardBtn || !cancelBtn) return;
+  var dirty = false;
+  var pendingCloseHref = "";
+  form.addEventListener("input", function () { dirty = true; });
+  form.addEventListener("change", function () { dirty = true; });
+  form.addEventListener("submit", function () { dirty = false; });
+  closeBtn.addEventListener("click", function (e) {
+    if (!dirty) return;
+    e.preventDefault();
+    pendingCloseHref = closeBtn.getAttribute("href") || opts.fallbackHref || "/";
+    overlay.classList.add("is-open");
+  });
+  saveBtn.addEventListener("click", function () { form.requestSubmit(); });
+  discardBtn.addEventListener("click", function () { window.location.href = pendingCloseHref || opts.fallbackHref || "/"; });
+  cancelBtn.addEventListener("click", function () {
+    overlay.classList.remove("is-open");
+    pendingCloseHref = "";
+  });
+};
+</script>';
         echo '</body></html>';
         return;
     }

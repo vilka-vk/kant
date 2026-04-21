@@ -301,6 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     foreach ($locales as $locale) {
+        $shortDescription = trim((string) ($_POST['short_description_' . $locale] ?? ''));
         $pdo->prepare('INSERT INTO modules_translations (module_id, locale, title, short_description, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html)
           VALUES (:module_id,:locale,:title,:short_description,:hero_kicker,:hero_subtitle,:lecture_title,:presentation_title,:literature_html)
           ON DUPLICATE KEY UPDATE title = VALUES(title), short_description = VALUES(short_description), hero_kicker = VALUES(hero_kicker),
@@ -309,9 +310,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'module_id' => $id,
                 'locale' => $locale,
                 'title' => trim((string) ($_POST['title_' . $locale] ?? '[empty]')),
-                'short_description' => trim((string) ($_POST['short_description_' . $locale] ?? '')),
+                'short_description' => $shortDescription,
                 'hero_kicker' => '',
-                'hero_subtitle' => trim((string) ($_POST['hero_subtitle_' . $locale] ?? '')),
+                'hero_subtitle' => $shortDescription,
                 'lecture_title' => trim((string) ($_POST['lecture_title_' . $locale] ?? '')),
                 'presentation_title' => trim((string) ($_POST['presentation_title_' . $locale] ?? '')),
                 'literature_html' => (string) ($_POST['literature_html_' . $locale] ?? ''),
@@ -474,7 +475,6 @@ admin_header(tr('Модули', 'Modules'));
         $translationFields = [
           'title' => 'Title',
           'short_description' => 'Short Description',
-          'hero_subtitle' => 'Hero subtitle',
           'lecture_title' => 'Lecture title',
           'presentation_title' => 'Presentation title',
           'literature_html' => 'Literature text (WYSIWYG)',
@@ -686,34 +686,15 @@ admin_header(tr('Модули', 'Modules'));
 </div>
 
 <script>
-var moduleForm = document.querySelector('.kant-drawer form[method="post"][enctype="multipart/form-data"]');
-var closeDrawerBtn = document.querySelector('[data-close-drawer]');
-var confirmOverlay = document.getElementById('modules-close-confirm');
-var dirty = false;
-var pendingCloseHref = '';
-if (moduleForm) {
-  moduleForm.addEventListener('input', function () { dirty = true; });
-  moduleForm.addEventListener('change', function () { dirty = true; });
-  moduleForm.addEventListener('submit', function () { dirty = false; });
-}
-if (closeDrawerBtn && moduleForm && confirmOverlay) {
-  closeDrawerBtn.addEventListener('click', function (e) {
-    if (!dirty) return;
-    e.preventDefault();
-    pendingCloseHref = closeDrawerBtn.getAttribute('href') || '/admin/modules.php';
-    confirmOverlay.classList.add('is-open');
-  });
-  document.getElementById('modules-confirm-save').addEventListener('click', function () {
-    moduleForm.requestSubmit();
-  });
-  document.getElementById('modules-confirm-discard').addEventListener('click', function () {
-    window.location.href = pendingCloseHref || '/admin/modules.php';
-  });
-  document.getElementById('modules-confirm-cancel').addEventListener('click', function () {
-    confirmOverlay.classList.remove('is-open');
-    pendingCloseHref = '';
-  });
-}
+window.initKantDrawerCloseGuard({
+  formSelector: '.kant-drawer form[method="post"][enctype="multipart/form-data"]',
+  closeSelector: '[data-close-drawer]',
+  overlaySelector: '#modules-close-confirm',
+  saveSelector: '#modules-confirm-save',
+  discardSelector: '#modules-confirm-discard',
+  cancelSelector: '#modules-confirm-cancel',
+  fallbackHref: '/admin/modules.php'
+});
 
 function applyLanguageFilter(inputId, tableId) {
   var input = document.getElementById(inputId);

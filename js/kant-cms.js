@@ -53,6 +53,12 @@
     }
   }
 
+  function stripHtml(value) {
+    var wrapper = document.createElement('div');
+    wrapper.innerHTML = String(value || '');
+    return (wrapper.textContent || wrapper.innerText || '').trim();
+  }
+
   function escapeAttr(value) {
     return String(value || '')
       .replace(/&/g, '&amp;')
@@ -86,7 +92,7 @@
   }
 
   function renderAbout(about) {
-    setText('.about__sticker-text', about.sticker_text || '');
+    setText('.about__sticker-text', stripHtml(about.sticker_text || ''));
     setHtml('#about-modal .modal__content', about.modal_body || '');
     var tabsWrap = document.querySelector('#about .about__left .tabs');
     var playerWrap = document.querySelector('#about .about__left .about__player');

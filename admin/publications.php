@@ -20,6 +20,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Bad CSRF token');
     }
     $action = (string) ($_POST['action'] ?? 'save_publication');
+    if ($action === 'reorder_publications') {
+        $ids = $_POST['ids'] ?? [];
+        if (is_array($ids)) {
+            $order = 1;
+            $stmt = $pdo->prepare('UPDATE publications SET display_order = :display_order WHERE id = :id');
+            foreach ($ids as $id) {
+                $stmt->execute(['display_order' => $order++, 'id' => (int) $id]);
+            }
+        }
+        redirect('/admin/publications.php?tab=publications');
+    }
+    if ($action === 'reorder_publication_types') {
+        $ids = $_POST['ids'] ?? [];
+        if (is_array($ids)) {
+            $order = 1;
+            $stmt = $pdo->prepare('UPDATE publication_types SET sort_order = :sort_order WHERE id = :id');
+            foreach ($ids as $id) {
+                $stmt->execute(['sort_order' => $order++, 'id' => (int) $id]);
+            }
+        }
+        redirect('/admin/publications.php?tab=types');
+    }
     if ($action === 'save_publication_type') {
         $typeId = (int) ($_POST['type_id'] ?? 0);
         $slug = trim((string) ($_POST['type_slug'] ?? ''));
@@ -224,9 +246,9 @@ admin_header(tr('Публикации', 'Publications'));
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <table>
     <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Дата', 'Date')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
-    <tbody>
+    <tbody id="publications-sortable">
     <?php foreach ($rows as $r): ?>
-      <tr>
+      <tr draggable="true" data-id="<?= h((string) $r['id']) ?>">
         <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h((string) $r['type_slug']) ?></td>
@@ -237,6 +259,11 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     </tbody>
   </table>
+  <form method="post" id="publications-reorder-form" style="display:none">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="reorder_publications">
+    <div id="publications-reorder-ids"></div>
+  </form>
 </div>
 
 <?php if ($isPublicationFormOpen): ?>
@@ -291,9 +318,9 @@ admin_header(tr('Публикации', 'Publications'));
   <?php if (!empty($_GET['saved_type'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <table>
     <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th>Slug</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
-    <tbody>
+    <tbody id="publication-types-sortable">
     <?php foreach ($typeRows as $row): ?>
-      <tr>
+      <tr draggable="true" data-id="<?= h((string) $row['id']) ?>">
         <td><?= h((string) $row['sort_order']) ?></td>
         <td><?= h((string) $row['id']) ?></td>
         <td><?= h($row['slug']) ?></td>
@@ -302,6 +329,11 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     </tbody>
   </table>
+  <form method="post" id="publication-types-reorder-form" style="display:none">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="reorder_publication_types">
+    <div id="publication-types-reorder-ids"></div>
+  </form>
 </div>
 
 <?php if ($isTypeFormOpen): ?>
@@ -359,5 +391,35 @@ window.initKantDrawerCloseGuard({
   cancelSelector: '#publications-confirm-cancel',
   fallbackHref: '/admin/publications.php'
 });
+
+(function () {
+  function initSortable(tbodyId, formId, idsWrapId) {
+    var tbody = document.getElementById(tbodyId);
+    var form = document.getElementById(formId);
+    var idsWrap = document.getElementById(idsWrapId);
+    if (!tbody || !form || !idsWrap) return;
+    var dragged = null;
+    tbody.querySelectorAll('tr[draggable="true"]').forEach(function (row) {
+      row.addEventListener('dragstart', function () { dragged = row; });
+      row.addEventListener('dragover', function (e) { e.preventDefault(); });
+      row.addEventListener('drop', function (e) {
+        e.preventDefault();
+        if (!dragged || dragged === row) return;
+        tbody.insertBefore(dragged, row);
+        idsWrap.innerHTML = '';
+        tbody.querySelectorAll('tr[data-id]').forEach(function (tr) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'ids[]';
+          input.value = tr.getAttribute('data-id') || '';
+          idsWrap.appendChild(input);
+        });
+        form.submit();
+      });
+    });
+  }
+  initSortable('publications-sortable', 'publications-reorder-form', 'publications-reorder-ids');
+  initSortable('publication-types-sortable', 'publication-types-reorder-form', 'publication-types-reorder-ids');
+})();
 </script>
 <?php admin_footer();

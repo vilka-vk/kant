@@ -66,6 +66,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         redirect('/admin/about-project.php');
     }
+    if ($action === 'reorder_about_videos') {
+        $ids = $_POST['ids'] ?? [];
+        if (is_array($ids)) {
+            $order = 1;
+            $stmt = $pdo->prepare('UPDATE about_project_videos SET sort_order = :sort_order WHERE id = :id');
+            foreach ($ids as $id) {
+                $stmt->execute(['sort_order' => $order++, 'id' => (int) $id]);
+            }
+        }
+        redirect('/admin/about-project.php');
+    }
     foreach ($locales as $locale) {
         $fixedSectionTitle = (string) ($defaultTranslations[$locale]['section_title'] ?? 'About Project');
         $stmt = $pdo->prepare('INSERT INTO about_project_translations
@@ -169,9 +180,9 @@ admin_header(tr('О проекте', 'About Project'));
   </form>
   <table>
     <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Lang')) ?></th><th>URL</th><th>Alt</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
-    <tbody>
+    <tbody id="about-videos-sortable">
       <?php foreach ($aboutVideos as $video): ?>
-      <tr>
+      <tr draggable="true" data-id="<?= h((string) $video['id']) ?>">
         <td><?= h((string) $video['sort_order']) ?></td>
         <td><?= h((string) $video['language_code']) ?></td>
         <td><?= h((string) $video['video_url']) ?></td>
@@ -188,5 +199,37 @@ admin_header(tr('О проекте', 'About Project'));
       <?php endforeach; ?>
     </tbody>
   </table>
+  <form method="post" id="about-videos-reorder-form" style="display:none">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="reorder_about_videos">
+    <div id="about-videos-reorder-ids"></div>
+  </form>
 </div>
+<script>
+(function () {
+  var tbody = document.getElementById('about-videos-sortable');
+  var form = document.getElementById('about-videos-reorder-form');
+  var idsWrap = document.getElementById('about-videos-reorder-ids');
+  if (!tbody || !form || !idsWrap) return;
+  var dragged = null;
+  tbody.querySelectorAll('tr[draggable="true"]').forEach(function (row) {
+    row.addEventListener('dragstart', function () { dragged = row; });
+    row.addEventListener('dragover', function (e) { e.preventDefault(); });
+    row.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (!dragged || dragged === row) return;
+      tbody.insertBefore(dragged, row);
+      idsWrap.innerHTML = '';
+      tbody.querySelectorAll('tr[data-id]').forEach(function (tr) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = tr.getAttribute('data-id') || '';
+        idsWrap.appendChild(input);
+      });
+      form.submit();
+    });
+  });
+})();
+</script>
 <?php admin_footer();

@@ -15,6 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         http_response_code(400);
         exit('Bad CSRF token');
     }
+    $action = (string) ($_POST['action'] ?? 'save_author');
+    if ($action === 'reorder_authors') {
+        $ids = $_POST['ids'] ?? [];
+        if (is_array($ids)) {
+            $order = 1;
+            $stmt = $pdo->prepare('UPDATE authors SET display_order = :display_order WHERE id = :id');
+            foreach ($ids as $authorId) {
+                $stmt->execute(['display_order' => $order++, 'id' => (int) $authorId]);
+            }
+        }
+        redirect('/admin/authors.php');
+    }
     $id = (int) ($_POST['id'] ?? 0);
     $photoPath = trim((string) ($_POST['photo_path'] ?? ''));
     try {
@@ -100,9 +112,9 @@ admin_header(tr('Авторы', 'Authors'));
 <div class="card">
   <table>
     <thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
-    <tbody>
+    <tbody id="authors-sortable">
     <?php foreach ($rows as $r): ?>
-      <tr>
+      <tr draggable="true" data-id="<?= h((string) $r['id']) ?>">
         <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['id']) ?></td>
         <td><?= h($r['photo_path']) ?></td>
@@ -111,5 +123,37 @@ admin_header(tr('Авторы', 'Authors'));
     <?php endforeach; ?>
     </tbody>
   </table>
+  <form method="post" id="authors-reorder-form" style="display:none">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="reorder_authors">
+    <div id="authors-reorder-ids"></div>
+  </form>
 </div>
+<script>
+(function () {
+  var tbody = document.getElementById('authors-sortable');
+  var form = document.getElementById('authors-reorder-form');
+  var idsWrap = document.getElementById('authors-reorder-ids');
+  if (!tbody || !form || !idsWrap) return;
+  var dragged = null;
+  tbody.querySelectorAll('tr[draggable="true"]').forEach(function (row) {
+    row.addEventListener('dragstart', function () { dragged = row; });
+    row.addEventListener('dragover', function (e) { e.preventDefault(); });
+    row.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (!dragged || dragged === row) return;
+      tbody.insertBefore(dragged, row);
+      idsWrap.innerHTML = '';
+      tbody.querySelectorAll('tr[data-id]').forEach(function (tr) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = tr.getAttribute('data-id') || '';
+        idsWrap.appendChild(input);
+      });
+      form.submit();
+    });
+  });
+})();
+</script>
 <?php admin_footer();

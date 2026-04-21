@@ -221,9 +221,10 @@
     });
   }
 
-  function renderModuleDetail(moduleItem, transcripts, readings) {
+  function renderModuleDetail(moduleItem, transcripts, readings, locale) {
     if (!moduleItem) return;
-    setText('.module-hero__kicker', 'Module ' + (moduleItem.module_number || ''));
+    var moduleWord = locale === 'ru' ? 'Модуль' : 'Module';
+    setText('.module-hero__kicker', moduleWord + ' ' + (moduleItem.module_number || ''));
     setText('.module-hero__headline', moduleItem.title || '');
     setText('.module-hero__subtitle', moduleItem.short_description || '');
     setImg('.module-hero .hero__bg', moduleItem.hero_background_image_path || '');
@@ -386,7 +387,7 @@
         return;
       }
 
-      if (path.endsWith('/modules.html')) {
+      if (path.endsWith('/modules.html') || path.endsWith('/modules')) {
         var heroModules = (await apiGet('hero-sections?page_key=modules', locale)).data || {};
         var aboutModules = (await apiGet('about-project', locale)).data || {};
         var listModules = (await apiGet('modules', locale)).data || [];
@@ -398,7 +399,7 @@
         return;
       }
 
-      if (path.endsWith('/publications.html')) {
+      if (path.endsWith('/publications.html') || path.endsWith('/publications')) {
         var heroPublications = (await apiGet('hero-sections?page_key=publications', locale)).data || {};
         var publicationTypes = (await apiGet('publication-types', locale)).data || [];
         var pubs = (await apiGet('publications', locale)).data || [];
@@ -410,7 +411,7 @@
         return;
       }
 
-      if (path.endsWith('/module.html') || path.endsWith('/module-1.html')) {
+      if (path.endsWith('/module.html') || path.endsWith('/module-1.html') || path.endsWith('/module')) {
         var params = new URLSearchParams(window.location.search);
         var slug = params.get('slug');
         var moduleItem = null;
@@ -421,9 +422,14 @@
           moduleItem = moduleList[0] || null;
         }
         if (moduleItem && moduleItem.id) {
-          var transcripts = (await apiGet('modules/' + moduleItem.id + '/transcripts', locale)).data || [];
+          var transcripts = [];
+          try {
+            transcripts = (await apiGet('modules/' + moduleItem.id + '/transcripts', locale)).data || [];
+          } catch (e) {
+            transcripts = Array.isArray(moduleItem.transcripts) ? moduleItem.transcripts : [];
+          }
           var readings = (await apiGet('modules/' + moduleItem.id + '/readings', locale)).data || [];
-          renderModuleDetail(moduleItem, transcripts, readings);
+          renderModuleDetail(moduleItem, transcripts, readings, locale);
         }
       }
     } catch (err) {

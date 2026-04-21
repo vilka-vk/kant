@@ -94,6 +94,14 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
     $payload['translations'] = $translations;
     $payload['lecture_videos'] = $lectureVideos;
     $payload['presentation_videos'] = $presentationVideos;
+    $transcriptsStmt = $pdo->prepare('SELECT * FROM module_transcripts WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
+    $transcriptsStmt->execute(['module_id' => (int) $row['id']]);
+    $transcriptRows = $transcriptsStmt->fetchAll();
+    $payload['transcripts'] = [];
+    foreach ($transcriptRows as $transcriptRow) {
+        $transcriptTr = translated_row($pdo, 'module_transcripts_translations', 'module_transcript_id', (int) $transcriptRow['id'], $locale, $defaultLocale) ?: [];
+        $payload['transcripts'][] = array_merge($transcriptRow, $transcriptTr);
+    }
     out($payload, $locale);
 }
 

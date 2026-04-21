@@ -16,15 +16,11 @@ $defaultTranslations = [
     'en' => [
         'section_title' => 'About Project',
         'sticker_text' => "People have always dreamed of peace but constantly waged war. Will it ever be possible to achieve a lasting peace? The German philosopher Immanuel Kant proposed an answer to this question in his treatise Perpetual Peace. The 300th anniversary of Kant's birth is an opportunity to consider how relevant the ideas of this thinker from Konigsberg still are today.",
-        'video_title_primary' => 'Perpetual Peace intro',
-        'video_title_secondary' => 'Perpetual Peace details',
         'modal_body' => 'People have always dreamed of peace but constantly waged war. Will it ever be possible to achieve a lasting peace? The German philosopher Immanuel Kant proposed an answer to this question in his treatise Perpetual Peace.',
     ],
     'ru' => [
         'section_title' => 'О проекте',
         'sticker_text' => 'Люди всегда мечтали о мире, но постоянно вели войны. Возможно ли достичь устойчивого мира? Немецкий философ Иммануил Кант предложил ответ в трактате «К вечному миру». 300-летие со дня рождения Канта — повод заново посмотреть на актуальность его идей сегодня.',
-        'video_title_primary' => 'Вступительное видео',
-        'video_title_secondary' => 'О проекте подробнее',
         'modal_body' => 'Люди всегда мечтали о мире, но постоянно вели войны. Возможно ли достичь устойчивого мира? Немецкий философ Иммануил Кант предложил ответ в трактате «К вечному миру».',
     ],
 ];
@@ -92,8 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'locale' => $locale,
             'section_title' => $fixedSectionTitle,
             'sticker_text' => trim((string) ($_POST['sticker_text_' . $locale] ?? '')),
-            'video_title_primary' => trim((string) ($_POST['video_title_primary_' . $locale] ?? '')),
-            'video_title_secondary' => trim((string) ($_POST['video_title_secondary_' . $locale] ?? '')),
+            'video_title_primary' => '',
+            'video_title_secondary' => '',
             'modal_body' => trim((string) ($_POST['modal_body_' . $locale] ?? '')),
         ]);
     }
@@ -136,8 +132,6 @@ admin_header(tr('О проекте', 'About Project'));
         <?php
           $aboutFields = [
             'sticker_text' => 'Sticker text / Текст стикера',
-            'video_title_primary' => 'Video title primary',
-            'video_title_secondary' => 'Video title secondary',
             'modal_body' => 'Modal body / Текст модального окна',
           ];
           foreach ($aboutFields as $key => $label):
@@ -170,18 +164,10 @@ admin_header(tr('О проекте', 'About Project'));
 </div>
 <div class="card">
   <h2><?= h(tr('Видео блока "О проекте" по языкам (динамические вкладки)', 'About project videos by language (dynamic tabs)')) ?></h2>
-  <form method="post" style="margin-bottom:14px" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <input type="hidden" name="action" value="add_about_video">
-    <div class="grid">
-      <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm / kz / de / ge / az" required></div>
-      <div><label><?= h(tr('Video URL (embed или путь к файлу)', 'Video URL (embed or file path)')) ?></label><input name="video_url"></div>
-      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
-      <div><label><?= h(tr('Alt видео (необязательно)', 'Video Alt (optional)')) ?></label><input name="video_alt"></div>
-      <div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="video_sort_order" value="0"></div>
-    </div>
-    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Добавить видео', 'Add about video')) ?></button></div>
-  </form>
+  <div class="kant-section-head">
+    <h3><?= h(tr('Список видео', 'Videos list')) ?></h3>
+    <button type="button" class="btn" data-toggle-form="about-video-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
+  </div>
   <table>
     <thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Lang')) ?></th><th>URL</th><th>Alt</th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody id="about-videos-sortable">
@@ -209,8 +195,37 @@ admin_header(tr('О проекте', 'About Project'));
     <input type="hidden" name="action" value="reorder_about_videos">
     <div id="about-videos-reorder-ids"></div>
   </form>
+  <form method="post" class="compact-inputs" id="about-video-add-form" enctype="multipart/form-data" hidden style="margin-top:12px">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="add_about_video">
+    <div class="grid">
+      <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm / kz / de / ge / az" required></div>
+      <div><label><?= h(tr('Video URL (embed или путь к файлу)', 'Video URL (embed or file path)')) ?></label><input name="video_url"></div>
+      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Alt видео (необязательно)', 'Video Alt (optional)')) ?></label><input name="video_alt"></div>
+      <div><label><?= h(tr('Порядок', 'Order')) ?></label><input type="number" name="video_sort_order" min="1" value="<?= h((string) (count($aboutVideos) + 1)) ?>"></div>
+    </div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
+  </form>
 </div>
 <script>
+(function () {
+  document.querySelectorAll('[data-toggle-form]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var formId = btn.getAttribute('data-toggle-form');
+      var form = formId ? document.getElementById(formId) : null;
+      if (!form) return;
+      var isOpen = !form.hasAttribute('hidden');
+      if (isOpen) {
+        form.setAttribute('hidden', 'hidden');
+      } else {
+        form.removeAttribute('hidden');
+      }
+      btn.textContent = isOpen ? <?= json_encode(h(tr('Добавить +', 'Add +'))) ?> : <?= json_encode(h(tr('Скрыть форму', 'Hide form'))) ?>;
+    });
+  });
+})();
+
 (function () {
   var tbody = document.getElementById('about-videos-sortable');
   var form = document.getElementById('about-videos-reorder-form');

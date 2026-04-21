@@ -179,11 +179,23 @@ if (!empty($heroPublications['id'])) {
 }
 $selectedTypeId = (int) ($_GET['type_id'] ?? 0);
 $rowsStmt = $pdo->prepare('SELECT p.id, p.published_at, p.file_path, p.external_url, pt.slug AS type_slug,
-    COALESCE(ptt.name, pt.slug) AS type_name, COALESCE(ptr.title, \'\') AS title
+    COALESCE(ptt.name, pt.slug) AS type_name,
+    COALESCE(
+      NULLIF(ptr_locale.title, \'\'),
+      (
+        SELECT ptr_any.title
+        FROM publications_translations ptr_any
+        WHERE ptr_any.publication_id = p.id
+          AND TRIM(COALESCE(ptr_any.title, \'\')) <> \'\'
+        ORDER BY ptr_any.locale ASC
+        LIMIT 1
+      ),
+      \'\'
+    ) AS title
   FROM publications p
   LEFT JOIN publication_types pt ON pt.id = p.publication_type_id
   LEFT JOIN publication_types_translations ptt ON ptt.publication_type_id = pt.id AND ptt.locale = :types_locale
-  LEFT JOIN publications_translations ptr ON ptr.publication_id = p.id AND ptr.locale = :titles_locale
+  LEFT JOIN publications_translations ptr_locale ON ptr_locale.publication_id = p.id AND ptr_locale.locale = :titles_locale
   WHERE (:type_id_filter = 0 OR p.publication_type_id = :type_id_value)
   ORDER BY p.id DESC');
 $rowsStmt->execute([

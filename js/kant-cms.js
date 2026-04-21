@@ -136,8 +136,8 @@
     });
   }
 
-  function renderPublications(items) {
-    var list = document.querySelector('.publications.publications--grid');
+  function renderPublications(items, selector) {
+    var list = document.querySelector(selector || '.publications.publications--grid');
     if (!list) return;
     list.innerHTML = '';
     items.forEach(function (p) {
@@ -152,6 +152,15 @@
         '<p class="publication-item__title text-paragraph-caps">' + (p.title || '') + '</p>';
       list.appendChild(card);
     });
+  }
+
+  function pickLatestPublications(items, limit) {
+    return (items || []).slice().sort(function (a, b) {
+      var aTime = Date.parse(a && a.published_at ? a.published_at : '') || 0;
+      var bTime = Date.parse(b && b.published_at ? b.published_at : '') || 0;
+      if (bTime !== aTime) return bTime - aTime;
+      return (Number(b && b.id) || 0) - (Number(a && a.id) || 0);
+    }).slice(0, limit);
   }
 
   function renderPublicationTabs(types, locale) {
@@ -370,7 +379,7 @@
         renderAbout(about);
         renderOurPosition(position);
         renderModulesList(modules, 5);
-        renderPublications(publications.slice(0, 3));
+        renderPublications(pickLatestPublications(publications, 3), '#publications .publications');
         renderAuthors(authors);
         return;
       }
@@ -395,7 +404,7 @@
         setText('.hero__subtitle', heroPublications.subtitle || '');
         setImg('.hero .hero__bg', heroPublications.background_image_path || '');
         renderPublicationTabs(publicationTypes, locale);
-        renderPublications(pubs);
+        renderPublications(pubs, '.publications.publications--grid');
         return;
       }
 

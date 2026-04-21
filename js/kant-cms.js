@@ -406,26 +406,29 @@
       var path = window.location.pathname.toLowerCase();
       var cleanPath = path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
       if (cleanPath.endsWith('/index.html') || cleanPath === '/' || cleanPath.endsWith('/kant')) {
-        var homeData = await Promise.all([
-          apiGet('site-settings', locale),
-          apiGet('about-project', locale),
-          apiGet('our-position', locale),
-          apiGet('modules', locale),
-          apiGet('publications', locale),
-          apiGet('authors', locale)
-        ]);
-        var site = (homeData[0] && homeData[0].data) || {};
-        var about = (homeData[1] && homeData[1].data) || {};
-        var position = (homeData[2] && homeData[2].data) || {};
-        var modules = (homeData[3] && homeData[3].data) || [];
-        var publications = (homeData[4] && homeData[4].data) || [];
-        var authors = (homeData[5] && homeData[5].data) || [];
-        renderFooter(site);
-        renderAbout(about);
-        renderOurPosition(position);
-        renderModulesList(modules, 5);
-        renderPublications(pickLatestPublications(publications, 3), '#publications .publications');
-        renderAuthors(authors);
+        var homeRequests = [
+          apiGet('site-settings', locale).then(function (res) {
+            renderFooter((res && res.data) || {});
+          }),
+          apiGet('about-project', locale).then(function (res) {
+            renderAbout((res && res.data) || {});
+          }),
+          apiGet('our-position', locale).then(function (res) {
+            renderOurPosition((res && res.data) || {});
+          }),
+          apiGet('modules', locale).then(function (res) {
+            var modules = (res && res.data) || [];
+            renderModulesList(modules, 5);
+          }),
+          apiGet('publications', locale).then(function (res) {
+            var publications = (res && res.data) || [];
+            renderPublications(pickLatestPublications(publications, 3), '#publications .publications');
+          }),
+          apiGet('authors', locale).then(function (res) {
+            renderAuthors((res && res.data) || []);
+          })
+        ];
+        await Promise.allSettled(homeRequests);
         return;
       }
 

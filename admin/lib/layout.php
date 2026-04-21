@@ -115,6 +115,32 @@ window.initKantDrawerCloseGuard = function (opts) {
   });
 };
 </script>';
+        echo '<script>
+(function () {
+  var KEY = "kantAdminScrollRestore";
+  try {
+    var raw = sessionStorage.getItem(KEY);
+    if (raw) {
+      var data = JSON.parse(raw);
+      if (data && data.path === window.location.pathname) {
+        window.scrollTo(0, Number(data.y) || 0);
+      }
+      sessionStorage.removeItem(KEY);
+    }
+  } catch (e) {}
+
+  document.querySelectorAll("form[method=\'post\']").forEach(function (form) {
+    form.addEventListener("submit", function () {
+      try {
+        sessionStorage.setItem(KEY, JSON.stringify({
+          path: window.location.pathname,
+          y: window.scrollY || 0
+        }));
+      } catch (e) {}
+    });
+  });
+})();
+</script>';
         echo '</body></html>';
         return;
     }

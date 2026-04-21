@@ -684,10 +684,6 @@ admin_header(tr('Модули', 'Modules'));
     <h3><?= h(tr('Список видео лекций', 'Lecture videos list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="lecture-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
-  <div class="filter-row">
-    <label for="lecture-filter"><strong><?= h(tr('Фильтр по языку:', 'Filter by language:')) ?></strong></label>
-    <input id="lecture-filter" type="text" placeholder="<?= h(tr('например: ru, en', 'e.g. ru, en')) ?>">
-  </div>
   <div class="table-scroll">
   <table id="lecture-table"><thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody id="lecture-sortable">
     <?php foreach ($lectureVideos as $video): ?>
@@ -756,10 +752,6 @@ admin_header(tr('Модули', 'Modules'));
   <div class="kant-section-head">
     <h3><?= h(tr('Список видео презентаций', 'Presentation videos list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="presentation-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
-  </div>
-  <div class="filter-row">
-    <label for="presentation-filter"><strong><?= h(tr('Фильтр по языку:', 'Filter by language:')) ?></strong></label>
-    <input id="presentation-filter" type="text" placeholder="<?= h(tr('например: ru, en', 'e.g. ru, en')) ?>">
   </div>
   <div class="table-scroll">
   <table id="presentation-table"><thead><tr><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody id="presentation-sortable">
@@ -862,24 +854,6 @@ admin_header(tr('Модули', 'Modules'));
 <?php endif; ?>
 
 <script>
-function applyLanguageFilter(inputId, tableId) {
-  var input = document.getElementById(inputId);
-  var table = document.getElementById(tableId);
-  if (!input || !table) return;
-  var rows = table.querySelectorAll('tbody tr[data-language-code]');
-  var run = function () {
-    var q = String(input.value || '').trim().toLowerCase();
-    rows.forEach(function (row) {
-      var lang = row.getAttribute('data-language-code') || '';
-      row.style.display = q === '' || lang.indexOf(q) !== -1 ? '' : 'none';
-    });
-  };
-  input.addEventListener('input', run);
-}
-
-applyLanguageFilter('lecture-filter', 'lecture-table');
-applyLanguageFilter('presentation-filter', 'presentation-table');
-
 document.querySelectorAll('[data-toggle-form]').forEach(function (btn) {
   btn.addEventListener('click', function () {
     var formId = btn.getAttribute('data-toggle-form');

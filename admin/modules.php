@@ -106,6 +106,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/admin/modules.php');
     }
 
+    if ($action === 'save_presentation_file') {
+        $currentStmt = $pdo->prepare('SELECT presentation_file_path FROM modules WHERE id = :id LIMIT 1');
+        $currentStmt->execute(['id' => $moduleId]);
+        $current = $currentStmt->fetch() ?: [];
+        $presentationFile = (string) ($current['presentation_file_path'] ?? '');
+        try {
+            $uploadedPresentation = upload_public_file('presentation_file_upload', 'module-presentations', ['pdf']);
+            if ($uploadedPresentation) {
+                $presentationFile = $uploadedPresentation;
+            }
+        } catch (Throwable $e) {
+            redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode($e->getMessage()));
+        }
+        if ($presentationFile === '') {
+            redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode('Presentation file is required.'));
+        }
+        $pdo->prepare('UPDATE modules SET presentation_file_path = :presentation_file_path WHERE id = :id')
+            ->execute(['presentation_file_path' => $presentationFile, 'id' => $moduleId]);
+        redirect('/admin/modules.php?edit=' . $moduleId . '&saved=1');
+    }
+
     if ($action === 'regenerate_slugs') {
         $mods = $pdo->query('SELECT id, module_number FROM modules ORDER BY id ASC')->fetchAll();
         foreach ($mods as $mod) {
@@ -290,15 +311,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $id = $moduleId;
     $heroBackground = trim((string) ($_POST['hero_background_image_path'] ?? ''));
-    $presentationFile = trim((string) ($_POST['presentation_file_path'] ?? ''));
+    $presentationFile = '';
+    if ($id > 0) {
+        $existingStmt = $pdo->prepare('SELECT presentation_file_path FROM modules WHERE id = :id LIMIT 1');
+        $existingStmt->execute(['id' => $id]);
+        $existingModule = $existingStmt->fetch() ?: [];
+        $presentationFile = (string) ($existingModule['presentation_file_path'] ?? '');
+    }
     try {
         $uploadedHero = upload_public_file('hero_background_file', 'module-hero', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
         if ($uploadedHero) {
             $heroBackground = $uploadedHero;
-        }
-        $uploadedPresentation = upload_public_file('presentation_file_upload', 'module-presentations', ['pdf', 'ppt', 'pptx']);
-        if ($uploadedPresentation) {
-            $presentationFile = $uploadedPresentation;
         }
     } catch (Throwable $e) {
         redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode($e->getMessage()));
@@ -488,7 +511,7 @@ admin_header(tr('Модули', 'Modules'));
     </div>
   </div>
   <table>
-    <thead><tr><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Лекция', 'Lecture')) ?></th><th><?= h(tr('Презентация', 'Presentation')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Лекция', 'Lecture')) ?></th><th><?= h(tr('Презентация', 'Presentation')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $row): ?>
       <tr>
@@ -497,6 +520,14 @@ admin_header(tr('Модули', 'Modules'));
         <td><?= h($row['languages']) ?></td>
         <td><?= h(((int) $row['has_lecture']) > 0 ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
         <td><?= h(((int) $row['has_presentation']) > 0 ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
+        <td>
+          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить модуль?', 'Delete module?')) ?>')">
+            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="id" value="<?= h((string) $row['id']) ?>">
+            <button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
+          </form>
+        </td>
       </tr>
     <?php endforeach; ?>
     </tbody>
@@ -523,11 +554,9 @@ admin_header(tr('Модули', 'Modules'));
       <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
       <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
-      <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input name="hero_background_image_path" value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>"></div>
-      <div><label><?= h(tr('Путь к файлу презентации (необязательно)', 'Presentation file path (optional)')) ?></label><input name="presentation_file_path" value="<?= h((string) ($editRow['presentation_file_path'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Загрузить hero-изображение', 'Upload hero image')) ?></label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label><?= h(tr('Загрузить PDF/PPT презентации (необязательно)', 'Upload presentation PDF/PPT (optional)')) ?></label><input type="file" name="presentation_file_upload" accept=".pdf,.ppt,.pptx"></div>
+      <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
     </div>
     <hr style="margin:16px 0">
     <?php
@@ -627,6 +656,16 @@ admin_header(tr('Модули', 'Modules'));
 <details class="module-section card" open>
   <summary><?= h(tr('Видео презентации', 'Presentation Videos')) ?></summary>
   <div class="module-section__body">
+  <form method="post" enctype="multipart/form-data" style="margin-bottom:12px">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="save_presentation_file">
+    <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <div class="grid">
+      <div><label><?= h(tr('Текущий файл презентации', 'Current presentation file')) ?></label><input value="<?= h((string) ($editRow['presentation_file_path'] ?? '')) ?>" readonly></div>
+      <div><label><?= h(tr('Загрузить PDF презентации', 'Upload presentation PDF')) ?></label><input type="file" name="presentation_file_upload" accept=".pdf" required></div>
+    </div>
+    <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить файл презентации', 'Save presentation file')) ?></button></div>
+  </form>
   <div class="kant-section-head">
     <h3><?= h(tr('Список видео презентаций', 'Presentation videos list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="presentation-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>

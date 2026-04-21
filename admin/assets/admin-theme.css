@@ -151,13 +151,37 @@ label {
 
 button,
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 10px;
   padding: 10px 14px;
   text-decoration: none;
+  border: 1px solid #0757c9;
+  background: #0757c9;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+button:hover,
+.btn:hover {
+  background: #0648a5;
+  border-color: #0648a5;
+  color: #fff;
 }
 
 .btn-secondary {
-  color: #fff;
+  border-color: #cdd6e5;
+  background: #fff;
+  color: #1f2937;
+}
+
+.btn-secondary:hover {
+  border-color: #b8c3d8;
+  background: #f8fafc;
+  color: #111827;
 }
 
 .btn.is-active-lang {

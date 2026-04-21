@@ -548,7 +548,7 @@ admin_header(tr('Модули', 'Modules'));
   </tbody></table>
   </div>
   <p class="inline-help"><?= h(tr('Подсказка: используйте embed URL, например https://www.youtube.com/embed/... или Vimeo player URL.', 'URL hint: use embed URL, e.g. https://www.youtube.com/embed/... or Vimeo player URL.')) ?></p>
-  <form method="post" style="margin-bottom:12px;display:none" class="compact-inputs" id="lecture-add-form" enctype="multipart/form-data">
+  <form method="post" style="margin-bottom:12px" class="compact-inputs" id="lecture-add-form" enctype="multipart/form-data" hidden>
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="add_lecture_video">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
@@ -599,7 +599,7 @@ admin_header(tr('Модули', 'Modules'));
     <?php endforeach; ?>
   </tbody></table>
   </div>
-  <form method="post" style="margin-bottom:12px;display:none" class="compact-inputs" id="presentation-add-form" enctype="multipart/form-data">
+  <form method="post" style="margin-bottom:12px" class="compact-inputs" id="presentation-add-form" enctype="multipart/form-data" hidden>
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="add_presentation_video"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <div class="grid">
       <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}"></div>
@@ -626,7 +626,7 @@ admin_header(tr('Модули', 'Modules'));
     <tr><td><?= h((string) $t['file_path']) ?></td><td><?= h((string) $t['sort_order']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить транскрипцию?', 'Delete transcript?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
-  <form method="post" style="margin-bottom:12px;display:none" class="compact-inputs" id="transcript-add-form" enctype="multipart/form-data">
+  <form method="post" style="margin-bottom:12px" class="compact-inputs" id="transcript-add-form" enctype="multipart/form-data" hidden>
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <div class="grid"><div><label><?= h(tr('Путь к файлу (если без загрузки)', 'File path (if no upload)')) ?></label><input name="file_path"></div><div><label><?= h(tr('Загрузить файл транскрипции', 'Upload transcript file')) ?></label><input type="file" name="transcript_file" accept=".pdf,.doc,.docx,.txt"></div><div><label><?= h(tr('Порядок сортировки', 'Sort order')) ?></label><input type="number" name="sort_order" value="0"></div></div>
     <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label><?= h(tr('Название (', 'Title (')) ?><?= h(strtoupper($locale)) ?>)</label><input name="display_name_<?= h($locale) ?>"></div><?php endforeach; ?>
@@ -667,7 +667,7 @@ admin_header(tr('Модули', 'Modules'));
     <tr><td><?= h((string) ($r['linked_publication_id'] ?: '-')) ?></td><td><?= h((string) ($r['custom_file_path'] ?: $r['custom_url'])) ?></td><td><?= h((string) $r['sort_order']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить материал?', 'Delete reading?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="reading_id" value="<?= h((string) $r['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
-  <form method="post" style="margin-bottom:12px;display:none" class="compact-inputs" id="reading-add-form" enctype="multipart/form-data">
+  <form method="post" style="margin-bottom:12px" class="compact-inputs" id="reading-add-form" enctype="multipart/form-data" hidden>
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <div class="grid">
       <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>">#<?= h((string) $p['id']) ?></option><?php endforeach; ?></select></div>
@@ -735,22 +735,34 @@ document.querySelectorAll('[data-toggle-form]').forEach(function (btn) {
     var formId = btn.getAttribute('data-toggle-form');
     var form = formId ? document.getElementById(formId) : null;
     if (!form) return;
-    var isOpen = form.style.display !== 'none';
-    form.style.display = isOpen ? 'none' : 'block';
-    btn.textContent = isOpen ? '<?= h(tr('Добавить +', 'Add +')) ?>' : '<?= h(tr('Скрыть форму', 'Hide form')) ?>';
+    var isOpen = !form.hasAttribute('hidden');
+    if (isOpen) {
+      form.setAttribute('hidden', 'hidden');
+    } else {
+      form.removeAttribute('hidden');
+    }
+    btn.textContent = isOpen ? <?= json_encode(h(tr('Добавить +', 'Add +'))) ?> : <?= json_encode(h(tr('Скрыть форму', 'Hide form'))) ?>;
   });
 });
 
-var drawerMainForm = document.querySelector('.kant-drawer > .card form[method="post"][enctype="multipart/form-data"]');
-if (drawerMainForm) {
-  drawerMainForm.addEventListener('submit', function () {
-    sessionStorage.setItem('kantModulesDrawerScrollY', String(window.scrollY || 0));
-  });
-  var savedY = sessionStorage.getItem('kantModulesDrawerScrollY');
-  if (savedY !== null) {
-    window.scrollTo(0, parseInt(savedY, 10) || 0);
-    sessionStorage.removeItem('kantModulesDrawerScrollY');
+document.querySelectorAll('[data-toggle-form]').forEach(function (btn) {
+  var formId = btn.getAttribute('data-toggle-form');
+  var form = formId ? document.getElementById(formId) : null;
+  if (form) form.setAttribute('hidden', 'hidden');
+});
+
+var drawer = document.querySelector('.kant-drawer');
+if (drawer) {
+  var savedDrawerScroll = sessionStorage.getItem('kantModulesDrawerScrollTop');
+  if (savedDrawerScroll !== null) {
+    drawer.scrollTop = parseInt(savedDrawerScroll, 10) || 0;
+    sessionStorage.removeItem('kantModulesDrawerScrollTop');
   }
+  drawer.querySelectorAll('form[method="post"]').forEach(function (form) {
+    form.addEventListener('submit', function () {
+      sessionStorage.setItem('kantModulesDrawerScrollTop', String(drawer.scrollTop || 0));
+    });
+  });
 }
 
 var addTranscriptBtn = document.getElementById('add-transcript-row');

@@ -267,12 +267,17 @@
     setText('.module-hero__headline', moduleItem.title || '');
     setText('.module-hero__subtitle', moduleItem.short_description || '');
     setImg('.module-hero .hero__bg', moduleItem.hero_background_image_path || '');
+    var lectureBlock = document.querySelector('.module-main .module-block:nth-of-type(1)');
+    var presentationBlock = document.querySelector('.module-main .module-block:nth-of-type(2)');
     setText('.module-main .module-block:nth-of-type(1) .module-title', moduleItem.lecture_title || '');
     setText('.module-main .module-block:nth-of-type(2) .module-title', moduleItem.presentation_title || '');
 
     var lectureTabsWrap = document.querySelector('.module-main .module-block:nth-of-type(1) .tabs');
     var lecturePlayerWrap = document.querySelector('.module-main .module-block:nth-of-type(1) .about__player.module-player');
     var lectureVideos = Array.isArray(moduleItem.lecture_videos) ? moduleItem.lecture_videos : [];
+    if (lectureBlock) {
+      lectureBlock.style.display = lectureVideos.length ? '' : 'none';
+    }
     if (lectureTabsWrap && lecturePlayerWrap && lectureVideos.length) {
       lectureTabsWrap.innerHTML = '';
       lecturePlayerWrap.innerHTML = '';
@@ -301,6 +306,9 @@
     }
     var presentationFrame = document.querySelector('.module-main .module-block:nth-of-type(2) iframe');
     var presentationVideos = Array.isArray(moduleItem.presentation_videos) ? moduleItem.presentation_videos : [];
+    if (presentationBlock) {
+      presentationBlock.style.display = presentationVideos.length ? '' : 'none';
+    }
     var presentationTabsWrap = document.querySelector('.module-main .module-block:nth-of-type(2) .tabs');
     var presentationPlayerWrap = document.querySelector('.module-main .module-block:nth-of-type(2) .about__player.module-player');
     if (!presentationTabsWrap && presentationPlayerWrap) {

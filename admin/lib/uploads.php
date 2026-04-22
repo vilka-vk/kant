@@ -49,8 +49,78 @@ function upload_public_file(string $fieldName, string $subdir, array $allowedExt
     if (!move_uploaded_file($tmpPath, $targetPath)) {
         throw new RuntimeException('Cannot move uploaded file for "' . $fieldName . '".');
     }
+    optimize_uploaded_image($targetPath, $extension);
 
     return '/' . $relativeDir . '/' . $fileName;
+}
+
+function optimize_uploaded_image(string $path, string $extension): void
+{
+    $ext = strtolower($extension);
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+        return;
+    }
+    if (!is_file($path)) {
+        return;
+    }
+
+    if (class_exists('Imagick')) {
+        try {
+            $image = new Imagick($path);
+            $image->stripImage();
+            if ($ext === 'jpg' || $ext === 'jpeg') {
+                $image->setImageCompression(Imagick::COMPRESSION_JPEG);
+                $image->setImageCompressionQuality(82);
+                $image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+            } elseif ($ext === 'png') {
+                $image->setOption('png:compression-level', '9');
+                $image->setOption('png:compression-strategy', '1');
+            } elseif ($ext === 'webp') {
+                $image->setImageCompressionQuality(82);
+            }
+            $image->writeImage($path);
+            $image->clear();
+            $image->destroy();
+            return;
+        } catch (Throwable $e) {
+            // Fallback to GD below.
+        }
+    }
+
+    if (!function_exists('imagecreatefromjpeg')) {
+        return;
+    }
+
+    try {
+        if ($ext === 'jpg' || $ext === 'jpeg') {
+            $img = @imagecreatefromjpeg($path);
+            if ($img !== false) {
+                @imageinterlace($img, true);
+                @imagejpeg($img, $path, 82);
+                @imagedestroy($img);
+            }
+            return;
+        }
+        if ($ext === 'png' && function_exists('imagecreatefrompng')) {
+            $img = @imagecreatefrompng($path);
+            if ($img !== false) {
+                @imagealphablending($img, false);
+                @imagesavealpha($img, true);
+                @imagepng($img, $path, 9);
+                @imagedestroy($img);
+            }
+            return;
+        }
+        if ($ext === 'webp' && function_exists('imagecreatefromwebp') && function_exists('imagewebp')) {
+            $img = @imagecreatefromwebp($path);
+            if ($img !== false) {
+                @imagewebp($img, $path, 82);
+                @imagedestroy($img);
+            }
+        }
+    } catch (Throwable $e) {
+        // Keep original file if optimization fails.
+    }
 }
 
 function delete_public_file(string $path): void

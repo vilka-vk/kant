@@ -13,6 +13,8 @@ $fixedSectionTitles = [
     'ru' => 'Наша позиция',
     'en' => 'Our position',
 ];
+$defaultImagePrimaryPath = '/assets/images/position-photo-1.jpg';
+$defaultImageSecondaryPath = '/assets/images/position-photo-2.jpg';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_check($_POST['_csrf'] ?? null)) {
@@ -86,6 +88,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $base = $pdo->query('SELECT * FROM our_position WHERE id = 1')->fetch() ?: [];
+$needsDefaultImagePaths = trim((string) ($base['image_primary_path'] ?? '')) === ''
+    || trim((string) ($base['image_secondary_path'] ?? '')) === '';
+if ($needsDefaultImagePaths) {
+    $base['image_primary_path'] = trim((string) ($base['image_primary_path'] ?? '')) !== ''
+        ? (string) $base['image_primary_path']
+        : $defaultImagePrimaryPath;
+    $base['image_secondary_path'] = trim((string) ($base['image_secondary_path'] ?? '')) !== ''
+        ? (string) $base['image_secondary_path']
+        : $defaultImageSecondaryPath;
+    $pdo->prepare('INSERT INTO our_position (id, image_primary_path, image_secondary_path)
+      VALUES (1, :image_primary_path, :image_secondary_path)
+      ON DUPLICATE KEY UPDATE image_primary_path = VALUES(image_primary_path), image_secondary_path = VALUES(image_secondary_path)')
+        ->execute([
+            'image_primary_path' => (string) $base['image_primary_path'],
+            'image_secondary_path' => (string) $base['image_secondary_path'],
+        ]);
+}
 $trs = $pdo->query('SELECT * FROM our_position_translations WHERE our_position_id = 1')->fetchAll();
 $map = [];
 foreach ($trs as $row) {
@@ -103,23 +122,6 @@ admin_header(tr('Наша позиция', 'Our position'));
   <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-
-    <div class="grid">
-      <div>
-        <label><?= h(tr('Путь к изображению 1', 'Image 1 path')) ?></label>
-        <input name="image_primary_path" value="<?= h((string) ($base['image_primary_path'] ?? '')) ?>">
-        <label style="margin-top:8px"><?= h(tr('Загрузить изображение 1', 'Upload image 1')) ?></label>
-        <input type="file" name="image_primary_file" accept=".jpg,.jpeg,.png,.webp,.gif">
-      </div>
-      <div>
-        <label><?= h(tr('Путь к изображению 2', 'Image 2 path')) ?></label>
-        <input name="image_secondary_path" value="<?= h((string) ($base['image_secondary_path'] ?? '')) ?>">
-        <label style="margin-top:8px"><?= h(tr('Загрузить изображение 2', 'Upload image 2')) ?></label>
-        <input type="file" name="image_secondary_file" accept=".jpg,.jpeg,.png,.webp,.gif">
-      </div>
-    </div>
-
-    <hr style="margin:16px 0">
     <p class="muted"><?= h(tr('Таблица локализации: слева', 'Localization table: left column is')) ?> <?= h(strtoupper($leftLocale)) ?>, <?= h(tr('справа', 'right column is')) ?> <?= h(strtoupper($rightLocale)) ?>.</p>
     <table>
       <thead>
@@ -165,6 +167,28 @@ admin_header(tr('Наша позиция', 'Our position'));
         <?php endforeach; ?>
       </tbody>
     </table>
+    <hr style="margin:16px 0">
+    <div class="card" style="margin-bottom:0">
+      <h3 style="margin-top:0"><?= h(tr('Изображения блока', 'Block images')) ?></h3>
+      <p class="muted" style="margin-top:0"><?= h(tr(
+          'Рекомендуем менять эти изображения только при необходимости: текущие файлы соответствуют утвержденному дизайну страницы.',
+          'We recommend updating these images only when necessary: the current files match the approved page design.'
+      )) ?></p>
+      <div class="grid">
+        <div>
+          <label><?= h(tr('Путь к изображению 1', 'Image 1 path')) ?></label>
+          <input name="image_primary_path" value="<?= h((string) ($base['image_primary_path'] ?? '')) ?>">
+          <label style="margin-top:8px"><?= h(tr('Загрузить изображение 1', 'Upload image 1')) ?></label>
+          <input type="file" name="image_primary_file" accept=".jpg,.jpeg,.png,.webp,.gif">
+        </div>
+        <div>
+          <label><?= h(tr('Путь к изображению 2', 'Image 2 path')) ?></label>
+          <input name="image_secondary_path" value="<?= h((string) ($base['image_secondary_path'] ?? '')) ?>">
+          <label style="margin-top:8px"><?= h(tr('Загрузить изображение 2', 'Upload image 2')) ?></label>
+          <input type="file" name="image_secondary_file" accept=".jpg,.jpeg,.png,.webp,.gif">
+        </div>
+      </div>
+    </div>
     <div class="actions" style="margin-top:12px">
       <button type="submit"><?= h(tr('Сохранить блок "Наша позиция"', 'Save our position')) ?></button>
     </div>

@@ -1229,14 +1229,15 @@ ul, ol {
   text-transform: capitalize;
 }
 
-.module-publications {
+.publications.module-publications {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  gap: 60px;
+  align-items: start;
   width: 100%;
 }
 
-.module-publications .publication-item {
+.publications.module-publications .publication-item {
   width: 100%;
 }
 
@@ -1741,6 +1742,10 @@ ul, ol {
 
   /* --- Publications --- */
   .publications            { gap: 32px; }
+  .publications.module-publications {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
   .publication-item__image { width: 76px; height: 96px; }
   .publication-item__title { font-size: 14px; }
 
@@ -1998,6 +2003,10 @@ ul, ol {
   /* --- Publications (Figma: flex-col gap-[24px], image 76×96, title text-[12px]) --- */
   .publications {
     flex-direction: column;
+    gap: 24px;
+  }
+  .publications.module-publications {
+    grid-template-columns: 1fr;
     gap: 24px;
   }
   .publication-item       { width: 100%; }

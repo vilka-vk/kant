@@ -406,14 +406,12 @@
         if (aOrder !== bOrder) return aOrder - bOrder;
         return (Number(a && a.id) || 0) - (Number(b && b.id) || 0);
       });
-      var latestCreated = allModules.slice().sort(function (a, b) {
-        return (Number(b && b.id) || 0) - (Number(a && a.id) || 0);
-      })[0] || sortedByOrder[sortedByOrder.length - 1];
-
       var currentIndex = sortedByOrder.findIndex(function (m) {
         return Number(m && m.id) === Number(moduleItem && moduleItem.id);
       });
       if (currentIndex < 0) currentIndex = 0;
+      var prevIndex = (currentIndex - 1 + sortedByOrder.length) % sortedByOrder.length;
+      var prevModule = sortedByOrder[prevIndex] || sortedByOrder[sortedByOrder.length - 1];
       var nextModule = sortedByOrder[(currentIndex + 1) % sortedByOrder.length] || sortedByOrder[0];
 
       function moduleNavLabel(item) {
@@ -432,7 +430,7 @@
         }
       }
 
-      applyModuleNav(prevLink, latestCreated);
+      applyModuleNav(prevLink, prevModule);
       applyModuleNav(nextLink, nextModule);
     }
   }

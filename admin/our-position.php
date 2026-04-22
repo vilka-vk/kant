@@ -171,7 +171,7 @@ admin_header(tr('Наша позиция', 'Our position'));
     <div class="card" style="margin-bottom:0">
       <h3 style="margin-top:0"><?= h(tr('Изображения блока', 'Block images')) ?></h3>
       <p class="muted" style="margin-top:0"><?= h(tr(
-          'Рекомендуем менять эти изображения только при необходимости: текущие файлы соответствуют утвержденному дизайну страницы.',
+          'Не рекомендуем менять эти изображения, только при острой необходимости: текущие файлы соответствуют утвержденному дизайну страницы.',
           'We recommend updating these images only when necessary: the current files match the approved page design.'
       )) ?></p>
       <div class="grid">

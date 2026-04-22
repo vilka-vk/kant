@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'affiliation' => trim((string) ($_POST['affiliation_' . $locale] ?? '')),
         ]);
     }
-    redirect('/admin/authors.php?edit=' . $id . '&saved=1');
+    redirect('/admin/authors.php?form=1&edit=' . $id . '&saved=1');
 }
 
 $editId = (int) ($_GET['edit'] ?? 0);
@@ -80,11 +80,44 @@ if ($editId > 0) {
     }
 }
 $rows = $pdo->query('SELECT * FROM authors ORDER BY display_order ASC, id ASC')->fetchAll();
+$isFormOpen = $edit || (string) ($_GET['form'] ?? '') === '1';
 
 admin_header(tr('Авторы', 'Authors'));
 ?>
 <div class="card">
-  <h1><?= h(tr('Авторы', 'Authors')) ?></h1>
+  <div class="kant-section-head">
+    <h1><?= h(tr('Авторы', 'Authors')) ?></h1>
+    <a class="btn" href="/admin/authors.php?form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
+  </div>
+  <?php if (!empty($_GET['saved']) && !$isFormOpen): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error']) && !$isFormOpen): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
+  <table>
+    <thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <tbody id="authors-sortable">
+    <?php foreach ($rows as $r): ?>
+      <tr data-id="<?= h((string) $r['id']) ?>">
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
+        <td><?= h((string) $r['display_order']) ?></td>
+        <td><?= h((string) $r['id']) ?></td>
+        <td><?= h($r['photo_path']) ?></td>
+        <td><a class="btn btn-secondary" href="/admin/authors.php?form=1&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
+      </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+  <form method="post" id="authors-reorder-form" style="display:none">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="reorder_authors">
+    <div id="authors-reorder-ids"></div>
+  </form>
+</div>
+
+<?php if ($isFormOpen): ?>
+<div class="card">
+  <div class="kant-drawer-actions">
+    <h2><?= h($edit ? tr('Редактирование автора', 'Edit author') : tr('Добавление автора', 'Add author')) ?></h2>
+    <a class="btn btn-secondary" href="/admin/authors.php"><?= h(tr('Закрыть', 'Close')) ?></a>
+  </div>
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
@@ -93,7 +126,7 @@ admin_header(tr('Авторы', 'Authors'));
     <div class="grid">
       <div><label><?= h(tr('Путь к фото', 'Photo path')) ?></label><input name="photo_path" required value="<?= h((string) ($edit['photo_path'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Загрузить фото', 'Upload photo')) ?></label><input type="file" name="photo_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label><?= h(tr('Порядок отображения', 'Display order')) ?></label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? 0)) ?>"></div>
+      <div><label><?= h(tr('Порядок отображения', 'Display order')) ?></label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? (count($rows) + 1))) ?>"></div>
     </div>
     <hr style="margin:16px 0">
     <?php foreach ($locales as $locale): ?>
@@ -105,31 +138,11 @@ admin_header(tr('Авторы', 'Authors'));
     <?php endforeach; ?>
     <div class="actions">
       <button type="submit"><?= $edit ? h(tr('Обновить автора', 'Update author')) : h(tr('Создать автора', 'Create author')) ?></button>
-      <a class="btn btn-secondary" href="/admin/authors.php"><?= h(tr('Новый', 'New')) ?></a>
+      <a class="btn btn-secondary" href="/admin/authors.php?form=1"><?= h(tr('Новый', 'New')) ?></a>
     </div>
   </form>
 </div>
-<div class="card">
-  <table>
-    <thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
-    <tbody id="authors-sortable">
-    <?php foreach ($rows as $r): ?>
-      <tr data-id="<?= h((string) $r['id']) ?>">
-        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
-        <td><?= h((string) $r['display_order']) ?></td>
-        <td><?= h((string) $r['id']) ?></td>
-        <td><?= h($r['photo_path']) ?></td>
-        <td><a class="btn btn-secondary" href="/admin/authors.php?edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
-      </tr>
-    <?php endforeach; ?>
-    </tbody>
-  </table>
-  <form method="post" id="authors-reorder-form" style="display:none">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <input type="hidden" name="action" value="reorder_authors">
-    <div id="authors-reorder-ids"></div>
-  </form>
-</div>
+<?php endif; ?>
 <script>
 (function () {
   var tbody = document.getElementById('authors-sortable');

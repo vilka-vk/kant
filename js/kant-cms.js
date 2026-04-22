@@ -105,10 +105,24 @@
   function renderFooter(settings) {
     setText('.footer__copyright', settings.footer_copyright || '');
     var links = document.querySelectorAll('.footer__socials a.footer__social');
-    if (links[0]) links[0].setAttribute('href', settings.social_youtube_url || '#');
-    if (links[1]) links[1].setAttribute('href', settings.social_twitter_url || '#');
-    if (links[2]) links[2].setAttribute('href', settings.social_instagram_url || '#');
-    if (links[3]) links[3].setAttribute('href', settings.social_facebook_url || '#');
+    var socials = [
+      settings.social_youtube_url,
+      settings.social_twitter_url,
+      settings.social_instagram_url,
+      settings.social_facebook_url
+    ];
+    socials.forEach(function (url, idx) {
+      var link = links[idx];
+      if (!link) return;
+      var value = String(url || '').trim();
+      if (value) {
+        link.setAttribute('href', value);
+        link.style.display = '';
+      } else {
+        link.removeAttribute('href');
+        link.style.display = 'none';
+      }
+    });
   }
 
   function renderAbout(about) {

@@ -4,6 +4,17 @@
   var API_BASE = '/api';
   var DEFAULT_LOCALE = 'ru';
   var STORAGE_KEY = 'kant-locale';
+  var currentPath = window.location.pathname.toLowerCase();
+  var cleanCurrentPath = currentPath.endsWith('/') && currentPath.length > 1 ? currentPath.slice(0, -1) : currentPath;
+  var isModuleDetailPage = cleanCurrentPath.endsWith('/module.html') || cleanCurrentPath.endsWith('/module-1.html') || cleanCurrentPath.endsWith('/module');
+
+  if (isModuleDetailPage) {
+    document.documentElement.classList.add('kant-module-loading');
+    var preloadStyle = document.createElement('style');
+    preloadStyle.setAttribute('data-kant-module-preload', '1');
+    preloadStyle.textContent = 'html.kant-module-loading .module-hero, html.kant-module-loading .module-main { visibility: hidden; }';
+    document.head.appendChild(preloadStyle);
+  }
 
   function currentLocale() {
     var params = new URLSearchParams(window.location.search);
@@ -263,9 +274,14 @@
   function renderModuleDetail(moduleItem, transcripts, readings, locale, moduleList) {
     if (!moduleItem) return;
     var moduleWord = locale === 'ru' ? 'Модуль' : 'Module';
+    var moduleShortDescription = String(moduleItem.short_description || '').trim();
     setText('.module-hero__kicker', moduleWord + ' ' + (moduleItem.module_number || ''));
     setText('.module-hero__headline', moduleItem.title || '');
-    setText('.module-hero__subtitle', moduleItem.short_description || '');
+    var heroSubtitle = document.querySelector('.module-hero__subtitle');
+    if (heroSubtitle) {
+      heroSubtitle.textContent = moduleShortDescription;
+      heroSubtitle.style.display = moduleShortDescription ? '' : 'none';
+    }
     setImg('.module-hero .hero__bg', moduleItem.hero_background_image_path || '');
     var lectureBlock = document.querySelector('.module-main .module-block:nth-of-type(1)');
     var presentationBlock = document.querySelector('.module-main .module-block:nth-of-type(2)');
@@ -582,6 +598,10 @@
       }
     } catch (err) {
       console.error('KANT CMS error:', err);
+    } finally {
+      if (isModuleDetailPage) {
+        document.documentElement.classList.remove('kant-module-loading');
+      }
     }
   }
 

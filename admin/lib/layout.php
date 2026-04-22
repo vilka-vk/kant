@@ -117,6 +117,40 @@ window.initKantDrawerCloseGuard = function (opts) {
 </script>';
         echo '<script>
 (function () {
+  var statusClass = "kant-upload-status";
+  var chosenPrefix = ' . json_encode(tr('Выбран файл: ', 'Selected file: ')) . ';
+  var pendingSuffix = ' . json_encode(tr('Будет загружено после сохранения.', 'Will be uploaded after saving.')) . ';
+
+  function ensureStatusNode(input) {
+    if (!input || !input.parentNode) return null;
+    var node = input.parentNode.querySelector("." + statusClass);
+    if (!node) {
+      node = document.createElement("small");
+      node.className = "muted " + statusClass;
+      node.style.display = "block";
+      node.style.marginTop = "6px";
+      input.parentNode.appendChild(node);
+    }
+    return node;
+  }
+
+  document.querySelectorAll("input[type=\'file\']").forEach(function (input) {
+    input.addEventListener("change", function () {
+      var status = ensureStatusNode(input);
+      if (!status) return;
+      var files = input.files ? Array.from(input.files) : [];
+      if (!files.length) {
+        status.textContent = "";
+        return;
+      }
+      var names = files.map(function (file) { return file.name; }).join(", ");
+      status.textContent = chosenPrefix + names + ". " + pendingSuffix;
+    });
+  });
+})();
+</script>';
+        echo '<script>
+(function () {
   var KEY = "kantAdminScrollRestore";
   try {
     var raw = sessionStorage.getItem(KEY);

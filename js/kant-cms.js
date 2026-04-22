@@ -229,17 +229,33 @@
   }
 
   function renderAuthors(items) {
-    var slider = document.querySelector('.authors-slider__track');
+    var slider = document.querySelector('.authors-slider__track') || document.querySelector('.authors-slider');
     if (!slider) return;
     slider.innerHTML = '';
     items.forEach(function (a) {
-      var card = document.createElement('article');
-      card.className = 'author-card';
+      var card = document.createElement('div');
+      card.className = 'card-author';
       var name = ((a.first_name || '') + ' ' + (a.last_name || '')).trim() || a.full_name || '';
+      var nameLines = name ? name.split(/\s+/) : [];
+      var firstLine = nameLines.slice(0, Math.max(1, nameLines.length - 1)).join(' ');
+      var secondLine = nameLines.length > 1 ? nameLines[nameLines.length - 1] : '';
       card.innerHTML =
-        '<img class="author-card__photo" src="' + (a.photo_path || 'assets/images/author-paper.svg') + '" alt="">' +
-        '<h3 class="author-card__name text-h3">' + name + '</h3>' +
-        '<p class="author-card__role text-paragraph">' + (a.affiliation || '') + '</p>';
+        '<div class="card-author__photo">' +
+          '<img src="' + (a.photo_path || 'assets/images/author-paper.svg') + '" alt="">' +
+          '<div class="card-author__name text-author-name">' +
+            '<p>' + (firstLine || name || '') + '</p>' +
+            '<p>' + (secondLine || '') + '</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card-author__quote">' +
+          '<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-end;">' +
+            '<p class="card-author__bio">' + (a.affiliation || '') + '</p>' +
+          '</div>' +
+          '<div class="card-author__name text-author-name">' +
+            '<p>' + (firstLine || name || '') + '</p>' +
+            '<p>' + (secondLine || '') + '</p>' +
+          '</div>' +
+        '</div>';
       slider.appendChild(card);
     });
   }

@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $heroRow = $pdo->prepare('SELECT id, background_image_path, subtitle_enabled FROM hero_sections WHERE page_key = :page_key LIMIT 1');
         $heroRow->execute(['page_key' => 'publications']);
         $hero = $heroRow->fetch() ?: null;
-        $heroBg = trim((string) ($_POST['hero_publications_background_image_path'] ?? ($hero['background_image_path'] ?? '')));
+        $heroBg = trim((string) ($hero['background_image_path'] ?? ''));
         $heroBg = str_replace('\\', '/', $heroBg);
         $uploadsPos = stripos($heroBg, '/uploads/');
         if ($uploadsPos !== false) {
@@ -115,9 +115,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $id = (int) ($_POST['id'] ?? 0);
-    $file = trim((string) ($_POST['file_path'] ?? ''));
-    $url = trim((string) ($_POST['external_url'] ?? ''));
-    $cover = trim((string) ($_POST['cover_image_path'] ?? ''));
+    $existingPublication = [];
+    if ($id > 0) {
+        $existingPublicationStmt = $pdo->prepare('SELECT file_path, external_url, cover_image_path FROM publications WHERE id = :id LIMIT 1');
+        $existingPublicationStmt->execute(['id' => $id]);
+        $existingPublication = $existingPublicationStmt->fetch() ?: [];
+    }
+    $file = trim((string) ($existingPublication['file_path'] ?? ''));
+    $url = trim((string) ($_POST['external_url'] ?? ($existingPublication['external_url'] ?? '')));
+    $cover = trim((string) ($existingPublication['cover_image_path'] ?? ''));
     try {
         $uploadedFile = upload_public_file('file_upload', 'publications/files', ['pdf', 'doc', 'docx']);
         if ($uploadedFile) {
@@ -264,7 +270,7 @@ admin_header(tr('Публикации', 'Publications'));
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="save_publications_page_hero">
     <div class="grid">
-      <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input name="hero_publications_background_image_path" value="<?= h((string) ($heroPublications['background_image_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input value="<?= h((string) ($heroPublications['background_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить фон hero', 'Upload hero background')) ?></label><input type="file" name="hero_publications_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_publications_subtitle_enabled"><option value="1" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
     </div>
@@ -359,9 +365,9 @@ admin_header(tr('Публикации', 'Publications'));
       </div>
       <div><label><?= h(tr('Дата публикации', 'Published at')) ?></label><input name="published_at" value="<?= h((string) ($edit['published_at'] ?? date('Y-m-d 00:00:00'))) ?>"></div>
       <div><label><?= h(tr('Порядок', 'Order')) ?></label><input type="number" name="display_order" min="1" value="<?= h((string) ($edit['display_order'] ?? (count($rows) + 1))) ?>"></div>
-      <div><label><?= h(tr('Путь к обложке', 'Cover image path')) ?></label><input name="cover_image_path" value="<?= h((string) ($edit['cover_image_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Путь к обложке', 'Cover image path')) ?></label><input value="<?= h((string) ($edit['cover_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить обложку', 'Upload cover image')) ?></label><input type="file" name="cover_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label><?= h(tr('Путь к файлу', 'File path')) ?></label><input name="file_path" value="<?= h((string) ($edit['file_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Путь к файлу', 'File path')) ?></label><input value="<?= h((string) ($edit['file_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить файл', 'Upload file')) ?></label><input type="file" name="file_upload" accept=".pdf,.doc,.docx"></div>
       <div><label><?= h(tr('Внешняя ссылка', 'External URL')) ?></label><input name="external_url" value="<?= h((string) ($edit['external_url'] ?? '')) ?>"></div>
     </div>

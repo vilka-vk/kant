@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $heroRow = $pdo->prepare('SELECT id, background_image_path, subtitle_enabled FROM hero_sections WHERE page_key = :page_key LIMIT 1');
         $heroRow->execute(['page_key' => 'modules']);
         $hero = $heroRow->fetch() ?: null;
-        $heroBg = trim((string) ($_POST['hero_modules_background_image_path'] ?? ($hero['background_image_path'] ?? '')));
+        $heroBg = trim((string) ($hero['background_image_path'] ?? ''));
         try {
             $uploadedHero = upload_public_file('hero_modules_background_file', 'hero', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
             if ($uploadedHero) {
@@ -342,8 +342,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['reading_id'] ?? 0);
         $linked = (int) ($_POST['linked_publication_id'] ?? 0);
         $customUrl = trim((string) ($_POST['custom_url'] ?? ''));
-        $customFile = trim((string) ($_POST['custom_file_path'] ?? ''));
-        $customCover = trim((string) ($_POST['custom_cover_image_path'] ?? ''));
+        $customFile = '';
+        $customCover = '';
+        if ($id > 0) {
+            $existingReadingStmt = $pdo->prepare('SELECT custom_file_path, custom_cover_image_path FROM module_readings WHERE id = :id AND module_id = :module_id LIMIT 1');
+            $existingReadingStmt->execute(['id' => $id, 'module_id' => $moduleId]);
+            $existingReading = $existingReadingStmt->fetch() ?: [];
+            $customFile = trim((string) ($existingReading['custom_file_path'] ?? ''));
+            $customCover = trim((string) ($existingReading['custom_cover_image_path'] ?? ''));
+        }
         try {
             $uploadedReadingFile = upload_public_file('custom_file_upload', 'module-readings', ['pdf', 'doc', 'docx', 'txt']);
             if ($uploadedReadingFile) {
@@ -398,12 +405,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $id = $moduleId;
-    $heroBackground = trim((string) ($_POST['hero_background_image_path'] ?? ''));
+    $heroBackground = '';
     $presentationFile = '';
     if ($id > 0) {
-        $existingStmt = $pdo->prepare('SELECT presentation_file_path FROM modules WHERE id = :id LIMIT 1');
+        $existingStmt = $pdo->prepare('SELECT hero_background_image_path, presentation_file_path FROM modules WHERE id = :id LIMIT 1');
         $existingStmt->execute(['id' => $id]);
         $existingModule = $existingStmt->fetch() ?: [];
+        $heroBackground = (string) ($existingModule['hero_background_image_path'] ?? '');
         $presentationFile = (string) ($existingModule['presentation_file_path'] ?? '');
     }
     try {
@@ -585,7 +593,7 @@ admin_header(tr('Модули', 'Modules'));
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="save_modules_page_hero">
     <div class="grid">
-      <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input name="hero_modules_background_image_path" value="<?= h((string) ($heroModules['background_image_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input value="<?= h((string) ($heroModules['background_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить фон hero', 'Upload hero background')) ?></label><input type="file" name="hero_modules_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_modules_subtitle_enabled"><option value="1" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
     </div>
@@ -650,14 +658,14 @@ admin_header(tr('Модули', 'Modules'));
       <div>
         <label><?= h(tr('Slug (автоматически)', 'Slug (auto)')) ?></label>
         <div style="display:flex;gap:8px;align-items:center">
-          <input name="slug" readonly value="<?= h((string) ($editRow['slug'] ?? '')) ?>">
+          <input name="slug" disabled value="<?= h((string) ($editRow['slug'] ?? '')) ?>">
           <button type="button" class="btn btn-secondary" data-regenerate-slug title="<?= h(tr('Обновить Slug', 'Regenerate slug')) ?>" aria-label="<?= h(tr('Обновить Slug', 'Regenerate slug')) ?>">↻</button>
         </div>
       </div>
       <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
       <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
-      <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input name="hero_background_image_path" value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить hero-изображение', 'Upload hero image')) ?></label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
     </div>
@@ -765,7 +773,7 @@ admin_header(tr('Модули', 'Modules'));
     <input type="hidden" name="action" value="save_presentation_file">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <div class="grid">
-      <div><label><?= h(tr('Текущий файл презентации', 'Current presentation file')) ?></label><input value="<?= h((string) ($editRow['presentation_file_path'] ?? '')) ?>" readonly></div>
+      <div><label><?= h(tr('Текущий файл презентации', 'Current presentation file')) ?></label><input value="<?= h((string) ($editRow['presentation_file_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить PDF презентации', 'Upload presentation PDF')) ?></label><input type="file" name="presentation_file_upload" accept=".pdf" required></div>
     </div>
     <div class="actions" style="margin-top:10px;justify-content:space-between;width:100%">
@@ -870,9 +878,9 @@ admin_header(tr('Модули', 'Modules'));
     <div class="grid">
       <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>">#<?= h((string) $p['id']) ?><?= !empty($p['title']) ? (' - ' . h((string) $p['title'])) : '' ?></option><?php endforeach; ?></select></div>
       <div><label><?= h(tr('Ссылка на материал', 'Reading URL')) ?></label><input name="custom_url" id="reading-custom-url"></div>
-      <div><label><?= h(tr('Путь к файлу материала (если без загрузки)', 'Reading file path (if no upload)')) ?></label><input name="custom_file_path" id="reading-custom-file-path"></div>
+      <div><label><?= h(tr('Путь к файлу материала', 'Reading file path')) ?></label><input id="reading-custom-file-path" disabled></div>
       <div><label><?= h(tr('Загрузить файл материала', 'Upload reading file')) ?></label><input type="file" name="custom_file_upload" id="reading-custom-file-upload" accept=".pdf,.doc,.docx,.txt"></div>
-      <div><label><?= h(tr('Путь к обложке (если без загрузки)', 'Cover image path (if no upload)')) ?></label><input name="custom_cover_image_path" id="reading-custom-cover-path"></div>
+      <div><label><?= h(tr('Путь к обложке', 'Cover image path')) ?></label><input id="reading-custom-cover-path" disabled></div>
       <div><label><?= h(tr('Загрузить изображение обложки', 'Upload cover image')) ?></label><input type="file" name="custom_cover_upload" id="reading-custom-cover-upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
     </div>
     <div id="reading-custom-titles">

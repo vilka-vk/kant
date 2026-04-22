@@ -28,7 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/admin/authors.php');
     }
     $id = (int) ($_POST['id'] ?? 0);
-    $photoPath = trim((string) ($_POST['photo_path'] ?? ''));
+    $photoPath = '';
+    if ($id > 0) {
+        $currentAuthorStmt = $pdo->prepare('SELECT photo_path FROM authors WHERE id = :id LIMIT 1');
+        $currentAuthorStmt->execute(['id' => $id]);
+        $currentAuthor = $currentAuthorStmt->fetch() ?: [];
+        $photoPath = trim((string) ($currentAuthor['photo_path'] ?? ''));
+    }
     try {
         $uploadedPhoto = upload_public_file('photo_upload', 'authors', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
         if ($uploadedPhoto) {
@@ -132,7 +138,11 @@ admin_header(tr('Авторы', 'Authors'));
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($edit['id'] ?? 0)) ?>">
     <div class="grid">
-      <div><label><?= h(tr('Путь к фото', 'Photo path')) ?></label><input name="photo_path" value="<?= h((string) ($edit['photo_path'] ?? '')) ?>"></div>
+      <div>
+        <label><?= h(tr('Путь к фото', 'Photo path')) ?></label>
+        <input value="<?= h((string) ($edit['photo_path'] ?? '')) ?>" disabled>
+        <small class="muted"><?= h(tr('Заполняется автоматически после загрузки фото.', 'Filled automatically after photo upload.')) ?></small>
+      </div>
       <div><label><?= h(tr('Загрузить фото', 'Upload photo')) ?></label><input type="file" name="photo_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Порядок отображения', 'Display order')) ?></label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? (count($rows) + 1))) ?>"></div>
     </div>

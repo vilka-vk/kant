@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $current = $pdo->query('SELECT * FROM our_position WHERE id = 1')->fetch() ?: [];
-    $imagePrimary = trim((string) ($_POST['image_primary_path'] ?? ($current['image_primary_path'] ?? '')));
-    $imageSecondary = trim((string) ($_POST['image_secondary_path'] ?? ($current['image_secondary_path'] ?? '')));
+    $imagePrimary = trim((string) ($current['image_primary_path'] ?? ''));
+    $imageSecondary = trim((string) ($current['image_secondary_path'] ?? ''));
 
     try {
         $uploadedPrimary = upload_public_file('image_primary_file', 'position-images', ['jpg', 'jpeg', 'png', 'webp', 'gif']);
@@ -177,13 +177,13 @@ admin_header(tr('Наша позиция', 'Our position'));
       <div class="grid">
         <div>
           <label><?= h(tr('Путь к изображению 1', 'Image 1 path')) ?></label>
-          <input name="image_primary_path" value="<?= h((string) ($base['image_primary_path'] ?? '')) ?>">
+          <input value="<?= h((string) ($base['image_primary_path'] ?? '')) ?>" disabled>
           <label style="margin-top:8px"><?= h(tr('Загрузить изображение 1', 'Upload image 1')) ?></label>
           <input type="file" name="image_primary_file" accept=".jpg,.jpeg,.png,.webp,.gif">
         </div>
         <div>
           <label><?= h(tr('Путь к изображению 2', 'Image 2 path')) ?></label>
-          <input name="image_secondary_path" value="<?= h((string) ($base['image_secondary_path'] ?? '')) ?>">
+          <input value="<?= h((string) ($base['image_secondary_path'] ?? '')) ?>" disabled>
           <label style="margin-top:8px"><?= h(tr('Загрузить изображение 2', 'Upload image 2')) ?></label>
           <input type="file" name="image_secondary_file" accept=".jpg,.jpeg,.png,.webp,.gif">
         </div>

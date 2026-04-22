@@ -486,6 +486,12 @@
       if (cleanPath.endsWith('/module.html') || cleanPath.endsWith('/module-1.html') || cleanPath.endsWith('/module')) {
         var siteModuleDetail = (await apiGet('site-settings', locale)).data || {};
         renderFooter(siteModuleDetail);
+        var moduleHeroSection = {};
+        try {
+          moduleHeroSection = (await apiGet('hero-sections?page_key=modules', locale)).data || {};
+        } catch (e) {
+          moduleHeroSection = {};
+        }
         var params = new URLSearchParams(window.location.search);
         var slug = params.get('slug');
         var moduleItem = null;
@@ -496,6 +502,9 @@
           moduleItem = moduleList[0] || null;
         }
         if (moduleItem && moduleItem.id) {
+          if (!moduleItem.hero_background_image_path && moduleHeroSection.background_image_path) {
+            moduleItem.hero_background_image_path = moduleHeroSection.background_image_path;
+          }
           var transcripts = [];
           try {
             transcripts = (await apiGet('modules/' + moduleItem.id + '/transcripts', locale)).data || [];

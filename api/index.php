@@ -80,6 +80,8 @@ if ($route === 'modules') {
     $rows = $pdo->query('SELECT * FROM modules ORDER BY sort_order ASC, id ASC')->fetchAll();
     $result = [];
     foreach ($rows as $row) {
+        $row['hero_background_image_path'] = normalize_public_asset_path((string) ($row['hero_background_image_path'] ?? ''));
+        $row['presentation_file_path'] = normalize_public_asset_path((string) ($row['presentation_file_path'] ?? ''));
         $tr = translated_row($pdo, 'modules_translations', 'module_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
         $result[] = array_merge($row, $tr);
     }
@@ -109,6 +111,8 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
     $videosStmt->execute(['module_id' => (int) $row['id']]);
     $presentationVideos = $videosStmt->fetchAll();
     $payload = array_merge($row, $tr);
+    $payload['hero_background_image_path'] = normalize_public_asset_path((string) ($payload['hero_background_image_path'] ?? ''));
+    $payload['presentation_file_path'] = normalize_public_asset_path((string) ($payload['presentation_file_path'] ?? ''));
     $payload['translations'] = $translations;
     $payload['lecture_videos'] = $lectureVideos;
     $payload['presentation_videos'] = $presentationVideos;
@@ -118,7 +122,9 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
     $payload['transcripts'] = [];
     foreach ($transcriptRows as $transcriptRow) {
         $transcriptTr = translated_row($pdo, 'module_transcripts_translations', 'module_transcript_id', (int) $transcriptRow['id'], $locale, $defaultLocale) ?: [];
-        $payload['transcripts'][] = array_merge($transcriptRow, $transcriptTr);
+        $transcriptPayload = array_merge($transcriptRow, $transcriptTr);
+        $transcriptPayload['file_path'] = normalize_public_asset_path((string) ($transcriptPayload['file_path'] ?? ''));
+        $payload['transcripts'][] = $transcriptPayload;
     }
     out($payload, $locale);
 }

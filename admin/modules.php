@@ -658,7 +658,7 @@ admin_header(tr('Модули', 'Modules'));
     <a class="btn" href="/admin/modules.php?form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
   </div>
   <table>
-    <thead><tr><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Превью', 'Preview')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Лекция', 'Lecture')) ?></th><th><?= h(tr('Презентация', 'Presentation')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Обложка', 'Cover')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Лекция', 'Lecture')) ?></th><th><?= h(tr('Презентация', 'Presentation')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $row): ?>
       <tr>
@@ -737,12 +737,15 @@ admin_header(tr('Модули', 'Modules'));
         $translationFields = [
           'title' => tr('Название модуля', 'Module title'),
           'short_description' => tr('Короткое описание', 'Short description'),
+          'formats' => tr('Форматы (через запятую)', 'Formats (comma-separated)'),
           'lecture_title' => tr('Заголовок блока лекции', 'Lecture block title'),
           'presentation_title' => tr('Заголовок блока презентации', 'Presentation block title'),
           'literature_html' => tr('Текст списка литературы (WYSIWYG)', 'Literature text (WYSIWYG)'),
         ];
         if ($moduleTranslationsHasFormats) {
-          $translationFields['formats'] = tr('Форматы (через запятую)', 'Formats (comma-separated)');
+          // keep localized formats field right after short_description
+        } else {
+          unset($translationFields['formats']);
         }
         foreach ($translationFields as $fieldKey => $label):
           $leftValue = (string) ($trMap[$leftLocale][$fieldKey] ?? '');

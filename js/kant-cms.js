@@ -260,7 +260,7 @@
     });
   }
 
-  function renderModuleDetail(moduleItem, transcripts, readings, locale) {
+  function renderModuleDetail(moduleItem, transcripts, readings, locale, moduleList) {
     if (!moduleItem) return;
     var moduleWord = locale === 'ru' ? 'Модуль' : 'Module';
     setText('.module-hero__kicker', moduleWord + ' ' + (moduleItem.module_number || ''));
@@ -394,6 +394,47 @@
         if (literatureLink) literatureLink.style.display = 'none';
       }
     }
+
+    var navPair = document.querySelector('.module-nav-pair');
+    var prevLink = navPair ? navPair.querySelector('.btn-interlinking--prev') : null;
+    var nextLink = navPair ? navPair.querySelector('.btn-interlinking--next') : null;
+    var allModules = Array.isArray(moduleList) ? moduleList.slice() : [];
+    if (prevLink && nextLink && allModules.length) {
+      var sortedByOrder = allModules.slice().sort(function (a, b) {
+        var aOrder = Number(a && a.sort_order) || 0;
+        var bOrder = Number(b && b.sort_order) || 0;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        return (Number(a && a.id) || 0) - (Number(b && b.id) || 0);
+      });
+      var latestCreated = allModules.slice().sort(function (a, b) {
+        return (Number(b && b.id) || 0) - (Number(a && a.id) || 0);
+      })[0] || sortedByOrder[sortedByOrder.length - 1];
+
+      var currentIndex = sortedByOrder.findIndex(function (m) {
+        return Number(m && m.id) === Number(moduleItem && moduleItem.id);
+      });
+      if (currentIndex < 0) currentIndex = 0;
+      var nextModule = sortedByOrder[(currentIndex + 1) % sortedByOrder.length] || sortedByOrder[0];
+
+      function moduleNavLabel(item) {
+        if (!item) return '';
+        var num = item.module_number || item.sort_order || '';
+        var title = item.title || '';
+        return moduleWord + ' ' + num + ': ' + title;
+      }
+
+      function applyModuleNav(anchor, item) {
+        if (!anchor || !item) return;
+        anchor.setAttribute('href', 'module.html?slug=' + encodeURIComponent(item.slug || ''));
+        var textEl = anchor.querySelector('.btn-interlinking__text');
+        if (textEl) {
+          textEl.innerHTML = '<strong>' + moduleNavLabel(item) + '</strong>';
+        }
+      }
+
+      applyModuleNav(prevLink, latestCreated);
+      applyModuleNav(nextLink, nextModule);
+    }
   }
 
   function renderOurPosition(position) {
@@ -503,6 +544,7 @@
       if (cleanPath.endsWith('/module.html') || cleanPath.endsWith('/module-1.html') || cleanPath.endsWith('/module')) {
         var siteModuleDetail = (await apiGet('site-settings', locale)).data || {};
         renderFooter(siteModuleDetail);
+        var moduleList = (await apiGet('modules', locale)).data || [];
         var moduleHeroSection = {};
         try {
           moduleHeroSection = (await apiGet('hero-sections?page_key=modules', locale)).data || {};
@@ -515,7 +557,6 @@
         if (slug) {
           moduleItem = (await apiGet('modules/' + encodeURIComponent(slug), locale)).data || null;
         } else {
-          var moduleList = (await apiGet('modules', locale)).data || [];
           moduleItem = moduleList[0] || null;
         }
         if (moduleItem && moduleItem.id) {
@@ -529,7 +570,7 @@
             transcripts = Array.isArray(moduleItem.transcripts) ? moduleItem.transcripts : [];
           }
           var readings = (await apiGet('modules/' + moduleItem.id + '/readings', locale)).data || [];
-          renderModuleDetail(moduleItem, transcripts, readings, locale);
+          renderModuleDetail(moduleItem, transcripts, readings, locale, moduleList);
           refreshScrollAnimations();
         }
       }

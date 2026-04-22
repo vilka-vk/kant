@@ -553,6 +553,7 @@ $rowsStmt = $pdo->prepare('SELECT
     m.id,
     m.sort_order,
     m.languages,
+    m.hero_background_image_path,
     COALESCE(mt.title, "") AS title,
     CASE WHEN EXISTS (
       SELECT 1 FROM module_lecture_videos lv WHERE lv.module_id = m.id LIMIT 1
@@ -625,11 +626,22 @@ admin_header(tr('Модули', 'Modules'));
     <a class="btn" href="/admin/modules.php?form=1"><?= h(tr('Добавить +', 'Add +')) ?></a>
   </div>
   <table>
-    <thead><tr><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Лекция', 'Lecture')) ?></th><th><?= h(tr('Презентация', 'Presentation')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
+    <thead><tr><th><?= h(tr('Номер', 'Number')) ?></th><th><?= h(tr('Превью', 'Preview')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Языки', 'Languages')) ?></th><th><?= h(tr('Лекция', 'Lecture')) ?></th><th><?= h(tr('Презентация', 'Presentation')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $row): ?>
       <tr>
         <td><?= h((string) $row['sort_order']) ?></td>
+        <td>
+          <?php
+            $heroPreview = (string) ($row['hero_background_image_path'] ?? '');
+            if ($heroPreview !== '' && !preg_match('#^([a-z]+:)?//#i', $heroPreview) && !str_starts_with($heroPreview, '/')) {
+                $heroPreview = '/' . $heroPreview;
+            }
+          ?>
+          <?php if ($heroPreview !== ''): ?>
+            <img class="table-preview" src="<?= h($heroPreview) ?>" alt="<?= h(tr('Hero превью', 'Hero preview')) ?>">
+          <?php endif; ?>
+        </td>
         <td><a href="/admin/modules.php?form=1&edit=<?= h((string) $row['id']) ?>"><?= h((string) $row['title']) ?></a></td>
         <td><?= h($row['languages']) ?></td>
         <td><?= h(((int) $row['has_lecture']) > 0 ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
@@ -739,7 +751,7 @@ admin_header(tr('Модули', 'Modules'));
   <table id="lecture-table"><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody id="lecture-sortable">
     <?php foreach ($lectureVideos as $video): ?>
       <tr data-id="<?= h((string) $video['id']) ?>" data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
-        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $video['sort_order']) ?></td><td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td>
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $video['sort_order']) ?></td><td><?= h((string) $video['language_code']) ?></td><td><a href="<?= h((string) $video['video_url']) ?>" target="_blank" rel="noopener noreferrer"><?= h((string) $video['video_url']) ?></a></td><td><?= h((string) $video['video_alt']) ?></td>
         <td class="actions compact-inputs">
           <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&lecture_video=<?= h((string) $video['id']) ?>"><?= h(tr('Изменить', 'Edit')) ?></a>
           <form method="post" onsubmit="return confirm('<?= h(tr('Удалить видео лекции?', 'Delete lecture video?')) ?>')">
@@ -807,7 +819,7 @@ admin_header(tr('Модули', 'Modules'));
   <table id="presentation-table"><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Видео (ссылка/файл)', 'Video (link/file)')) ?></th><th><?= h(tr('Подпись к видео', 'Video caption')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead><tbody id="presentation-sortable">
     <?php foreach ($presentationVideos as $video): ?>
       <tr data-id="<?= h((string) $video['id']) ?>" data-language-code="<?= h(strtolower((string) $video['language_code'])) ?>">
-        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $video['sort_order']) ?></td><td><?= h((string) $video['language_code']) ?></td><td><?= h((string) $video['video_url']) ?></td><td><?= h((string) $video['video_alt']) ?></td>
+        <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $video['sort_order']) ?></td><td><?= h((string) $video['language_code']) ?></td><td><a href="<?= h((string) $video['video_url']) ?>" target="_blank" rel="noopener noreferrer"><?= h((string) $video['video_url']) ?></a></td><td><?= h((string) $video['video_alt']) ?></td>
         <td class="actions compact-inputs">
           <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&presentation_video=<?= h((string) $video['id']) ?>"><?= h(tr('Изменить', 'Edit')) ?></a>
           <form method="post" onsubmit="return confirm('<?= h(tr('Удалить видео презентации?', 'Delete presentation video?')) ?>')">

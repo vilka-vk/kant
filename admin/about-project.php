@@ -168,7 +168,7 @@ admin_header(tr('О проекте', 'About Project'));
         <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
         <td><?= h((string) $video['sort_order']) ?></td>
         <td><?= h((string) $video['language_code']) ?></td>
-        <td><?= h((string) $video['video_url']) ?></td>
+        <td><a href="<?= h((string) $video['video_url']) ?>" target="_blank" rel="noopener noreferrer"><?= h((string) $video['video_url']) ?></a></td>
         <td><?= h((string) $video['video_alt']) ?></td>
         <td>
           <form method="post" onsubmit="return confirm('<?= h(tr('Удалить это видео?', 'Delete this video?')) ?>')">

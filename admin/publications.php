@@ -203,7 +203,7 @@ if (!empty($heroPublications['id'])) {
     }
 }
 $selectedTypeId = (int) ($_GET['type_id'] ?? 0);
-$rowsStmt = $pdo->prepare('SELECT p.id, p.display_order, p.published_at, p.file_path, p.external_url, pt.slug AS type_slug,
+$rowsStmt = $pdo->prepare('SELECT p.id, p.display_order, p.published_at, p.file_path, p.external_url, p.cover_image_path, pt.slug AS type_slug,
     COALESCE(ptt.name, pt.slug) AS type_name,
     COALESCE(
       NULLIF(ptr_locale.title, \'\'),
@@ -308,13 +308,22 @@ admin_header(tr('Публикации', 'Publications'));
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'xor'): ?><p class="err"><?= h(tr('Нужно указать только одно: путь к файлу или внешнюю ссылку.', 'Exactly one of file path or external URL is required.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] !== 'xor'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <table style="table-layout: fixed; width: 100%;">
-    <thead><tr><th class="drag-col"></th><th style="width: 84px;"><?= h(tr('Порядок', 'Order')) ?></th><th style="width: 64px;">ID</th><th style="width: 180px;"><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th style="width: 180px;"><?= h(tr('Дата', 'Date')) ?></th><th style="width: 90px; text-align: center;"><?= h(tr('Цель', 'Target')) ?></th><th style="width: 150px;"><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th class="drag-col"></th><th style="width: 84px;"><?= h(tr('Порядок', 'Order')) ?></th><th style="width: 64px;">ID</th><th style="width: 120px;"><?= h(tr('Обложка', 'Cover')) ?></th><th style="width: 180px;"><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th style="width: 180px;"><?= h(tr('Дата', 'Date')) ?></th><th style="width: 90px; text-align: center;"><?= h(tr('Цель', 'Target')) ?></th><th style="width: 150px;"><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody id="publications-sortable">
     <?php foreach ($rows as $r): ?>
       <tr data-id="<?= h((string) $r['id']) ?>">
         <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
         <td><?= h((string) $r['display_order']) ?></td>
         <td><?= h((string) $r['id']) ?></td>
+        <td>
+          <?php
+            $coverPreview = (string) ($r['cover_image_path'] ?? '');
+            if ($coverPreview !== '' && !preg_match('#^([a-z]+:)?//#i', $coverPreview) && !str_starts_with($coverPreview, '/')) {
+                $coverPreview = '/' . $coverPreview;
+            }
+          ?>
+          <img class="table-preview" src="<?= h($coverPreview !== '' ? $coverPreview : '/assets/images/publication-3.svg') ?>" alt="<?= h(tr('Обложка публикации', 'Publication cover')) ?>">
+        </td>
         <td><?= h((string) $r['type_name']) ?></td>
         <td style="width: auto;"><?= h((string) $r['title']) ?></td>
         <td><?= h((string) $r['published_at']) ?></td>

@@ -250,6 +250,18 @@ td {
   cursor: grabbing;
 }
 
+.table-preview {
+  max-width: 100px;
+  max-height: 100px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #e6e9f2;
+  background: #fff;
+  display: block;
+}
+
 .muted {
   color: #6b7280;
 }

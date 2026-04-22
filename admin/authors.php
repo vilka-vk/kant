@@ -27,6 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         redirect('/admin/authors.php');
     }
+    if ($action === 'delete_author') {
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id > 0) {
+            $photoStmt = $pdo->prepare('SELECT photo_path FROM authors WHERE id = :id LIMIT 1');
+            $photoStmt->execute(['id' => $id]);
+            $author = $photoStmt->fetch() ?: [];
+            $pdo->prepare('DELETE FROM authors WHERE id = :id')->execute(['id' => $id]);
+            delete_public_file((string) ($author['photo_path'] ?? ''));
+        }
+        redirect('/admin/authors.php');
+    }
     $id = (int) ($_POST['id'] ?? 0);
     $photoPath = '';
     if ($id > 0) {
@@ -93,7 +104,18 @@ if ($editId > 0) {
         $trMap[$tr['locale']] = $tr;
     }
 }
-$rows = $pdo->query('SELECT * FROM authors ORDER BY display_order ASC, id ASC')->fetchAll();
+$rows = $pdo->query("SELECT
+  a.id,
+  a.photo_path,
+  a.display_order,
+  COALESCE(CONCAT_WS(' ', NULLIF(atr_ru.first_name, ''), NULLIF(atr_ru.last_name, '')), '') AS name_ru,
+  COALESCE(CONCAT_WS(' ', NULLIF(atr_en.first_name, ''), NULLIF(atr_en.last_name, '')), '') AS name_en
+FROM authors a
+LEFT JOIN authors_translations atr_ru
+  ON atr_ru.author_id = a.id AND atr_ru.locale = 'ru'
+LEFT JOIN authors_translations atr_en
+  ON atr_en.author_id = a.id AND atr_en.locale = 'en'
+ORDER BY a.display_order ASC, a.id ASC")->fetchAll();
 $isFormOpen = $edit || (string) ($_GET['form'] ?? '') === '1';
 
 admin_header(tr('Авторы', 'Authors'));
@@ -106,15 +128,34 @@ admin_header(tr('Авторы', 'Authors'));
   <?php if (!empty($_GET['saved']) && !$isFormOpen): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && !$isFormOpen): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <table>
-    <thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th>ID</th><th><?= h(tr('Фото', 'Photo')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
+    <thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Превью фото', 'Photo preview')) ?></th><th><?= h(tr('Имя + Фамилия (RU)', 'Full name (RU)')) ?></th><th><?= h(tr('Имя + Фамилия (EN)', 'Full name (EN)')) ?></th><th><?= h(tr('Действия', 'Actions')) ?></th></tr></thead>
     <tbody id="authors-sortable">
     <?php foreach ($rows as $r): ?>
       <tr data-id="<?= h((string) $r['id']) ?>">
         <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
         <td><?= h((string) $r['display_order']) ?></td>
-        <td><?= h((string) $r['id']) ?></td>
-        <td><?= h($r['photo_path']) ?></td>
-        <td><a class="btn btn-secondary" href="/admin/authors.php?form=1&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a></td>
+        <td>
+          <?php
+            $photoPreview = (string) ($r['photo_path'] ?? '');
+            if ($photoPreview !== '' && !preg_match('#^([a-z]+:)?//#i', $photoPreview) && !str_starts_with($photoPreview, '/')) {
+                $photoPreview = '/' . $photoPreview;
+            }
+          ?>
+          <?php if ($photoPreview !== ''): ?>
+            <img class="table-preview" src="<?= h($photoPreview) ?>" alt="<?= h(tr('Фото автора', 'Author photo')) ?>">
+          <?php endif; ?>
+        </td>
+        <td><?= h((string) $r['name_ru']) ?></td>
+        <td><?= h((string) $r['name_en']) ?></td>
+        <td class="actions">
+          <a class="btn btn-secondary" href="/admin/authors.php?form=1&edit=<?= h((string) $r['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a>
+          <form method="post" onsubmit="return confirm('<?= h(tr('Удалить автора?', 'Delete author?')) ?>')">
+            <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+            <input type="hidden" name="action" value="delete_author">
+            <input type="hidden" name="id" value="<?= h((string) $r['id']) ?>">
+            <button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
+          </form>
+        </td>
       </tr>
     <?php endforeach; ?>
     </tbody>

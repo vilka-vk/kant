@@ -259,7 +259,8 @@ td {
   display: block;
 }
 
-#publications-sortable .table-preview {
+#publications-sortable .table-preview,
+#readings-sortable .table-preview {
   max-width: 50px;
   max-height: 60px;
 }

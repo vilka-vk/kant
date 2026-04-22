@@ -48,7 +48,7 @@ function makeModuleSlug(int $moduleNumber, array $locales, array $post): string
     if ($slug === '') {
         return 'module-' . max(1, $moduleNumber);
     }
-    return $slug;
+    return 'module-' . $slug;
 }
 
 function nextSortOrder(PDO $pdo, string $table, int $moduleId): int
@@ -433,12 +433,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $moduleNumber = (int) ($_POST['sort_order'] ?? 0);
+    $fallbackLocale = $locales[0] ?? 'ru';
     $base = [
         'slug' => makeModuleSlug($moduleNumber, $locales, $_POST),
         'module_number' => $moduleNumber,
         'sort_order' => (int) ($_POST['sort_order'] ?? 0),
         'languages' => trim((string) ($_POST['languages'] ?? '')),
-        'formats' => trim((string) ($_POST['formats'] ?? '')),
+        'formats' => trim((string) ($_POST['formats_' . $fallbackLocale] ?? '')),
         'list_duration_display' => trim((string) ($_POST['list_duration_display'] ?? '')),
         'hero_background_image_path' => $heroBackground,
         'presentation_file_path' => $presentationFile,
@@ -457,15 +458,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     foreach ($locales as $locale) {
         $shortDescription = trim((string) ($_POST['short_description_' . $locale] ?? ''));
-        $pdo->prepare('INSERT INTO modules_translations (module_id, locale, title, short_description, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html)
-          VALUES (:module_id,:locale,:title,:short_description,:hero_kicker,:hero_subtitle,:lecture_title,:presentation_title,:literature_html)
+        $pdo->prepare('INSERT INTO modules_translations (module_id, locale, title, short_description, formats, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html)
+          VALUES (:module_id,:locale,:title,:short_description,:formats,:hero_kicker,:hero_subtitle,:lecture_title,:presentation_title,:literature_html)
           ON DUPLICATE KEY UPDATE title = VALUES(title), short_description = VALUES(short_description), hero_kicker = VALUES(hero_kicker),
-          hero_subtitle = VALUES(hero_subtitle), lecture_title = VALUES(lecture_title), presentation_title = VALUES(presentation_title), literature_html = VALUES(literature_html)')
+          formats = VALUES(formats), hero_subtitle = VALUES(hero_subtitle), lecture_title = VALUES(lecture_title), presentation_title = VALUES(presentation_title), literature_html = VALUES(literature_html)')
             ->execute([
                 'module_id' => $id,
                 'locale' => $locale,
                 'title' => trim((string) ($_POST['title_' . $locale] ?? '[empty]')),
                 'short_description' => $shortDescription,
+                'formats' => trim((string) ($_POST['formats_' . $locale] ?? '')),
                 'hero_kicker' => '',
                 'hero_subtitle' => $shortDescription,
                 'lecture_title' => trim((string) ($_POST['lecture_title_' . $locale] ?? '')),
@@ -493,7 +495,7 @@ if ($editId > 0) {
     $stmt = $pdo->prepare('SELECT * FROM modules WHERE id = :id');
     $stmt->execute(['id' => $editId]);
     $editRow = $stmt->fetch();
-    $trs = $pdo->prepare('SELECT locale, title, short_description, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html FROM modules_translations WHERE module_id = :id');
+    $trs = $pdo->prepare('SELECT locale, title, short_description, formats, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html FROM modules_translations WHERE module_id = :id');
     $trs->execute(['id' => $editId]);
     foreach ($trs->fetchAll() as $tr) {
         $trMap[$tr['locale']] = $tr;
@@ -685,7 +687,6 @@ admin_header(tr('Модули', 'Modules'));
       </div>
       <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
-      <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить hero-изображение', 'Upload hero image')) ?></label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
@@ -703,6 +704,7 @@ admin_header(tr('Модули', 'Modules'));
         $translationFields = [
           'title' => tr('Название модуля', 'Module title'),
           'short_description' => tr('Короткое описание', 'Short description'),
+          'formats' => tr('Форматы (через запятую)', 'Formats (comma-separated)'),
           'lecture_title' => 'Lecture title',
           'presentation_title' => 'Presentation title',
           'literature_html' => 'Literature text (WYSIWYG)',
@@ -1060,7 +1062,7 @@ function refreshModuleSlug() {
   });
   var combined = [moduleNumber, title].filter(Boolean).join(' ');
   var slug = moduleSlugify(combined);
-  slugInput.value = slug || ('module-' + (moduleNumber || '1'));
+  slugInput.value = slug ? ('module-' + slug) : ('module-' + (moduleNumber || '1'));
 }
 if (slugInput && moduleNumberInput) {
   moduleNumberInput.addEventListener('input', refreshModuleSlug);

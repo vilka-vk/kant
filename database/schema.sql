@@ -153,6 +153,7 @@ CREATE TABLE IF NOT EXISTS modules_translations (
   locale VARCHAR(10) NOT NULL,
   title VARCHAR(255) NOT NULL,
   short_description MEDIUMTEXT NOT NULL,
+  formats VARCHAR(255) DEFAULT '',
   hero_kicker VARCHAR(255) DEFAULT '',
   hero_subtitle VARCHAR(500) DEFAULT '',
   lecture_label VARCHAR(255) DEFAULT '',

@@ -1076,7 +1076,7 @@ ul, ol {
 
 .module-hero__headline {
   margin-top: 8px;
-  font-size: 92px;
+  font-size: 80px;
   line-height: 0.88;
   color: var(--color-white);
 }
@@ -1755,7 +1755,7 @@ ul, ol {
   .module-hero { min-height: 640px; }
   .module-hero .hero__content { left: 32px; right: auto; bottom: 32px; max-width: calc(100% - 32px - 300px); }
   .module-hero__kicker { font-size: 88px; letter-spacing: 1.76px; }
-  .module-hero__headline { font-size: 64px; }
+  .module-hero__headline { font-size: 48px; }
   .module-hero__subtitle { margin-top: 24px; }
   .module-hero .hero__crease { width: 280px; height: 245px; }
   .module-label { font-size: 44px; letter-spacing: 0.88px; }
@@ -2104,7 +2104,7 @@ ul, ol {
   .module-hero { min-height: 480px; }
   .module-hero .hero__content { left: 16px; right: auto; top: auto; bottom: 16px; max-width: calc(100% - 16px - 180px); padding: 0; gap: 10px; }
   .module-hero__kicker { font-size: 52px; letter-spacing: 1.04px; }
-  .module-hero__headline { font-size: 38px; line-height: 0.92; }
+  .module-hero__headline { font-size: 32px; line-height: 0.88; }
   .module-hero__subtitle { max-width: 100%; margin-top: 16px; font-size: 10px; width: 100%; }
   .module-hero .hero__crease { width: 164px; height: auto; }
   .module-label { font-size: 40px; letter-spacing: 0.8px; }

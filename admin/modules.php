@@ -791,7 +791,7 @@ admin_header(tr('Модули', 'Modules'));
           'short_description' => tr('Короткое описание', 'Short description'),
           'lecture_title' => tr('Заголовок блока лекции', 'Lecture block title'),
           'presentation_title' => tr('Заголовок блока презентации', 'Presentation block title'),
-          'literature_html' => tr('Текст списка литературы (WYSIWYG)', 'Literature text (WYSIWYG)'),
+          'literature_html' => tr('Список литературы', 'Literature list'),
         ];
         foreach ($translationFields as $fieldKey => $label):
           $leftValue = (string) ($trMap[$leftLocale][$fieldKey] ?? '');

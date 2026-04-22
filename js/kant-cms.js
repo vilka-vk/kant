@@ -14,7 +14,8 @@
   }
 
   async function apiGet(path, locale) {
-    var url = API_BASE + '/' + path + '?lang=' + encodeURIComponent(locale);
+    var separator = path.indexOf('?') === -1 ? '?' : '&';
+    var url = API_BASE + '/' + path + separator + 'lang=' + encodeURIComponent(locale);
     var res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('Request failed: ' + path);
     return res.json();

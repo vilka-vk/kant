@@ -72,7 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $heroRow = $pdo->prepare('SELECT id, background_image_path, subtitle_enabled FROM hero_sections WHERE page_key = :page_key LIMIT 1');
         $heroRow->execute(['page_key' => 'modules']);
         $hero = $heroRow->fetch() ?: null;
-        $heroBg = trim((string) ($hero['background_image_path'] ?? ''));
+        $previousHeroBg = trim((string) ($hero['background_image_path'] ?? ''));
+        $heroBg = $previousHeroBg;
         try {
             $uploadedHero = upload_public_file('hero_modules_background_file', 'hero', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
             if ($uploadedHero) {
@@ -97,6 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'background_image_path' => $heroBg,
                 ]);
             $heroId = (int) $pdo->lastInsertId();
+        }
+        if ($heroBg !== '' && $previousHeroBg !== '' && $heroBg !== $previousHeroBg) {
+            delete_public_file($previousHeroBg);
         }
         foreach ($locales as $locale) {
             $pdo->prepare('INSERT INTO hero_sections_translations (hero_section_id, locale, title, subtitle)
@@ -406,18 +410,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $id = $moduleId;
     $heroBackground = '';
+    $previousHeroBackground = '';
     $presentationFile = '';
     if ($id > 0) {
         $existingStmt = $pdo->prepare('SELECT hero_background_image_path, presentation_file_path FROM modules WHERE id = :id LIMIT 1');
         $existingStmt->execute(['id' => $id]);
         $existingModule = $existingStmt->fetch() ?: [];
         $heroBackground = (string) ($existingModule['hero_background_image_path'] ?? '');
+        $previousHeroBackground = $heroBackground;
         $presentationFile = (string) ($existingModule['presentation_file_path'] ?? '');
     }
     try {
         $uploadedHero = upload_public_file('hero_background_file', 'module-hero', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
         if ($uploadedHero) {
             $heroBackground = $uploadedHero;
+            if ($previousHeroBackground !== '' && $previousHeroBackground !== $heroBackground) {
+                delete_public_file($previousHeroBackground);
+            }
         }
     } catch (Throwable $e) {
         redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode($e->getMessage()));

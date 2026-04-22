@@ -60,6 +60,10 @@
         RU: 'Наши авторы',
         EN: 'Our Authors'
       },
+      homeHeroPeaceSubtitle: {
+        RU: 'Мир через силу знания',
+        EN: 'Peace through the strength of knowledge'
+      },
       navModules: {
         RU: 'Модули',
         EN: 'Modules'

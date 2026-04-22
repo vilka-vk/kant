@@ -187,6 +187,13 @@ admin_header(tr('О проекте', 'About Project'));
     <input type="hidden" name="action" value="reorder_about_videos">
     <div id="about-videos-reorder-ids"></div>
   </form>
+  <p class="muted"><?= h(tr('Предпросмотр вкладок:', 'Preview tabs:')) ?>
+    <?php foreach ($aboutVideos as $video): ?>
+      <span style="display:inline-block;padding:2px 8px;border:1px solid #ccc;border-radius:14px;margin-right:6px">
+        <?= h(strtoupper((string) ($video['language_code'] ?? ''))) ?>
+      </span>
+    <?php endforeach; ?>
+  </p>
   <form method="post" class="compact-inputs" id="about-video-add-form" enctype="multipart/form-data" hidden style="margin-top:12px">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="add_about_video">

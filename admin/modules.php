@@ -569,16 +569,16 @@ if ($editId > 0) {
       p.cover_image_path AS publication_cover_image_path,
       pt.slug AS publication_type_slug,
       COALESCE(
-        NULLIF(ptt_locale.name, ''),
+        NULLIF(ptt_locale.name, \'\'),
         (
           SELECT ptt_any.name
           FROM publication_types_translations ptt_any
-          WHERE ptt_any.publication_type_id = pt.id AND TRIM(COALESCE(ptt_any.name, '')) <> ''
+          WHERE ptt_any.publication_type_id = pt.id AND TRIM(COALESCE(ptt_any.name, \'\')) <> \'\'
           ORDER BY ptt_any.locale ASC
           LIMIT 1
         ),
         pt.slug,
-        ''
+        \'\'
       ) AS publication_type_name,
       COALESCE(
         NULLIF(ptr_locale.title, \'\'),

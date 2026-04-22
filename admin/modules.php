@@ -237,16 +237,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $videoId = (int) ($_POST['video_id'] ?? 0);
         $table = str_contains($action, 'lecture') ? 'module_lecture_videos' : 'module_presentation_videos';
         $videoUrl = trim((string) ($_POST['video_url'] ?? ''));
-        try {
-            $uploadedVideo = upload_public_file('video_file', 'module-videos', ['mp4', 'webm', 'ogg']);
-            if ($uploadedVideo) {
-                $videoUrl = $uploadedVideo;
-            }
-        } catch (Throwable $e) {
-            redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode($e->getMessage()));
-        }
         if ($videoUrl === '') {
-            redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode('Provide video URL or upload a file.'));
+            redirect('/admin/modules.php?edit=' . $moduleId . '&error=' . urlencode('Video URL is required.'));
         }
         $payload = [
             'module_id' => $moduleId,
@@ -755,8 +747,7 @@ admin_header(tr('Модули', 'Modules'));
     <?php if ($editLectureVideo): ?><input type="hidden" name="video_id" value="<?= h((string) $editLectureVideo['id']) ?>"><?php endif; ?>
     <div class="grid">
       <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}" value="<?= h((string) ($editLectureVideo['language_code'] ?? '')) ?>"></div>
-      <div><label><?= h(tr('Ссылка на видео (embed) или путь к файлу', 'Video URL (embed) or file path')) ?></label><input name="video_url" value="<?= h((string) ($editLectureVideo['video_url'] ?? '')) ?>"></div>
-      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Ссылка на видео (embed)', 'Video URL (embed)')) ?></label><input name="video_url" required value="<?= h((string) ($editLectureVideo['video_url'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Подпись к видео', 'Video caption')) ?></label><input name="video_alt" value="<?= h((string) ($editLectureVideo['video_alt'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Порядок', 'Order')) ?></label><input type="number" name="video_sort_order" min="1" value="<?= h((string) ($editLectureVideo['sort_order'] ?? (count($lectureVideos) + 1))) ?>"></div>
     </div>
@@ -821,8 +812,7 @@ admin_header(tr('Модули', 'Modules'));
     <?php if ($editPresentationVideo): ?><input type="hidden" name="video_id" value="<?= h((string) $editPresentationVideo['id']) ?>"><?php endif; ?>
     <div class="grid">
       <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}" value="<?= h((string) ($editPresentationVideo['language_code'] ?? '')) ?>"></div>
-      <div><label><?= h(tr('Ссылка на видео (embed) или путь к файлу', 'Video URL (embed) or file path')) ?></label><input name="video_url" value="<?= h((string) ($editPresentationVideo['video_url'] ?? '')) ?>"></div>
-      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Ссылка на видео (embed)', 'Video URL (embed)')) ?></label><input name="video_url" required value="<?= h((string) ($editPresentationVideo['video_url'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Подпись к видео', 'Video caption')) ?></label><input name="video_alt" value="<?= h((string) ($editPresentationVideo['video_alt'] ?? '')) ?>"></div>
     </div>
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>

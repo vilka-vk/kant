@@ -33,16 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? 'save_about');
     if ($action === 'add_about_video') {
         $videoUrl = trim((string) ($_POST['video_url'] ?? ''));
-        try {
-            $uploadedVideo = upload_public_file('video_file', 'about-videos', ['mp4', 'webm', 'ogg']);
-            if ($uploadedVideo) {
-                $videoUrl = $uploadedVideo;
-            }
-        } catch (Throwable $e) {
-            redirect('/admin/about-project.php?error=' . urlencode($e->getMessage()));
-        }
         if ($videoUrl === '') {
-            redirect('/admin/about-project.php?error=' . urlencode('Provide video URL or upload a file.'));
+            redirect('/admin/about-project.php?error=' . urlencode('Video URL is required.'));
         }
         $stmt = $pdo->prepare('INSERT INTO about_project_videos (about_project_id, language_code, video_url, video_alt, sort_order)
           VALUES (1, :language_code, :video_url, :video_alt, :sort_order)');
@@ -200,8 +192,7 @@ admin_header(tr('О проекте', 'About Project'));
     <input type="hidden" name="action" value="add_about_video">
     <div class="grid">
       <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm / kz / de / ge / az" required></div>
-      <div><label><?= h(tr('Video URL (embed или путь к файлу)', 'Video URL (embed or file path)')) ?></label><input name="video_url"></div>
-      <div><label><?= h(tr('Загрузить видеофайл', 'Upload video file')) ?></label><input type="file" name="video_file" accept=".mp4,.webm,.ogg"></div>
+      <div><label><?= h(tr('Video URL (embed)', 'Video URL (embed)')) ?></label><input name="video_url" required></div>
       <div><label><?= h(tr('Alt видео (необязательно)', 'Video Alt (optional)')) ?></label><input name="video_alt"></div>
       <div><label><?= h(tr('Порядок', 'Order')) ?></label><input type="number" name="video_sort_order" min="1" value="<?= h((string) (count($aboutVideos) + 1)) ?>"></div>
     </div>

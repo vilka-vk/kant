@@ -443,7 +443,7 @@
           }),
           apiGet('modules', locale).then(function (res) {
             var modules = (res && res.data) || [];
-            renderModulesList(modules, 5);
+            renderModulesList(modules, 3);
           }),
           apiGet('publications', locale).then(function (res) {
             var publications = (res && res.data) || [];

@@ -514,8 +514,11 @@ $readings = [];
 $publicationOptions = [];
 $editLectureVideoId = (int) ($_GET['lecture_video'] ?? 0);
 $editPresentationVideoId = (int) ($_GET['presentation_video'] ?? 0);
+$editReadingId = (int) ($_GET['reading'] ?? 0);
 $editLectureVideo = null;
 $editPresentationVideo = null;
+$editReading = null;
+$editReadingTitles = [];
 
 if ($editId > 0) {
     $stmt = $pdo->prepare('SELECT * FROM modules WHERE id = :id');
@@ -558,9 +561,46 @@ if ($editId > 0) {
     $transcripts->execute(['id' => $editId, 'locale' => admin_locale()]);
     $transcripts = $transcripts->fetchAll();
 
-    $readings = $pdo->prepare('SELECT mr.* FROM module_readings mr WHERE mr.module_id = :id ORDER BY mr.sort_order ASC, mr.id ASC');
-    $readings->execute(['id' => $editId]);
+    $readings = $pdo->prepare('SELECT
+      mr.*,
+      mrrt.custom_title,
+      p.file_path AS publication_file_path,
+      p.external_url AS publication_external_url,
+      p.cover_image_path AS publication_cover_image_path,
+      COALESCE(
+        NULLIF(ptr_locale.title, \'\'),
+        (
+          SELECT ptr_any.title
+          FROM publications_translations ptr_any
+          WHERE ptr_any.publication_id = p.id AND TRIM(COALESCE(ptr_any.title, \'\')) <> \'\'
+          ORDER BY ptr_any.locale ASC
+          LIMIT 1
+        ),
+        \'\'
+      ) AS publication_title
+      FROM module_readings mr
+      LEFT JOIN publications p ON p.id = mr.linked_publication_id
+      LEFT JOIN module_readings_translations mrrt
+        ON mrrt.module_reading_id = mr.id AND mrrt.locale = :locale
+      LEFT JOIN publications_translations ptr_locale
+        ON ptr_locale.publication_id = p.id AND ptr_locale.locale = :locale
+      WHERE mr.module_id = :id
+      ORDER BY mr.sort_order ASC, mr.id ASC');
+    $readings->execute(['id' => $editId, 'locale' => admin_locale()]);
     $readings = $readings->fetchAll();
+    foreach ($readings as $readingRow) {
+        if ((int) $readingRow['id'] === $editReadingId) {
+            $editReading = $readingRow;
+            break;
+        }
+    }
+    if ($editReading) {
+        $readingTitlesStmt = $pdo->prepare('SELECT locale, custom_title FROM module_readings_translations WHERE module_reading_id = :id');
+        $readingTitlesStmt->execute(['id' => (int) $editReading['id']]);
+        foreach ($readingTitlesStmt->fetchAll() as $readingTitleRow) {
+            $editReadingTitles[(string) $readingTitleRow['locale']] = $readingTitleRow;
+        }
+    }
 }
 
 $publicationOptionsStmt = $pdo->prepare('SELECT p.id,
@@ -923,9 +963,66 @@ admin_header(tr('Модули', 'Modules'));
     <h3><?= h(tr('Список материалов', 'Readings list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="reading-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
-  <table><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Связанная публикация', 'Linked publication')) ?></th><th><?= h(tr('Цель (файл/ссылка)', 'Target (file/link)')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody id="readings-sortable">
+  <table><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Превью', 'Preview')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody id="readings-sortable">
   <?php foreach ($readings as $r): ?>
-    <tr data-id="<?= h((string) $r['id']) ?>"><td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $r['sort_order']) ?></td><td><?= h((string) ($r['linked_publication_id'] ?: '-')) ?></td><td><?= h((string) ($r['custom_file_path'] ?: $r['custom_url'])) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить материал?', 'Delete reading?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="reading_id" value="<?= h((string) $r['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
+    <?php
+      $linkedPublicationId = (int) ($r['linked_publication_id'] ?? 0);
+      $previewPath = trim((string) ($r['custom_cover_image_path'] ?? ''));
+      if ($previewPath === '' && $linkedPublicationId > 0) {
+          $previewPath = trim((string) ($r['publication_cover_image_path'] ?? ''));
+      }
+      if ($previewPath === '') {
+          $previewPath = '/assets/images/publication-3.svg';
+      } elseif (!preg_match('/^([a-z]+:)?\/\//i', $previewPath) && strpos($previewPath, '/') !== 0) {
+          $previewPath = '/' . ltrim($previewPath, '/');
+      }
+      $targetUrl = trim((string) ($r['custom_file_path'] ?? ''));
+      if ($targetUrl === '') {
+          $targetUrl = trim((string) ($r['custom_url'] ?? ''));
+      }
+      if ($targetUrl === '' && $linkedPublicationId > 0) {
+          $targetUrl = trim((string) ($r['publication_file_path'] ?? ''));
+          if ($targetUrl === '') {
+              $targetUrl = trim((string) ($r['publication_external_url'] ?? ''));
+          }
+      }
+      if ($targetUrl !== '' && !preg_match('/^([a-z]+:)?\/\//i', $targetUrl) && strpos($targetUrl, '/') !== 0) {
+          $targetUrl = '/' . ltrim($targetUrl, '/');
+      }
+      $titleValue = '';
+      if ($linkedPublicationId > 0) {
+          $titleValue = trim((string) ($r['publication_title'] ?? ''));
+          if ($titleValue === '') {
+              $titleValue = '#' . $linkedPublicationId;
+          }
+      } else {
+          $titleValue = trim((string) ($r['custom_title'] ?? ''));
+          if ($titleValue === '') {
+              $titleValue = trim((string) ($r['custom_file_path'] ?? $r['custom_url'] ?? ''));
+          }
+      }
+    ?>
+    <tr data-id="<?= h((string) $r['id']) ?>">
+      <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
+      <td><?= h((string) $r['sort_order']) ?></td>
+      <td><img src="<?= h($previewPath) ?>" alt="" class="table-preview"></td>
+      <td><?= h((string) $titleValue) ?></td>
+      <td style="text-align:center;">
+        <?php if ($targetUrl !== ''): ?>
+          <a class="btn btn-secondary" style="padding: 6px 10px;" href="<?= h($targetUrl) ?>" target="_blank" rel="noopener noreferrer" title="<?= h(tr('Открыть ссылку', 'Open link')) ?>">↗</a>
+        <?php endif; ?>
+      </td>
+      <td class="actions compact-inputs">
+        <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&reading=<?= h((string) $r['id']) ?>"><?= h(tr('Изменить', 'Edit')) ?></a>
+        <form method="post" onsubmit="return confirm('<?= h(tr('Удалить материал?', 'Delete reading?')) ?>')">
+          <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+          <input type="hidden" name="action" value="delete_reading">
+          <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+          <input type="hidden" name="reading_id" value="<?= h((string) $r['id']) ?>">
+          <button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
+        </form>
+      </td>
+    </tr>
   <?php endforeach; ?>
   </tbody></table>
   <form method="post" id="readings-reorder-form" style="display:none">
@@ -936,16 +1033,17 @@ admin_header(tr('Модули', 'Modules'));
   </form>
   <form method="post" style="margin-bottom:12px" class="compact-inputs" id="reading-add-form" enctype="multipart/form-data" hidden>
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_reading"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <?php if ($editReading): ?><input type="hidden" name="reading_id" value="<?= h((string) $editReading['id']) ?>"><?php endif; ?>
     <div class="grid">
-      <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>">#<?= h((string) $p['id']) ?><?= !empty($p['title']) ? (' - ' . h((string) $p['title'])) : '' ?></option><?php endforeach; ?></select></div>
-      <div><label><?= h(tr('Ссылка на материал', 'Reading URL')) ?></label><input name="custom_url" id="reading-custom-url"></div>
-      <div><label><?= h(tr('Путь к файлу материала', 'Reading file path')) ?></label><input id="reading-custom-file-path" disabled></div>
+      <div><label>Публикация из базы (необязательно)</label><select name="linked_publication_id" id="linked-publication-select"><option value="">Не выбрано</option><?php foreach ($publicationOptions as $p): ?><option value="<?= h((string) $p['id']) ?>" <?= ((int) ($editReading['linked_publication_id'] ?? 0) === (int) $p['id']) ? 'selected' : '' ?>>#<?= h((string) $p['id']) ?><?= !empty($p['title']) ? (' - ' . h((string) $p['title'])) : '' ?></option><?php endforeach; ?></select></div>
+      <div><label><?= h(tr('Ссылка на материал', 'Reading URL')) ?></label><input name="custom_url" id="reading-custom-url" value="<?= h((string) ($editReading['custom_url'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Путь к файлу материала', 'Reading file path')) ?></label><input name="custom_file_path" id="reading-custom-file-path" value="<?= h((string) ($editReading['custom_file_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить файл материала', 'Upload reading file')) ?></label><input type="file" name="custom_file_upload" id="reading-custom-file-upload" accept=".pdf,.doc,.docx,.txt"></div>
-      <div><label><?= h(tr('Путь к обложке', 'Cover image path')) ?></label><input id="reading-custom-cover-path" disabled></div>
+      <div><label><?= h(tr('Путь к обложке', 'Cover image path')) ?></label><input name="custom_cover_image_path" id="reading-custom-cover-path" value="<?= h((string) ($editReading['custom_cover_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить изображение обложки', 'Upload cover image')) ?></label><input type="file" name="custom_cover_upload" id="reading-custom-cover-upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
     </div>
     <div id="reading-custom-titles">
-      <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label><?= h(tr('Заголовок (', 'Title (')) ?><?= h(strtoupper($locale)) ?>)</label><input name="custom_title_<?= h($locale) ?>"></div><?php endforeach; ?>
+      <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label><?= h(tr('Заголовок (', 'Title (')) ?><?= h(strtoupper($locale)) ?>)</label><input name="custom_title_<?= h($locale) ?>" value="<?= h((string) (($editReadingTitles[$locale] ?? [])['custom_title'] ?? '')) ?>"></div><?php endforeach; ?>
     </div>
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
   </form>
@@ -987,6 +1085,14 @@ document.querySelectorAll('[data-toggle-form]').forEach(function (btn) {
 (function () {
   var form = document.getElementById('presentation-add-form');
   var btn = document.querySelector('[data-toggle-form="presentation-add-form"]');
+  if (form) form.removeAttribute('hidden');
+  if (btn) btn.textContent = <?= json_encode(h(tr('Скрыть форму', 'Hide form'))) ?>;
+})();
+<?php endif; ?>
+<?php if ($editReading): ?>
+(function () {
+  var form = document.getElementById('reading-add-form');
+  var btn = document.querySelector('[data-toggle-form="reading-add-form"]');
   if (form) form.removeAttribute('hidden');
   if (btn) btn.textContent = <?= json_encode(h(tr('Скрыть форму', 'Hide form'))) ?>;
 })();

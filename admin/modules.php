@@ -598,6 +598,7 @@ $rowsStmt = $pdo->prepare('SELECT
   ORDER BY m.sort_order ASC, m.id ASC');
 $rowsStmt->execute(['locale' => admin_locale()]);
 $rows = $rowsStmt->fetchAll();
+$nextModuleNumber = (int) ($pdo->query('SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_number FROM modules')->fetch()['next_number'] ?? 1);
 $heroModulesStmt = $pdo->prepare('SELECT * FROM hero_sections WHERE page_key = :page_key LIMIT 1');
 $heroModulesStmt->execute(['page_key' => 'modules']);
 $heroModules = $heroModulesStmt->fetch() ?: [];
@@ -714,13 +715,13 @@ admin_header(tr('Модули', 'Modules'));
           <button type="button" class="btn btn-secondary" data-regenerate-slug title="<?= h(tr('Обновить Slug', 'Regenerate slug')) ?>" aria-label="<?= h(tr('Обновить Slug', 'Regenerate slug')) ?>">↻</button>
         </div>
       </div>
-      <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
-      <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
+      <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? $nextModuleNumber)) ?>"></div>
       <?php if (!$moduleTranslationsHasFormats): ?>
       <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
       <?php endif; ?>
       <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить hero-изображение', 'Upload hero image')) ?></label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+      <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
       <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
     </div>
     <hr style="margin:16px 0">
@@ -736,9 +737,9 @@ admin_header(tr('Модули', 'Modules'));
         $translationFields = [
           'title' => tr('Название модуля', 'Module title'),
           'short_description' => tr('Короткое описание', 'Short description'),
-          'lecture_title' => 'Lecture title',
-          'presentation_title' => 'Presentation title',
-          'literature_html' => 'Literature text (WYSIWYG)',
+          'lecture_title' => tr('Заголовок блока лекции', 'Lecture block title'),
+          'presentation_title' => tr('Заголовок блока презентации', 'Presentation block title'),
+          'literature_html' => tr('Текст списка литературы (WYSIWYG)', 'Literature text (WYSIWYG)'),
         ];
         if ($moduleTranslationsHasFormats) {
           $translationFields['formats'] = tr('Форматы (через запятую)', 'Formats (comma-separated)');

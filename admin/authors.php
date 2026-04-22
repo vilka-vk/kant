@@ -37,6 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (Throwable $e) {
         redirect('/admin/authors.php?error=' . urlencode($e->getMessage()));
     }
+    if ($photoPath === '') {
+        $target = '/admin/authors.php?form=1';
+        if ($id > 0) {
+            $target .= '&edit=' . $id;
+        }
+        $target .= '&error=' . urlencode(tr('Укажите путь к фото или загрузите файл.', 'Provide photo path or upload a file.'));
+        redirect($target);
+    }
     $payload = [
         'photo_path' => $photoPath,
         'display_order' => (int) ($_POST['display_order'] ?? 0),
@@ -124,7 +132,7 @@ admin_header(tr('Авторы', 'Authors'));
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="id" value="<?= h((string) ($edit['id'] ?? 0)) ?>">
     <div class="grid">
-      <div><label><?= h(tr('Путь к фото', 'Photo path')) ?></label><input name="photo_path" required value="<?= h((string) ($edit['photo_path'] ?? '')) ?>"></div>
+      <div><label><?= h(tr('Путь к фото', 'Photo path')) ?></label><input name="photo_path" value="<?= h((string) ($edit['photo_path'] ?? '')) ?>"></div>
       <div><label><?= h(tr('Загрузить фото', 'Upload photo')) ?></label><input type="file" name="photo_upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Порядок отображения', 'Display order')) ?></label><input type="number" name="display_order" value="<?= h((string) ($edit['display_order'] ?? (count($rows) + 1))) ?>"></div>
     </div>

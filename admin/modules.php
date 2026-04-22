@@ -1139,9 +1139,13 @@ var linkedPublicationSelect = document.getElementById('linked-publication-select
 function applyReadingMode() {
   if (!linkedPublicationSelect) return;
   var linked = linkedPublicationSelect.value !== '';
-  ['reading-custom-url', 'reading-custom-file-path', 'reading-custom-file-upload', 'reading-custom-cover-path', 'reading-custom-cover-upload'].forEach(function (id) {
+  ['reading-custom-url', 'reading-custom-file-upload', 'reading-custom-cover-upload'].forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.disabled = linked;
+  });
+  ['reading-custom-file-path', 'reading-custom-cover-path'].forEach(function (id) {
+    var pathEl = document.getElementById(id);
+    if (pathEl) pathEl.disabled = true;
   });
   var titlesWrap = document.getElementById('reading-custom-titles');
   if (titlesWrap) {

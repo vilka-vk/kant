@@ -82,7 +82,15 @@ if ($route === 'our-position') {
 }
 
 if ($route === 'modules') {
-    $rows = $pdo->query('SELECT * FROM modules ORDER BY sort_order ASC, id ASC')->fetchAll();
+    $rows = $pdo->query('SELECT m.*,
+      CASE WHEN EXISTS (
+        SELECT 1 FROM module_lecture_videos mlv WHERE mlv.module_id = m.id
+      ) THEN 1 ELSE 0 END AS has_lecture,
+      CASE WHEN EXISTS (
+        SELECT 1 FROM module_presentation_videos mpv WHERE mpv.module_id = m.id
+      ) THEN 1 ELSE 0 END AS has_presentation
+      FROM modules m
+      ORDER BY m.sort_order ASC, m.id ASC')->fetchAll();
     $result = [];
     foreach ($rows as $row) {
         $row['hero_background_image_path'] = normalize_public_asset_path((string) ($row['hero_background_image_path'] ?? ''));

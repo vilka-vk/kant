@@ -438,10 +438,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $moduleNumber = (int) ($_POST['sort_order'] ?? 0);
-    $fallbackLocale = $locales[0] ?? 'ru';
-    $fallbackFormats = $moduleTranslationsHasFormats
-        ? trim((string) ($_POST['formats_' . $fallbackLocale] ?? ''))
-        : trim((string) ($_POST['formats'] ?? ''));
+    $fallbackFormats = '';
     $base = [
         'slug' => makeModuleSlug($moduleNumber, $locales, $_POST),
         'module_number' => $moduleNumber,
@@ -476,7 +473,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'locale' => $locale,
                     'title' => trim((string) ($_POST['title_' . $locale] ?? '[empty]')),
                     'short_description' => $shortDescription,
-                    'formats' => trim((string) ($_POST['formats_' . $locale] ?? '')),
+                    'formats' => '',
                     'hero_kicker' => '',
                     'hero_subtitle' => $shortDescription,
                     'lecture_title' => trim((string) ($_POST['lecture_title_' . $locale] ?? '')),
@@ -774,9 +771,6 @@ admin_header(tr('Модули', 'Modules'));
         </div>
       </div>
       <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? $nextModuleNumber)) ?>"></div>
-      <?php if (!$moduleTranslationsHasFormats): ?>
-      <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
-      <?php endif; ?>
       <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить hero-изображение', 'Upload hero image')) ?></label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
@@ -795,16 +789,10 @@ admin_header(tr('Модули', 'Modules'));
         $translationFields = [
           'title' => tr('Название модуля', 'Module title'),
           'short_description' => tr('Короткое описание', 'Short description'),
-          'formats' => tr('Форматы (через запятую)', 'Formats (comma-separated)'),
           'lecture_title' => tr('Заголовок блока лекции', 'Lecture block title'),
           'presentation_title' => tr('Заголовок блока презентации', 'Presentation block title'),
           'literature_html' => tr('Текст списка литературы (WYSIWYG)', 'Literature text (WYSIWYG)'),
         ];
-        if ($moduleTranslationsHasFormats) {
-          // keep localized formats field right after short_description
-        } else {
-          unset($translationFields['formats']);
-        }
         foreach ($translationFields as $fieldKey => $label):
           $leftValue = (string) ($trMap[$leftLocale][$fieldKey] ?? '');
           $rightValue = (string) ($trMap[$rightLocale][$fieldKey] ?? '');

@@ -150,8 +150,14 @@
     var locale = currentLocale();
     var learnLabel = (window.KANT_LOCALES && window.KANT_LOCALES.ui && window.KANT_LOCALES.ui.moduleLearnAction && window.KANT_LOCALES.ui.moduleLearnAction[locale.toUpperCase()]) ||
       (locale === 'ru' ? 'Изучить модуль' : 'Learn the module');
+    var lectureLabel = locale === 'ru' ? 'Лекция' : 'Lecture';
+    var presentationLabel = locale === 'ru' ? 'Презентация' : 'Presentation';
     modules.slice(0, limit).forEach(function (m) {
       var href = 'module.html?slug=' + encodeURIComponent(m.slug);
+      var moduleKinds = [];
+      if (Number(m.has_lecture) > 0) moduleKinds.push(lectureLabel);
+      if (Number(m.has_presentation) > 0) moduleKinds.push(presentationLabel);
+      var moduleKindsLabel = moduleKinds.join(', ');
       var item = document.createElement('a');
       item.className = 'card-link perforated_row';
       item.setAttribute('href', href);
@@ -161,7 +167,7 @@
         '<h3 class="card-link__title text-h3">' + (m.title || '') + '</h3>' +
         '<p class="card-link__description text-paragraph">' + (m.short_description || '') + '</p>' +
         '<div class="card-link__meta-action"><p class="card-link__meta text-paragraph">' +
-        (m.formats || '') + '<br>' +
+        (moduleKindsLabel || '') + '<br>' +
         (m.list_duration_display || '') + '<br><strong>' + (m.languages || '') + '</strong></p>' +
         '<div class="card-link__action"><div class="card-link__action-label"><p>' + learnLabel + '</p></div>' +
         '<span class="icon icon--md"><img src="assets/icons/arrow-right.svg" alt=""></span></div>' +

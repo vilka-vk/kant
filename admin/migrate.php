@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $migrations = [
             __DIR__ . '/../database/migrations/2026-04-17-remove-legacy-video-columns.sql',
             __DIR__ . '/../database/migrations/2026-04-20-add-our-position.sql',
+            __DIR__ . '/../database/migrations/2026-04-22-add-module-translation-formats.sql',
         ];
         foreach ($migrations as $migrationPath) {
             $sql = file_get_contents($migrationPath);

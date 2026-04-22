@@ -10,6 +10,11 @@ require_auth();
 $pdo = db();
 $locales = $config['app']['supported_locales'];
 $languageCodePattern = '/^[a-z]{2,5}$/';
+$moduleTranslationsHasFormats = (bool) $pdo->query("SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'modules_translations'
+    AND COLUMN_NAME = 'formats'")->fetchColumn();
 
 function assertLanguageCode(string $value, string $pattern): bool
 {
@@ -434,12 +439,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $moduleNumber = (int) ($_POST['sort_order'] ?? 0);
     $fallbackLocale = $locales[0] ?? 'ru';
+    $fallbackFormats = $moduleTranslationsHasFormats
+        ? trim((string) ($_POST['formats_' . $fallbackLocale] ?? ''))
+        : trim((string) ($_POST['formats'] ?? ''));
     $base = [
         'slug' => makeModuleSlug($moduleNumber, $locales, $_POST),
         'module_number' => $moduleNumber,
         'sort_order' => (int) ($_POST['sort_order'] ?? 0),
         'languages' => trim((string) ($_POST['languages'] ?? '')),
-        'formats' => trim((string) ($_POST['formats_' . $fallbackLocale] ?? '')),
+        'formats' => $fallbackFormats,
         'list_duration_display' => trim((string) ($_POST['list_duration_display'] ?? '')),
         'hero_background_image_path' => $heroBackground,
         'presentation_file_path' => $presentationFile,
@@ -458,22 +466,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     foreach ($locales as $locale) {
         $shortDescription = trim((string) ($_POST['short_description_' . $locale] ?? ''));
-        $pdo->prepare('INSERT INTO modules_translations (module_id, locale, title, short_description, formats, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html)
-          VALUES (:module_id,:locale,:title,:short_description,:formats,:hero_kicker,:hero_subtitle,:lecture_title,:presentation_title,:literature_html)
-          ON DUPLICATE KEY UPDATE title = VALUES(title), short_description = VALUES(short_description), hero_kicker = VALUES(hero_kicker),
-          formats = VALUES(formats), hero_subtitle = VALUES(hero_subtitle), lecture_title = VALUES(lecture_title), presentation_title = VALUES(presentation_title), literature_html = VALUES(literature_html)')
-            ->execute([
-                'module_id' => $id,
-                'locale' => $locale,
-                'title' => trim((string) ($_POST['title_' . $locale] ?? '[empty]')),
-                'short_description' => $shortDescription,
-                'formats' => trim((string) ($_POST['formats_' . $locale] ?? '')),
-                'hero_kicker' => '',
-                'hero_subtitle' => $shortDescription,
-                'lecture_title' => trim((string) ($_POST['lecture_title_' . $locale] ?? '')),
-                'presentation_title' => trim((string) ($_POST['presentation_title_' . $locale] ?? '')),
-                'literature_html' => (string) ($_POST['literature_html_' . $locale] ?? ''),
-            ]);
+        if ($moduleTranslationsHasFormats) {
+            $pdo->prepare('INSERT INTO modules_translations (module_id, locale, title, short_description, formats, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html)
+              VALUES (:module_id,:locale,:title,:short_description,:formats,:hero_kicker,:hero_subtitle,:lecture_title,:presentation_title,:literature_html)
+              ON DUPLICATE KEY UPDATE title = VALUES(title), short_description = VALUES(short_description), hero_kicker = VALUES(hero_kicker),
+              formats = VALUES(formats), hero_subtitle = VALUES(hero_subtitle), lecture_title = VALUES(lecture_title), presentation_title = VALUES(presentation_title), literature_html = VALUES(literature_html)')
+                ->execute([
+                    'module_id' => $id,
+                    'locale' => $locale,
+                    'title' => trim((string) ($_POST['title_' . $locale] ?? '[empty]')),
+                    'short_description' => $shortDescription,
+                    'formats' => trim((string) ($_POST['formats_' . $locale] ?? '')),
+                    'hero_kicker' => '',
+                    'hero_subtitle' => $shortDescription,
+                    'lecture_title' => trim((string) ($_POST['lecture_title_' . $locale] ?? '')),
+                    'presentation_title' => trim((string) ($_POST['presentation_title_' . $locale] ?? '')),
+                    'literature_html' => (string) ($_POST['literature_html_' . $locale] ?? ''),
+                ]);
+        } else {
+            $pdo->prepare('INSERT INTO modules_translations (module_id, locale, title, short_description, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html)
+              VALUES (:module_id,:locale,:title,:short_description,:hero_kicker,:hero_subtitle,:lecture_title,:presentation_title,:literature_html)
+              ON DUPLICATE KEY UPDATE title = VALUES(title), short_description = VALUES(short_description), hero_kicker = VALUES(hero_kicker),
+              hero_subtitle = VALUES(hero_subtitle), lecture_title = VALUES(lecture_title), presentation_title = VALUES(presentation_title), literature_html = VALUES(literature_html)')
+                ->execute([
+                    'module_id' => $id,
+                    'locale' => $locale,
+                    'title' => trim((string) ($_POST['title_' . $locale] ?? '[empty]')),
+                    'short_description' => $shortDescription,
+                    'hero_kicker' => '',
+                    'hero_subtitle' => $shortDescription,
+                    'lecture_title' => trim((string) ($_POST['lecture_title_' . $locale] ?? '')),
+                    'presentation_title' => trim((string) ($_POST['presentation_title_' . $locale] ?? '')),
+                    'literature_html' => (string) ($_POST['literature_html_' . $locale] ?? ''),
+                ]);
+        }
     }
     redirect('/admin/modules.php?edit=' . $id . '&saved=1');
 }
@@ -495,7 +521,10 @@ if ($editId > 0) {
     $stmt = $pdo->prepare('SELECT * FROM modules WHERE id = :id');
     $stmt->execute(['id' => $editId]);
     $editRow = $stmt->fetch();
-    $trs = $pdo->prepare('SELECT locale, title, short_description, formats, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html FROM modules_translations WHERE module_id = :id');
+    $trsSql = $moduleTranslationsHasFormats
+        ? 'SELECT locale, title, short_description, formats, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html FROM modules_translations WHERE module_id = :id'
+        : 'SELECT locale, title, short_description, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html FROM modules_translations WHERE module_id = :id';
+    $trs = $pdo->prepare($trsSql);
     $trs->execute(['id' => $editId]);
     foreach ($trs->fetchAll() as $tr) {
         $trMap[$tr['locale']] = $tr;
@@ -687,6 +716,9 @@ admin_header(tr('Модули', 'Modules'));
       </div>
       <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? 1)) ?>"></div>
       <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
+      <?php if (!$moduleTranslationsHasFormats): ?>
+      <div><label>Formats</label><input name="formats" value="<?= h((string) ($editRow['formats'] ?? '')) ?>"></div>
+      <?php endif; ?>
       <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить hero-изображение', 'Upload hero image')) ?></label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
       <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
@@ -704,11 +736,13 @@ admin_header(tr('Модули', 'Modules'));
         $translationFields = [
           'title' => tr('Название модуля', 'Module title'),
           'short_description' => tr('Короткое описание', 'Short description'),
-          'formats' => tr('Форматы (через запятую)', 'Formats (comma-separated)'),
           'lecture_title' => 'Lecture title',
           'presentation_title' => 'Presentation title',
           'literature_html' => 'Literature text (WYSIWYG)',
         ];
+        if ($moduleTranslationsHasFormats) {
+          $translationFields['formats'] = tr('Форматы (через запятую)', 'Formats (comma-separated)');
+        }
         foreach ($translationFields as $fieldKey => $label):
           $leftValue = (string) ($trMap[$leftLocale][$fieldKey] ?? '');
           $rightValue = (string) ($trMap[$rightLocale][$fieldKey] ?? '');

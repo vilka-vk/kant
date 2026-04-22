@@ -9,6 +9,11 @@ header('Content-Type: application/json; charset=utf-8');
 $pdo = db();
 $defaultLocale = $config['app']['default_locale'];
 $locale = normalize_locale($_GET['lang'] ?? $defaultLocale);
+$moduleTranslationsHasFormats = (bool) $pdo->query("SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'modules_translations'
+    AND COLUMN_NAME = 'formats'")->fetchColumn();
 
 $uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $prefix = '/api/';
@@ -98,7 +103,10 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
         out([], $locale);
     }
     $tr = translated_row($pdo, 'modules_translations', 'module_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
-    $allStmt = $pdo->prepare('SELECT locale, lecture_title, lecture_video_title_primary, title, formats FROM modules_translations WHERE module_id = :module_id');
+    $allTranslationsSql = $moduleTranslationsHasFormats
+        ? 'SELECT locale, lecture_title, lecture_video_title_primary, title, formats FROM modules_translations WHERE module_id = :module_id'
+        : 'SELECT locale, lecture_title, lecture_video_title_primary, title FROM modules_translations WHERE module_id = :module_id';
+    $allStmt = $pdo->prepare($allTranslationsSql);
     $allStmt->execute(['module_id' => (int) $row['id']]);
     $translations = [];
     foreach ($allStmt->fetchAll() as $trRow) {

@@ -527,6 +527,7 @@ ul, ol {
 
 .nav__link--active {
   color: var(--color-accent);
+  text-decoration: underline;
 }
 
 /* Figma: Lang (node 628:305) */

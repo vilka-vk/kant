@@ -1230,6 +1230,13 @@ ul, ol {
 }
 
 .module-publications {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.module-publications .publication-item {
   width: 100%;
 }
 

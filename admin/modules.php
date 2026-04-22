@@ -684,29 +684,31 @@ admin_header(tr('Модули', 'Modules'));
 .filter-row input{max-width:140px}
 </style>
 <?php if (!$isModuleFormOpen): ?>
-<div class="card">
-  <h2><?= h(tr('Hero блока "Модули"', 'Modules hero block')) ?></h2>
-  <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero сохранен.', 'Hero saved.')) ?></p><?php endif; ?>
-  <form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <input type="hidden" name="action" value="save_modules_page_hero">
-    <div class="grid">
-      <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input value="<?= h((string) ($heroModules['background_image_path'] ?? '')) ?>" disabled></div>
-      <div><label><?= h(tr('Загрузить фон hero', 'Upload hero background')) ?></label><input type="file" name="hero_modules_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_modules_subtitle_enabled"><option value="1" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
-    </div>
-    <hr style="margin:12px 0">
-    <?php
-      $heroLeftLocale = $locales[0] ?? 'ru';
-      $heroRightLocale = $locales[1] ?? ($locales[0] ?? 'en');
-    ?>
-    <div class="grid" style="margin-bottom:8px">
-      <div><label>Hero subtitle (<?= h(strtoupper($heroLeftLocale)) ?>)</label><input name="hero_modules_subtitle_<?= h($heroLeftLocale) ?>" value="<?= h((string) ($heroModulesTrRows[$heroLeftLocale]['subtitle'] ?? '')) ?>"></div>
-      <div><label>Hero subtitle (<?= h(strtoupper($heroRightLocale)) ?>)</label><input name="hero_modules_subtitle_<?= h($heroRightLocale) ?>" value="<?= h((string) ($heroModulesTrRows[$heroRightLocale]['subtitle'] ?? '')) ?>"></div>
-    </div>
-    <div class="actions"><button type="submit"><?= h(tr('Сохранить hero для страницы модулей', 'Save modules hero')) ?></button></div>
-  </form>
-</div>
+<details class="module-section card">
+  <summary><?= h(tr('Hero блока "Модули"', 'Modules hero block')) ?></summary>
+  <div class="module-section__body">
+    <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero сохранен.', 'Hero saved.')) ?></p><?php endif; ?>
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+      <input type="hidden" name="action" value="save_modules_page_hero">
+      <div class="grid">
+        <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input value="<?= h((string) ($heroModules['background_image_path'] ?? '')) ?>" disabled></div>
+        <div><label><?= h(tr('Загрузить фон hero', 'Upload hero background')) ?></label><input type="file" name="hero_modules_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+        <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_modules_subtitle_enabled"><option value="1" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroModules['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
+      </div>
+      <hr style="margin:12px 0">
+      <?php
+        $heroLeftLocale = $locales[0] ?? 'ru';
+        $heroRightLocale = $locales[1] ?? ($locales[0] ?? 'en');
+      ?>
+      <div class="grid" style="margin-bottom:8px">
+        <div><label>Hero subtitle (<?= h(strtoupper($heroLeftLocale)) ?>)</label><input name="hero_modules_subtitle_<?= h($heroLeftLocale) ?>" value="<?= h((string) ($heroModulesTrRows[$heroLeftLocale]['subtitle'] ?? '')) ?>"></div>
+        <div><label>Hero subtitle (<?= h(strtoupper($heroRightLocale)) ?>)</label><input name="hero_modules_subtitle_<?= h($heroRightLocale) ?>" value="<?= h((string) ($heroModulesTrRows[$heroRightLocale]['subtitle'] ?? '')) ?>"></div>
+      </div>
+      <div class="actions"><button type="submit"><?= h(tr('Сохранить hero для страницы модулей', 'Save modules hero')) ?></button></div>
+    </form>
+  </div>
+</details>
 
 <div class="card">
   <div class="kant-section-head">

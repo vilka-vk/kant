@@ -255,6 +255,12 @@ $isTypeFormOpen = $tab === 'types' && ($typeEdit || (string) ($_GET['form'] ?? '
 
 admin_header(tr('Публикации', 'Publications'));
 ?>
+<style>
+.module-section{margin-top:14px}
+.module-section summary{cursor:pointer;font-weight:700;padding:10px 12px;background:#f2f2f5;border:1px solid #ddd;border-radius:8px}
+.module-section[open] summary{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.module-section__body{border:1px solid #ddd;border-top:none;border-bottom-left-radius:8px;border-bottom-right-radius:8px;padding:12px;background:#fff}
+</style>
 <div class="card">
   <div class="actions">
     <a class="kant-tab <?= $tab === 'publications' ? 'is-active' : '' ?>" href="/admin/publications.php?tab=publications"><?= h(tr('Публикации', 'Publications')) ?></a>
@@ -263,29 +269,31 @@ admin_header(tr('Публикации', 'Publications'));
 </div>
 
 <?php if ($tab === 'publications'): ?>
-<div class="card">
-  <h2><?= h(tr('Hero блока "Публикации"', 'Publications hero block')) ?></h2>
-  <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero сохранен.', 'Hero saved.')) ?></p><?php endif; ?>
-  <form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <input type="hidden" name="action" value="save_publications_page_hero">
-    <div class="grid">
-      <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input value="<?= h((string) ($heroPublications['background_image_path'] ?? '')) ?>" disabled></div>
-      <div><label><?= h(tr('Загрузить фон hero', 'Upload hero background')) ?></label><input type="file" name="hero_publications_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_publications_subtitle_enabled"><option value="1" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
-    </div>
-    <hr style="margin:12px 0">
-    <?php
-      $heroLeftLocale = $locales[0] ?? 'ru';
-      $heroRightLocale = $locales[1] ?? ($locales[0] ?? 'en');
-    ?>
-    <div class="grid" style="margin-bottom:8px">
-      <div><label>Hero subtitle (<?= h(strtoupper($heroLeftLocale)) ?>)</label><input name="hero_publications_subtitle_<?= h($heroLeftLocale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$heroLeftLocale]['subtitle'] ?? '')) ?>"></div>
-      <div><label>Hero subtitle (<?= h(strtoupper($heroRightLocale)) ?>)</label><input name="hero_publications_subtitle_<?= h($heroRightLocale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$heroRightLocale]['subtitle'] ?? '')) ?>"></div>
-    </div>
-    <div class="actions"><button type="submit"><?= h(tr('Сохранить hero для страницы публикаций', 'Save publications hero')) ?></button></div>
-  </form>
-</div>
+<details class="module-section card">
+  <summary><?= h(tr('Hero блока "Публикации"', 'Publications hero block')) ?></summary>
+  <div class="module-section__body">
+    <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero сохранен.', 'Hero saved.')) ?></p><?php endif; ?>
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+      <input type="hidden" name="action" value="save_publications_page_hero">
+      <div class="grid">
+        <div><label><?= h(tr('Фон hero (путь)', 'Hero background (path)')) ?></label><input value="<?= h((string) ($heroPublications['background_image_path'] ?? '')) ?>" disabled></div>
+        <div><label><?= h(tr('Загрузить фон hero', 'Upload hero background')) ?></label><input type="file" name="hero_publications_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+        <div><label><?= h(tr('Показывать subtitle', 'Show subtitle')) ?></label><select name="hero_publications_subtitle_enabled"><option value="1" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 1) ? 'selected' : '' ?>><?= h(tr('Да', 'Yes')) ?></option><option value="0" <?= ((int) ($heroPublications['subtitle_enabled'] ?? 1) === 0) ? 'selected' : '' ?>><?= h(tr('Нет', 'No')) ?></option></select></div>
+      </div>
+      <hr style="margin:12px 0">
+      <?php
+        $heroLeftLocale = $locales[0] ?? 'ru';
+        $heroRightLocale = $locales[1] ?? ($locales[0] ?? 'en');
+      ?>
+      <div class="grid" style="margin-bottom:8px">
+        <div><label>Hero subtitle (<?= h(strtoupper($heroLeftLocale)) ?>)</label><input name="hero_publications_subtitle_<?= h($heroLeftLocale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$heroLeftLocale]['subtitle'] ?? '')) ?>"></div>
+        <div><label>Hero subtitle (<?= h(strtoupper($heroRightLocale)) ?>)</label><input name="hero_publications_subtitle_<?= h($heroRightLocale) ?>" value="<?= h((string) ($heroPublicationsTrRows[$heroRightLocale]['subtitle'] ?? '')) ?>"></div>
+      </div>
+      <div class="actions"><button type="submit"><?= h(tr('Сохранить hero для страницы публикаций', 'Save publications hero')) ?></button></div>
+    </form>
+  </div>
+</details>
 
 <div class="card">
   <div class="kant-section-head">

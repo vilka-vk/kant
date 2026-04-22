@@ -567,6 +567,19 @@ if ($editId > 0) {
       p.file_path AS publication_file_path,
       p.external_url AS publication_external_url,
       p.cover_image_path AS publication_cover_image_path,
+      pt.slug AS publication_type_slug,
+      COALESCE(
+        NULLIF(ptt_locale.name, ''),
+        (
+          SELECT ptt_any.name
+          FROM publication_types_translations ptt_any
+          WHERE ptt_any.publication_type_id = pt.id AND TRIM(COALESCE(ptt_any.name, '')) <> ''
+          ORDER BY ptt_any.locale ASC
+          LIMIT 1
+        ),
+        pt.slug,
+        ''
+      ) AS publication_type_name,
       COALESCE(
         NULLIF(ptr_locale.title, \'\'),
         (
@@ -580,8 +593,11 @@ if ($editId > 0) {
       ) AS publication_title
       FROM module_readings mr
       LEFT JOIN publications p ON p.id = mr.linked_publication_id
+      LEFT JOIN publication_types pt ON pt.id = p.publication_type_id
       LEFT JOIN module_readings_translations mrrt
         ON mrrt.module_reading_id = mr.id AND mrrt.locale = :locale
+      LEFT JOIN publication_types_translations ptt_locale
+        ON ptt_locale.publication_type_id = pt.id AND ptt_locale.locale = :locale
       LEFT JOIN publications_translations ptr_locale
         ON ptr_locale.publication_id = p.id AND ptr_locale.locale = :locale
       WHERE mr.module_id = :id
@@ -963,7 +979,7 @@ admin_header(tr('Модули', 'Modules'));
     <h3><?= h(tr('Список материалов', 'Readings list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="reading-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
-  <table><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Превью', 'Preview')) ?></th><th><?= h(tr('Название', 'Title')) ?></th><th><?= h(tr('Цель', 'Target')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody id="readings-sortable">
+  <table style="table-layout: fixed; width: 100%;"><thead><tr><th class="drag-col"></th><th style="width: 84px;"><?= h(tr('Порядок', 'Order')) ?></th><th style="width: 64px;">ID</th><th style="width: 120px;"><?= h(tr('Обложка', 'Cover')) ?></th><th style="width: 180px;"><?= h(tr('Тип', 'Type')) ?></th><th><?= h(tr('Название', 'Name')) ?></th><th style="width: 90px; text-align: center;"><?= h(tr('Цель', 'Target')) ?></th><th style="width: 190px;"><?= h(tr('Действие', 'Action')) ?></th></tr></thead><tbody id="readings-sortable">
   <?php foreach ($readings as $r): ?>
     <?php
       $linkedPublicationId = (int) ($r['linked_publication_id'] ?? 0);
@@ -1001,12 +1017,17 @@ admin_header(tr('Модули', 'Modules'));
               $titleValue = trim((string) ($r['custom_file_path'] ?? $r['custom_url'] ?? ''));
           }
       }
+      $typeValue = $linkedPublicationId > 0
+          ? trim((string) ($r['publication_type_name'] ?? $r['publication_type_slug'] ?? ''))
+          : tr('Свой материал', 'Custom');
     ?>
     <tr data-id="<?= h((string) $r['id']) ?>">
       <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
       <td><?= h((string) $r['sort_order']) ?></td>
+      <td><?= h((string) $r['id']) ?></td>
       <td><img src="<?= h($previewPath) ?>" alt="" class="table-preview"></td>
-      <td><?= h((string) $titleValue) ?></td>
+      <td><?= h((string) $typeValue) ?></td>
+      <td style="width: auto;"><?= h((string) $titleValue) ?></td>
       <td style="text-align:center;">
         <?php if ($targetUrl !== ''): ?>
           <a class="btn btn-secondary" style="padding: 6px 10px;" href="<?= h($targetUrl) ?>" target="_blank" rel="noopener noreferrer" title="<?= h(tr('Открыть ссылку', 'Open link')) ?>">↗</a>

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var API_BASE = '/api';
+  var API_BASE = '/api/index.php';
   var DEFAULT_LOCALE = 'ru';
   var STORAGE_KEY = 'kant-locale';
   var currentPath = window.location.pathname.toLowerCase();
@@ -25,8 +25,21 @@
   }
 
   async function apiGet(path, locale) {
-    var separator = path.indexOf('?') === -1 ? '?' : '&';
-    var url = API_BASE + '/' + path + separator + 'lang=' + encodeURIComponent(locale);
+    var querySeparator = path.indexOf('?') === -1 ? '?' : '&';
+    var route = path;
+    var extraQuery = '';
+    if (querySeparator === '?') {
+      route = path;
+    } else {
+      var parts = path.split('?');
+      route = parts[0] || '';
+      extraQuery = parts[1] || '';
+    }
+    var url = API_BASE + '?route=' + encodeURIComponent(route);
+    if (extraQuery) {
+      url += '&' + extraQuery;
+    }
+    url += '&lang=' + encodeURIComponent(locale);
     var res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('Request failed: ' + path);
     return res.json();

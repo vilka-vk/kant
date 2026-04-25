@@ -15,10 +15,15 @@ $moduleTranslationsHasFormats = (bool) $pdo->query("SELECT COUNT(*)
     AND TABLE_NAME = 'modules_translations'
     AND COLUMN_NAME = 'formats'")->fetchColumn();
 
-$uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$prefix = '/api/';
-$route = str_starts_with($uriPath, $prefix) ? substr($uriPath, strlen($prefix)) : '';
-$route = trim($route, '/');
+$routeFromQuery = trim((string) ($_GET['route'] ?? ''));
+if ($routeFromQuery !== '') {
+    $route = trim($routeFromQuery, '/');
+} else {
+    $uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $prefix = '/api/';
+    $route = str_starts_with($uriPath, $prefix) ? substr($uriPath, strlen($prefix)) : '';
+    $route = trim($route, '/');
+}
 
 function out(array $data, string $lang, bool $fallbackUsed = false): void
 {

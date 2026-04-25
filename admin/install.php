@@ -5,8 +5,17 @@ require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/layout.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 $error = '';
 $ok = '';
+
+if (isset($_SESSION['install_flash_ok']) && is_string($_SESSION['install_flash_ok'])) {
+    $ok = $_SESSION['install_flash_ok'];
+    unset($_SESSION['install_flash_ok']);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $secret = (string) ($_POST['install_secret'] ?? '');
@@ -54,7 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                    ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)');
             $stmt->execute(['email' => $email, 'password_hash' => $hash]);
 
-            $ok = tr('Установка завершена. Удалите /admin/install.php или закройте доступ через .htaccess, затем войдите в админку.', 'Install finished. Delete /admin/install.php or protect it via .htaccess, then login.');
+            $_SESSION['install_flash_ok'] = tr(
+                'Установка завершена. Удалите /admin/install.php или закройте доступ через .htaccess, затем войдите в админку.',
+                'Install finished. Delete /admin/install.php or protect it via .htaccess, then login.'
+            );
+            redirect('/admin/install.php');
         } catch (Throwable $e) {
             $error = tr('Установка не удалась: ', 'Install failed: ') . $e->getMessage();
         }

@@ -27,6 +27,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($schema === false || $seed === false) {
                 throw new RuntimeException(tr('SQL-файлы не найдены.', 'SQL files are missing.'));
             }
+
+            // Reinstall-safe flow: wipe existing tables in current DB
+            // so rerunning install does not fail on duplicate primary keys.
+            $tables = $pdo->query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()');
+            if ($tables !== false) {
+                $existingTables = $tables->fetchAll(PDO::FETCH_COLUMN);
+                if (!empty($existingTables)) {
+                    $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+                    foreach ($existingTables as $tableName) {
+                        if (!is_string($tableName) || $tableName === '') {
+                            continue;
+                        }
+                        $safeTableName = str_replace('`', '``', $tableName);
+                        $pdo->exec("DROP TABLE IF EXISTS `{$safeTableName}`");
+                    }
+                    $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
+                }
+            }
+
             $pdo->exec($schema);
             $pdo->exec($seed);
 

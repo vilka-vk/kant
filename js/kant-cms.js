@@ -96,6 +96,7 @@
     var safeUrl = String(url || '').trim();
     var safeTitle = escapeAttr(title || 'Video');
     if (!safeUrl) return '';
+    var embedUrl = normalizeEmbedUrl(safeUrl);
     var lower = safeUrl.toLowerCase();
     var isFile = /\.(mp4|webm|ogg)(\?.*)?$/.test(lower);
     if (isFile) {
@@ -103,8 +104,53 @@
         '<source src="' + escapeAttr(safeUrl) + '">' +
         '</video>';
     }
-    return '<iframe src="' + escapeAttr(safeUrl) + '" title="' + safeTitle + '" loading="lazy"' +
+    return '<iframe src="' + escapeAttr(embedUrl) + '" title="' + safeTitle + '" loading="lazy"' +
       ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+  }
+
+  function normalizeEmbedUrl(rawUrl) {
+    try {
+      var parsed = new URL(String(rawUrl || '').trim(), window.location.origin);
+      var host = parsed.hostname.toLowerCase();
+
+      if (host === 'youtu.be' || host.endsWith('.youtu.be')) {
+        var shortId = parsed.pathname.replace(/^\/+/, '').split('/')[0];
+        if (!shortId) return parsed.toString();
+        return 'https://www.youtube.com/embed/' + encodeURIComponent(shortId);
+      }
+
+      if (host === 'youtube.com' || host === 'www.youtube.com' || host.endsWith('.youtube.com')) {
+        var path = parsed.pathname || '';
+        if (path.indexOf('/embed/') === 0) {
+          return parsed.toString();
+        }
+        if (path === '/watch') {
+          var videoId = parsed.searchParams.get('v');
+          if (!videoId) return parsed.toString();
+          return 'https://www.youtube.com/embed/' + encodeURIComponent(videoId);
+        }
+        if (path.indexOf('/shorts/') === 0) {
+          var shortVideoId = path.split('/')[2] || '';
+          if (!shortVideoId) return parsed.toString();
+          return 'https://www.youtube.com/embed/' + encodeURIComponent(shortVideoId);
+        }
+      }
+
+      if (host === 'vimeo.com' || host === 'www.vimeo.com' || host.endsWith('.vimeo.com')) {
+        if (parsed.pathname.indexOf('/video/') === 0) {
+          return parsed.toString();
+        }
+        var parts = parsed.pathname.split('/').filter(Boolean);
+        var vimeoId = parts.length ? parts[parts.length - 1] : '';
+        if (/^\d+$/.test(vimeoId)) {
+          return 'https://player.vimeo.com/video/' + vimeoId;
+        }
+      }
+
+      return parsed.toString();
+    } catch (e) {
+      return String(rawUrl || '').trim();
+    }
   }
 
   function refreshScrollAnimations() {

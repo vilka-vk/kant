@@ -10,3 +10,6 @@ admin/lib/config.local.php
 LOCAL-SETUP-OSPanel-6-RU.md
 .cursor/
 .tmp-vvveb-admin/
+config.local.php
+ADMIN-PASSWORD-RESET.md
+ADMIN-CREATE-USER.md

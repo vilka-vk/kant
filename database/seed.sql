@@ -1,68 +1,159 @@
-INSERT INTO site_settings (id) VALUES (1)
-ON DUPLICATE KEY UPDATE id = VALUES(id);
 
-INSERT INTO site_settings_translations (site_settings_id, locale, footer_copyright)
-VALUES
-  (1, 'en', 'KANT Project'),
-  (1, 'ru', 'Проект KANT')
-ON DUPLICATE KEY UPDATE footer_copyright = VALUES(footer_copyright);
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-INSERT INTO about_project (id) VALUES (1)
-ON DUPLICATE KEY UPDATE id = VALUES(id);
+LOCK TABLES `about_project` WRITE;
+/*!40000 ALTER TABLE `about_project` DISABLE KEYS */;
+INSERT INTO `about_project` (`id`, `video_url_primary`, `video_url_secondary`, `updated_at`) VALUES (1,'','','2026-04-20 17:24:25');
+/*!40000 ALTER TABLE `about_project` ENABLE KEYS */;
+UNLOCK TABLES;
 
-INSERT INTO about_project_translations (
-  about_project_id, locale, section_title, sticker_text, modal_body
-)
-VALUES
-  (1, 'en', 'About Project', 'Fill this text in admin panel.', 'Fill this modal body in admin panel.'),
-  (1, 'ru', 'О проекте', 'Заполните этот текст в админке.', 'Заполните этот текст модального окна в админке.')
-ON DUPLICATE KEY UPDATE
-  section_title = VALUES(section_title),
-  sticker_text = VALUES(sticker_text),
-  modal_body = VALUES(modal_body);
+LOCK TABLES `about_project_translations` WRITE;
+/*!40000 ALTER TABLE `about_project_translations` DISABLE KEYS */;
+INSERT INTO `about_project_translations` (`id`, `about_project_id`, `locale`, `section_title`, `sticker_text`, `video_title_primary`, `video_title_secondary`, `modal_body`) VALUES (1,1,'en','About Project','<p>People have always dreamed of&nbsp;peace but constantly waged war. Will it&nbsp;ever be&nbsp;possible to&nbsp;achieve a&nbsp;lasting peace? The German philosopher Immanuel Kant proposed an&nbsp;answer to&nbsp;this question in&nbsp;his treatise Perpetual Peace. The 300th anniversary of&nbsp;Kant&rsquo;s birth is&nbsp;an&nbsp;opportunity to&nbsp;consider how relevant the ideas of&nbsp;this thinker from K&ouml;nigsberg still are today.</p>','','','<p class=\"MsoNormal\">But does that mean that resistance to war and the system and ideology of militarism is futile? We don\'t think so.</p>\r\n<p class=\"MsoNormal\">The struggle continues. This project is a contribution to the resistance movement against war and the renewed militarization that has been escalating in recent years. Contrary to those who don&rsquo;t believe in a world without war and think that war can be a means of achieving peace, we are convinced of the opposite. We believe that peace is not achieved through military action, but through the power of knowledge. Combined with active civic engagement, it is knowledge and a critical understanding of militaristic ideologies that ensure progress toward a just peace.</p>\r\n<p class=\"MsoNormal\">Our program has been created primarily for citizens of the successor states of the former Soviet Union. However, it is also intended for a much wider range of countries. Wars and the militarization of people\'s consciousness are global problems. Therefore, the program has been developed in five languages: English, Russian, Armenian, Azerbaijani, and Georgian.</p>\r\n<p class=\"MsoNormal\">The program consists of modules proposing to look at the underlying causes of wars and of the popularity of militaristic ideologies and practices, as well as their direct connection to the dominant capitalist mode of production, and the imperialism and nationalism that capitalism generates.</p>\r\n<p class=\"MsoNormal\">State education programs in the humanities and social sciences largely serve the interests of those in power, who use imperialist, nationalist, and militaristic ideologies to mobilize people to fight wars designed to advance those interests.</p>\r\n<p class=\"MsoNormal\">We present an alternative educational program that helps participants understand the motives of the people who declare war, as well as those who are willing to don a military uniform, take up arms, and go out to kill and die for their interests. Together, we want to understand how a self-perpetuating system of mass armed violence has persisted for centuries and then think about how we can break it.</p>\r\n<p class=\"MsoNormal\">Our program is constantly evolving. War, the ideology of militarism, and the process of militarization are vast topics. Unfortunately, their relevance is only growing. We have to find answers to a lot of questions. Some of them we have not even been able to formulate or define yet. But the first step has already been taken, the foundation has been laid, and our work will continue.</p>\r\n<p class=\"MsoNormal\">According to Immanuel Kant, he took the title for his treatise from a \"satirical inscription&hellip; once found on a Dutch innkeeper&rsquo;s sign-board above the picture of a cemetery.\" \"Is [this inscription] aimed at mankind in general,&rdquo; wondered the K&ouml;nigsberg philosopher, &ldquo;or at the rulers of states in particular, unwearying in their love of war, or perhaps only at the philosophers who cherish the sweet dream of perpetual peace?&rdquo;</p>\r\n<p class=\"MsoNormal\">Borrowing Kant\'s question, our answer is that our&nbsp;peace education&nbsp;program is aimed at anyone willing to critically examine conventional notions about the structure of the world around them: to critically examine the phenomenon of the nation-state, the \"necessity\" of the army as an institution, the dominant militaristic and patriotic ideologies, the \"urgency\" of increasing military budgets for the sake of national security at the expense of well-being, and much more. And of course, this program is also intended for anyone who is not yet ready for such criticism. Our goal is to sow seeds of doubt under the conventional truths and rules that have trapped us all in a system of perpetual warfare. A simple desire to seek the root causes is enough to begin with. We share our knowledge with you in the hope of sparking interest in the topic of militarism and inspiring you to engage in informed anti-war action.</p>\r\n<p>Our program is also intended for anyone in the teaching profession. The modules can be used in schools and universities. Our approach is to look at the history of recent centuries through the emergence of the ideologies and practices of modern militarism, and to shed light on the presence of militarism in our everyday lives. This approach and the materials collected here can be an important resource for all participants in various educational settings who share our anti-war and anti-militarist position.</p>'),(2,1,'ru','О проекте','<p>Люди всегда мечтали о мире, но при этом постоянно вели войны. Удастся ли когда-нибудь достичь прочного мира? Немецкий философ Иммануил Кант предложил ответ на этот вопрос в своем трактате &laquo;Вечный мир&raquo;. 300-летие со дня рождения Канта &mdash; это повод задуматься о том, насколько актуальны идеи этого мыслителя из Кёнигсберга и сегодня.</p>','','','<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Наш проект начинался в</span>&nbsp;2024 году, когда отмечался&nbsp;300-<span style=\"font-family: Calibri;\">летний юбилей</span>&nbsp;<span style=\"font-family: Calibri;\">со дня рождения немецкого философа Иммануила Канта &ndash; автора философского трактата &laquo;К вечному миру&raquo;</span>. Отталкиваясь от этой символической даты, мы работаем над созданием образовательной программы суть которой можно отразить в коротком девизе &ndash; &ldquo;демилитаризируя сознание&rdquo;.</p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Политики и производители оружия, все те, кто обладает</span>&nbsp;<span style=\"font-family: Calibri;\">властью развязывать войны, не спешат отказываться от</span>&nbsp;<span style=\"font-family: Calibri;\">этого </span><span style=\"font-family: Calibri;\">метода утверждения</span>&nbsp;<span style=\"font-family: Calibri;\">и сохранения</span>&nbsp;<span style=\"font-family: Calibri;\">своего влияния и экономической выгоды. </span><span style=\"font-family: Calibri;\">У них</span>&nbsp;<span style=\"font-family: Calibri;\">всегда было неизмеримо </span><span style=\"font-family: Calibri;\">больше </span><span style=\"font-family: Calibri;\">ресурсов, чем у всех </span><span style=\"font-family: Calibri;\">выступавших</span>&nbsp;<span style=\"font-family: Calibri;\">против войн как в XIX и ХХ столетиях, так и в наши дни.</span></p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Значит ли это, что сопротивление войнам, системе и идеологии милитаризма </span><span style=\"font-family: Calibri;\">лишено всякого смысла</span>?&nbsp;<span style=\"font-family: Calibri;\">Мы</span>&nbsp;<span style=\"font-family: Calibri;\">так </span><span style=\"font-family: Calibri;\">не считаем</span>.</p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Борьба продолжается. Данный проект &ndash; это </span><span style=\"font-family: Calibri;\">вклад</span>&nbsp;<span style=\"font-family: Calibri;\">в движени</span><span style=\"font-family: Calibri;\">е</span>&nbsp;<span style=\"font-family: Calibri;\">сопротивления</span>&nbsp;<span style=\"font-family: Calibri;\">войн</span><span style=\"font-family: Calibri;\">ам</span>&nbsp;<span style=\"font-family: Calibri;\">и</span>&nbsp;<span style=\"font-family: Calibri;\">вновь нарастающей в последние годы </span><span style=\"font-family: Calibri;\">милитаризации.</span>&nbsp;<span style=\"font-family: Calibri;\">Вопреки убеждениям всех тех, кто не верит в мир без войны, считает, что война может быть методом достижения мира, мы уверенны в обратном. Мы считаем, что к миру ведут не военные действия, а сила знаний. В сочетании с активным гражданским действием, знания и навыки критического понимания милитаристских идеологий обеспечивают движение к справедливому миру.</span></p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Наша программа создавалась в первую очередь для граждан стран наследниц Советского союза. Но она предназначена и для гораздо более широкого круга стран. Войны и милитаризация сознания людей &ndash; это глобальные проблемы. Поэтому программа создавалась сразу на пяти языках: английском, русском, армянском, азербайджанском и грузинском.</span></p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Программа состоит из образовательных модулей, предлагающих взглянуть на глубинные причины войн и популярности милитаристских идеологий и практик; на их прямую связь с доминирующим в экономике капиталистическим способом производства, а также на генерируемые им империализмом и национализмом.</span></p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Г</span><span style=\"font-family: Calibri;\">осударственные </span><span style=\"font-family: Calibri;\">образовательные программы по гуманитарным и социальным предметам</span>&nbsp;<span style=\"font-family: Calibri;\">во многом </span><span style=\"font-family: Calibri;\">обслуживают интересы власть имущих, использующих империалистические, националистические и милитаристские идеологии с целью мобилизации людей для участия в войнах</span>, предназначенных для утверждения их интересов.</p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Мы </span><span style=\"font-family: Calibri;\">представляем</span>&nbsp;<span style=\"font-family: Calibri;\">альтернативную образовательную программу, </span><span style=\"font-family: Calibri;\">позволяющую </span><span style=\"font-family: Calibri;\">разобраться как в мотивах людей, объявляющих войны, так и тех, кто готов надеть военный мундир, взять в руки оружие и отправиться убивать и умирать за</span>&nbsp;<span style=\"font-family: Calibri;\">их</span>&nbsp;<span style=\"font-family: Calibri;\">интересы</span>.&nbsp;<span style=\"font-family: Calibri;\">Мы, вместе с вами, хотим разобраться с тем, как так случилось, что уже несколько веков работает самовозобновляющаяся система массового вооруженного насилия и думать о том, как мы можем сломать ее. </span></p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Наша п</span><span style=\"font-family: Calibri;\">рограмма</span>&nbsp;<span style=\"font-family: Calibri;\">находится в постоянном развитии</span>. <span style=\"font-family: Calibri;\">Война, милитаризм как идеология и милитаризация как процесс, &mdash; это </span><span style=\"font-family: Calibri;\">очень </span><span style=\"font-family: Calibri;\">обширные</span>&nbsp;<span style=\"font-family: Calibri;\">тем</span><span style=\"font-family: Calibri;\">ы</span>.&nbsp;<span style=\"font-family: Calibri;\">К сожалению, их актуальность только возрастает.</span>&nbsp;<span style=\"font-family: Calibri;\">Нам предстоит искать ответы на множество вопросов</span>. <span style=\"font-family: Calibri;\">Н</span><span style=\"font-family: Calibri;\">екоторые из них мы </span><span style=\"font-family: Calibri;\">ещё</span>&nbsp;<span style=\"font-family: Calibri;\">даже не можем сформулировать</span>&nbsp;<span style=\"font-family: Calibri;\">и обозначить</span>. Но первый шаг уже сделан,&nbsp;<span style=\"font-family: Calibri;\">основа положена</span>,&nbsp;<span style=\"font-family: Calibri;\">и наша работа будет продолжаться</span>.</p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Название для своего трактата Иммануил Кант, по его словам, увидел в &laquo;сатирической надписи на вывеске одного голландского трактирщика рядом с изображенным на этой вывеске кладбищем&raquo;. &laquo;Ко всем ли людям, </span>- <span style=\"font-family: Calibri;\">задается вопросом кенигсбергский философ, - или только к главам государств, которые никогда не смогут пресытиться войной, или, быть может, только к философам, которым снится этот сладкий сон&raquo; обращена эта надпись? </span></p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Воспользовавшись посылом Канта, и мы ответим на вопрос, что наша программа мирного просвещения обращена ко всем тем, кто готов критически взглянуть на привычные представления об устройстве окружающего их мира. Критически посмотреть на феномен национального государства, на &laquo;необходимость&raquo; существования института армии, на доминирующие милитаристские патриотические идеологии</span>, на &ldquo;срочность&rdquo; наращивания военных бюджетов ради национальной безопасности в ущерб благосостоянию, и многое другое.&nbsp;<span style=\"font-family: Calibri;\">И, конечно, эта программа предназначена также для всех тех, кто </span><span style=\"font-family: Calibri;\">ещё</span>&nbsp;<span style=\"font-family: Calibri;\">не готов к такой критике. Наша цель зародить зерна сомнения в признанных истинах и правилах, заключивших всех нас в систему беспрерывного воспроизводства войн. Для начала хватит и </span><span style=\"font-family: Calibri;\">простого</span>&nbsp;<span style=\"font-family: Calibri;\">желания искать первопричины. Мы</span>&nbsp;<span style=\"font-family: Calibri;\">делимся с </span><span style=\"font-family: Calibri;\">вам</span><span style=\"font-family: Calibri;\">и</span>&nbsp;<span style=\"font-family: Calibri;\">нашими</span> <span style=\"font-family: Calibri;\">знания</span><span style=\"font-family: Calibri;\">ми</span>&nbsp;<span style=\"font-family: Calibri;\">и надеемся зародить</span>&nbsp;<span style=\"font-family: Calibri;\">интерес к теме милитаризма и мотивировать на последующее информированное антивоенное действие</span>.</p>\r\n<p class=\"MsoNormal\"><span style=\"font-family: Calibri;\">Наша программа также предназначена для всех тех, кто занимается учительским трудом. Образовательные модули можно использовать в школах и университетах. Наш подход &ndash; это взгляд на историю последних веков через процесс зарождения современных милитаристских идеологий и практик</span>, а также на подсвечивание присутствия милитаризма в нашей повседневной жизни.&nbsp;<span style=\"font-family: Calibri;\">Этот подход и собранные здесь материалы могут стать важным подспорьем для всех</span>&nbsp;<span style=\"font-family: Calibri;\">участников различных образовательных процессов, </span><span style=\"font-family: Calibri;\">разделяющих нашу антивоенную и антимилитаристскую позицию.</span></p>');
+/*!40000 ALTER TABLE `about_project_translations` ENABLE KEYS */;
+UNLOCK TABLES;
 
-INSERT INTO our_position (id) VALUES (1)
-ON DUPLICATE KEY UPDATE id = VALUES(id);
+LOCK TABLES `about_project_videos` WRITE;
+/*!40000 ALTER TABLE `about_project_videos` DISABLE KEYS */;
+INSERT INTO `about_project_videos` (`id`, `about_project_id`, `language_code`, `video_url`, `video_alt`, `sort_order`) VALUES (1,1,'en','https://www.youtube.com/watch?v=LAaLGC19ipY','',1),(2,1,'ru','https://youtu.be/jif_79SU23Q','',2);
+/*!40000 ALTER TABLE `about_project_videos` ENABLE KEYS */;
+UNLOCK TABLES;
 
-INSERT INTO our_position_translations (
-  our_position_id, locale, section_title, concept_title, concept_body, principles_title, principles_body, objectives_title,
-  objective_1, objective_2, objective_3, objective_4
-)
-VALUES
-  (
-    1, 'en', 'Our position', 'Concept',
-    'For hundreds of years, institutions of mass education have been used to inculcate the interrelated ideologies of militarism, imperialism, and nationalism. But we believe that the power of knowledge can still pave the way to peace. Therefore, we are creating an alternative educational program designed to develop skills for a critical understanding of militaristic ideologies and practices.',
-    'Principles',
-    'We aim to expose the underlying causes of war, and the direct connections between capitalism, imperialism, nationalism, and militarism. We believe that a clear understanding of the causes and methods of war is the foundation for resistance and the struggle for peace. We aim to participate in anti-war and anti-militarist resistance. This educational resource has been created with this goal in mind.',
-    'Objectives',
-    'A critical review and analysis of militaristic institutions, ideologies and practices.',
-    'The creation of an alternative to the dominant historical narrative legitimizing war.',
-    'The promotion of anti-war anti-militarist and peace.',
-    'Research on the political economy of militarism; contribution to the development of critical militarism studies.'
-  ),
-  (
-    1, 'ru', 'Наша позиция', 'Концепция',
-    'На протяжении сотен лет институты массового образования использовались для внедрения взаимосвязанных идеологий милитаризма, империализма и национализма. Но мы убеждены, что сила знания все еще может прокладывать путь к миру. Поэтому мы создаем альтернативную образовательную программу для развития навыков критического понимания милитаристских идеологий и практик.',
-    'Принципы',
-    'Мы стремимся раскрыть глубинные причины войны и прямые связи между капитализмом, империализмом, национализмом и милитаризмом. Мы считаем, что ясное понимание причин и методов войны является основой сопротивления и борьбы за мир. Мы стремимся участвовать в антивоенном и антимилитаристском сопротивлении. Этот образовательный ресурс создан с этой целью.',
-    'Задачи',
-    'Критический обзор и анализ милитаристских институтов, идеологий и практик.',
-    'Создание альтернативы доминирующему историческому нарративу, легитимирующему войну.',
-    'Продвижение антивоенной, антимилитаристской и миротворческой повестки.',
-    'Исследование политической экономии милитаризма; вклад в развитие критических исследований милитаризма.'
-  )
-ON DUPLICATE KEY UPDATE
-  section_title = VALUES(section_title),
-  concept_title = VALUES(concept_title),
-  concept_body = VALUES(concept_body),
-  principles_title = VALUES(principles_title),
-  principles_body = VALUES(principles_body),
-  objectives_title = VALUES(objectives_title),
-  objective_1 = VALUES(objective_1),
-  objective_2 = VALUES(objective_2),
-  objective_3 = VALUES(objective_3),
-  objective_4 = VALUES(objective_4);
+LOCK TABLES `authors` WRITE;
+/*!40000 ALTER TABLE `authors` DISABLE KEYS */;
+INSERT INTO `authors` (`id`, `photo_path`, `display_order`) VALUES (1,'/uploads/authors/2026/04/Sevil-b5f9fcce.jpg',1),(2,'/uploads/authors/2026/04/Sergei-37304423.jpg',2),(3,'/uploads/authors/2026/04/Vadim-82c05bfa.jpg',3),(4,'/uploads/authors/2026/04/Katia-18720485.jpg',4),(5,'/uploads/authors/2026/04/Ruslan-9b50ff5b.jpg',5),(6,'/uploads/authors/2026/04/Evia-eb795603.jpg',6);
+/*!40000 ALTER TABLE `authors` ENABLE KEYS */;
+UNLOCK TABLES;
 
-INSERT INTO hero_sections (page_key)
-VALUES ('modules'), ('module_detail'), ('publications')
-ON DUPLICATE KEY UPDATE page_key = VALUES(page_key);
+LOCK TABLES `authors_translations` WRITE;
+/*!40000 ALTER TABLE `authors_translations` DISABLE KEYS */;
+INSERT INTO `authors_translations` (`id`, `author_id`, `locale`, `first_name`, `last_name`, `full_name`, `affiliation`) VALUES (1,1,'ru','Д-р Севиль','Гусейнова','','Cоциальный антрополог, Центр независимых социальных исследований, Берлин'),(2,1,'en','Dr.Sevil','Huseynova','','Social Anthropologist, Center for Independent Social Research Berlin'),(5,2,'ru','Д-р Сергей','Румянцев','','Социолог, Центр независимых социальных исследований, Берлин'),(6,2,'en','Dr. Sergey','Rumyansev','','Sociologist, Center for Independent Social Research Berlin'),(7,3,'ru','Д-р Вадим','Ромашов','','Исследователь мира и конфликтов, Департамент социальных наук Университета Восточной Финляндии'),(8,3,'en','Dr.Vadim','Romashov','','Peace Researcher, Department of Social Sciences University of Eastern Finland'),(9,4,'ru','Катя','Чигалейчик','','Социальный антрополог, Culture Connection Foundation'),(10,4,'en','Katya','Chigaleichik','','Social Anthropologist, Culture Connection Foundation'),(11,5,'ru','Д-р Руслан','Барамидзе','','Этнолог, приглашённый исследователь Центра исследований конфликтов Университета Марбурга'),(12,5,'en','Dr. Ruslan','Baramidze','','Ethnologist, Visiting Researcher, Center for Conflict Studies of University Marburg'),(13,6,'ru','Эвия','Оганнисян','','Социальный антрополог, аспирантка Института археологии и этнографии НАН РА'),(14,6,'en','Eviya','Hovhannisyan','','Social Anthropologist. PhD student Institute of Archaeology and Ethnography NAS RA');
+/*!40000 ALTER TABLE `authors_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `hero_sections` WRITE;
+/*!40000 ALTER TABLE `hero_sections` DISABLE KEYS */;
+INSERT INTO `hero_sections` (`id`, `page_key`, `subtitle_enabled`, `background_image_path`) VALUES (1,'modules',0,'/uploads/hero/2026/04/hero_modules-d6305299.png'),(2,'module_detail',1,''),(3,'publications',0,'/uploads/hero/2026/04/Publications_BG-2aadd8c6.png');
+/*!40000 ALTER TABLE `hero_sections` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `hero_sections_translations` WRITE;
+/*!40000 ALTER TABLE `hero_sections_translations` DISABLE KEYS */;
+INSERT INTO `hero_sections_translations` (`id`, `hero_section_id`, `locale`, `title`, `subtitle`) VALUES (1,1,'ru','Модули',''),(2,1,'en','Modules',''),(3,3,'ru','Публикации',''),(4,3,'en','Publications','');
+/*!40000 ALTER TABLE `hero_sections_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `module_lecture_videos` WRITE;
+/*!40000 ALTER TABLE `module_lecture_videos` DISABLE KEYS */;
+INSERT INTO `module_lecture_videos` (`id`, `module_id`, `language_code`, `video_url`, `video_alt`, `sort_order`) VALUES (1,1,'ru','https://youtu.be/jif_79SU23Q','',2),(2,1,'en','https://www.youtube.com/watch?v=LAaLGC19ipY','',1);
+/*!40000 ALTER TABLE `module_lecture_videos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `module_presentation_videos` WRITE;
+/*!40000 ALTER TABLE `module_presentation_videos` DISABLE KEYS */;
+INSERT INTO `module_presentation_videos` (`id`, `module_id`, `language_code`, `video_url`, `video_alt`, `sort_order`) VALUES (1,1,'en','https://www.youtube.com/watch?v=LAaLGC19ipY','',1);
+/*!40000 ALTER TABLE `module_presentation_videos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `module_readings` WRITE;
+/*!40000 ALTER TABLE `module_readings` DISABLE KEYS */;
+INSERT INTO `module_readings` (`id`, `module_id`, `linked_publication_id`, `custom_url`, `custom_file_path`, `custom_cover_image_path`, `sort_order`) VALUES (1,1,1,'','','',1),(2,1,2,'','','',2),(3,1,3,'','','',3),(4,1,NULL,'','/uploads/module-readings/2026/04/Education-and-the-politics-of-memory-in-Russia-and-Eatern-Europe-3d598037.pdf','/uploads/module-reading-covers/2026/04/publication-1-652cffee.jpg',4);
+/*!40000 ALTER TABLE `module_readings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `module_readings_translations` WRITE;
+/*!40000 ALTER TABLE `module_readings_translations` DISABLE KEYS */;
+INSERT INTO `module_readings_translations` (`id`, `module_reading_id`, `locale`, `custom_title`) VALUES (1,1,'ru',''),(2,1,'en',''),(3,2,'ru',''),(4,2,'en',''),(5,3,'ru',''),(6,3,'en',''),(7,4,'ru',''),(8,4,'en','Education and the politics of memory in Russia and Eatern Europe');
+/*!40000 ALTER TABLE `module_readings_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `module_transcripts` WRITE;
+/*!40000 ALTER TABLE `module_transcripts` DISABLE KEYS */;
+INSERT INTO `module_transcripts` (`id`, `module_id`, `file_path`, `sort_order`) VALUES (5,1,'/uploads/module-transcripts/2026/04/ARM-456a878f.pdf',2),(6,1,'/uploads/module-transcripts/2026/04/AZ-caa04f21.pdf',3),(7,1,'/uploads/module-transcripts/2026/04/GE-bf432c92.pdf',4),(8,1,'/uploads/module-transcripts/2026/04/file-60bf3340.pdf',1);
+/*!40000 ALTER TABLE `module_transcripts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `module_transcripts_translations` WRITE;
+/*!40000 ALTER TABLE `module_transcripts_translations` DISABLE KEYS */;
+INSERT INTO `module_transcripts_translations` (`id`, `module_transcript_id`, `locale`, `display_name`) VALUES (9,5,'ru','arm'),(10,5,'en','arm'),(11,6,'ru','az'),(12,6,'en','az'),(13,7,'ru','ge'),(14,7,'en','ge'),(15,8,'ru','ru'),(16,8,'en','ru');
+/*!40000 ALTER TABLE `module_transcripts_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `modules` WRITE;
+/*!40000 ALTER TABLE `modules` DISABLE KEYS */;
+INSERT INTO `modules` (`id`, `slug`, `module_number`, `sort_order`, `languages`, `formats`, `list_duration_display`, `hero_background_image_path`, `presentation_file_path`, `prev_module_id`, `next_module_id`) VALUES (1,'module-1-proishozhdenie-sovremennogo-militarizma-uroki-istorii',1,1,'EN, RU','Лекция, Презентация','14:23','/uploads/module-hero/2026/04/module-1-hero-bg-a157db17.png','/uploads/module-presentations/2026/04/ARM-1fdabea3.pdf',NULL,NULL),(2,'module-2-militarizm-v-xx-xxi-vekah-zabytye-uroki-noveyshey-istorii',2,2,'EN, RU','Лекция, Презентация','','','',NULL,NULL),(3,'3-militaristskie-ideologii-i-traditsii-v-rossiyskoy-imperii-i-sovetskom-soyuze',3,3,'EN, RU','','','','',NULL,NULL),(4,'module-4-militarizm-v-period-liberalnogo-mirotsroitelstva',4,4,'EN, RU','','','','',NULL,NULL);
+/*!40000 ALTER TABLE `modules` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `modules_translations` WRITE;
+/*!40000 ALTER TABLE `modules_translations` DISABLE KEYS */;
+INSERT INTO `modules_translations` (`id`, `module_id`, `locale`, `title`, `short_description`, `formats`, `hero_kicker`, `hero_subtitle`, `lecture_label`, `lecture_title`, `lecture_video_title_primary`, `lecture_video_title_secondary`, `presentation_label`, `presentation_title`, `presentation_video_title_primary`, `literature_html`) VALUES (1,1,'ru','Происхождение современного милитаризма: уроки истории','Введение в историю формирования идеологии и практик современного милитаризма.','Лекция, Презентация','','Введение в историю формирования идеологии и практик современного милитаризма.','','“Гремит и гремит войны барабан”: Истоки современного милитаризма','','','','«Планета наша похожа на новобранца, потеющего на марше»: Истоки современного милитаризма. Опыт критического обзора»','','<ol class=\"modal__references\">\r\n<li>Герц, Дж. Истоки войн и международная политика. Москва: Изд-во МГУ, 2018.</li>\r\n<li>Клаузевиц, К. О войне. Пер. с нем. Москва: Эксмо, 2020.</li>\r\n<li>Хобсбаум, Э. Век крайностей: Короткий двадцатый век, 1914-1991. Москва: АСТ, 2021.</li>\r\n<li>Keegan, J. A History of Warfare. New York: Vintage Books, 1994.</li>\r\n<li>Mann, M. The Sources of Social Power. Vol. 4: Globalizations, 1945-2011. Cambridge: Cambridge University Press, 2013.</li>\r\n<li>Oxford Research Encyclopedia of International Studies. \"Militarism and Society.\" Oxford University Press, 2022.</li>\r\n</ol>'),(2,1,'en','The origins of modern militarism: lessons from history','An introduction to the history of the formation of the ideology and practices of modern militarism.','Lesson, Presentation','','An introduction to the history of the formation of the ideology and practices of modern militarism.','','“The Drum of War Thunders and Thunders”: The Origins of Modern Militarism','','','','\"Our Planet Resembles a New Recruit Sweating on the March\": The Origins of Modern Militarism: A Critical Review','','<ol class=\"modal__references\">\r\n<li>Герц, Дж. Истоки войн и международная политика. Москва: Изд-во МГУ, 2018.</li>\r\n<li>Клаузевиц, К. О войне. Пер. с нем. Москва: Эксмо, 2020.</li>\r\n<li>Хобсбаум, Э. Век крайностей: Короткий двадцатый век, 1914-1991. Москва: АСТ, 2021.</li>\r\n<li>Keegan, J. A History of Warfare. New York: Vintage Books, 1994.</li>\r\n<li>Mann, M. The Sources of Social Power. Vol. 4: Globalizations, 1945-2011. Cambridge: Cambridge University Press, 2013.</li>\r\n<li>Oxford Research Encyclopedia of International Studies. \"Militarism and Society.\" Oxford University Press, 2022.</li>\r\n</ol>'),(21,2,'ru','Милитаризм в XX – XXI веках: забытые уроки новейшей истории','О том, как милитаризм вовлек в свою сеть десятки и сотни миллионов людей и служит сохранению современной политэкономической системы.','Лекция, Презентация','','О том, как милитаризм вовлек в свою сеть десятки и сотни миллионов людей и служит сохранению современной политэкономической системы.','','Век Мировых войн и гонки вооружений','','','','Массовый милитаризм в эпоху катастроф','',''),(22,2,'en','Militarism in the 20th and 21st centuries: forgotten lessons of modern history','How militarism has caught hundreds of millions of people in its web and how it serves to maintain modern political and economic systems.','Lesson, Presentation','','How militarism has caught hundreds of millions of people in its web and how it serves to maintain modern political and economic systems.','','The Age of World Wars and the Arms Race','','','','Mass Militarism in an Age of Catastrophe','',''),(23,3,'ru','Милитаристские идеологии и традиции в Российской империи и Советском Союзе','','','','','','','','','','','',''),(24,3,'en','Militaristic Ideologies and Traditions in the Russian Empire and the Soviet Union','','','','','','','','','','','',''),(31,4,'ru','Милитаризм в период либерального миротсроительства','О том, насколько глубокой была «демилитаризация» после окончания “Холодной войны” и стоило ли надеяться на конец истории войн и милитаризма.','','','О том, насколько глубокой была «демилитаризация» после окончания “Холодной войны” и стоило ли надеяться на конец истории войн и милитаризма.','','','','','','','',''),(32,4,'en','Militarism in the period of liberal peacebuilding','On how far-reaching the “demilitarization” was after the end of the Cold War, and whether there was reason to hope for an end to war and militarism.','','','On how far-reaching the “demilitarization” was after the end of the Cold War, and whether there was reason to hope for an end to war and militarism.','','','','','','','','');
+/*!40000 ALTER TABLE `modules_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `our_position` WRITE;
+/*!40000 ALTER TABLE `our_position` DISABLE KEYS */;
+INSERT INTO `our_position` (`id`, `image_primary_path`, `image_secondary_path`, `updated_at`) VALUES (1,'/assets/images/position-photo-1.jpg','/assets/images/position-photo-2.jpg','2026-04-22 14:15:18');
+/*!40000 ALTER TABLE `our_position` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `our_position_translations` WRITE;
+/*!40000 ALTER TABLE `our_position_translations` DISABLE KEYS */;
+INSERT INTO `our_position_translations` (`id`, `our_position_id`, `locale`, `section_title`, `concept_title`, `concept_body`, `principles_title`, `principles_body`, `objectives_title`, `objective_1`, `objective_2`, `objective_3`, `objective_4`, `objective_5`, `objective_6`) VALUES (1,1,'en','Our position','Concept','For hundreds of years, institutions of mass education have been used to inculcate the interrelated ideologies of militarism, imperialism, and nationalism. But we believe that the power of knowledge can still pave the way to peace. Therefore, we are creating an alternative educational program designed to develop skills for a critical understanding of militaristic ideologies and practices.','Principles','We aim to expose the underlying causes of war, and the direct connections between capitalism, imperialism, nationalism, and militarism. We believe that a clear understanding of the causes and methods of war is the foundation for resistance and the struggle for peace. We aim to participate in anti-war and anti-militarist resistance. This educational resource has been created with this goal in mind.','Objectives','A critical review and analysis of militaristic institutions, ideologies and practices.','The creation of an alternative to the dominant historical narrative legitimizing war.','The promotion of anti-war anti-militarist and peace.','Research on the political economy of militarism; contribution to the development of critical militarism studies.','',''),(2,1,'ru','Наша позиция','Концепция','На протяжении сотен лет институты массового образования использовались для внедрения взаимосвязанных идеологий милитаризма, империализма и национализма. Но мы убеждены, что сила знания все еще может прокладывать путь к миру. Поэтому мы создаем альтернативную образовательную программу для развития навыков критического понимания милитаристских идеологий и практик.','Принципы','Мы стремимся раскрыть глубинные причины войны и прямые связи между капитализмом, империализмом, национализмом и милитаризмом. Мы считаем, что ясное понимание причин и методов войны является основой сопротивления и борьбы за мир. Мы стремимся участвовать в антивоенном и антимилитаристском сопротивлении. Этот образовательный ресурс создан с этой целью.','Задачи','Критический обзор и анализ милитаристских институтов, идеологий и практик.','Создание альтернативы доминирующему историческому нарративу, легитимирующему войну.','Продвижение антивоенной, антимилитаристской и миротворческой повестки.','Исследование политической экономии милитаризма; вклад в развитие критических исследований милитаризма.','','');
+/*!40000 ALTER TABLE `our_position_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `publication_types` WRITE;
+/*!40000 ALTER TABLE `publication_types` DISABLE KEYS */;
+INSERT INTO `publication_types` (`id`, `slug`, `sort_order`) VALUES (1,'articles',0),(2,'books',1);
+/*!40000 ALTER TABLE `publication_types` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `publication_types_translations` WRITE;
+/*!40000 ALTER TABLE `publication_types_translations` DISABLE KEYS */;
+INSERT INTO `publication_types_translations` (`id`, `publication_type_id`, `locale`, `name`) VALUES (1,1,'ru','Статьи'),(2,1,'en','Articles'),(3,2,'ru','Книги'),(4,2,'en','Books');
+/*!40000 ALTER TABLE `publication_types_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `publications` WRITE;
+/*!40000 ALTER TABLE `publications` DISABLE KEYS */;
+INSERT INTO `publications` (`id`, `publication_type_id`, `cover_image_path`, `file_path`, `external_url`, `published_at`, `display_order`) VALUES (1,1,'','','https://www.tandfonline.com/doi/full/10.1080/17502977.2025.2554428','2026-04-21 00:00:00',2),(2,1,'','','https://trepo.tuni.fi/handle/10024/141110','2026-04-21 00:00:00',1),(3,2,'/uploads/publications/covers/2026/04/Education-and-the-politics-964fb48e.jpg','/uploads/publications/files/2026/04/Education-and-the-politics-of-memory-in-Russia-and-Eatern-Europe-f55ea3a0.pdf','','2026-04-22 00:00:00',3),(4,1,'','','https://doi.org/10.1037/pac0000727','2026-04-22 00:00:00',4);
+/*!40000 ALTER TABLE `publications` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `publications_translations` WRITE;
+/*!40000 ALTER TABLE `publications_translations` DISABLE KEYS */;
+INSERT INTO `publications_translations` (`id`, `publication_id`, `locale`, `title`, `description`) VALUES (1,1,'ru','',''),(2,1,'en','Liberal Peacebuilding and Petty Trade: Disconnects in Concepts and Practices',''),(3,2,'ru','',''),(4,2,'en','Living together with difference : Narratives and practices of co-existence in Armenian-Azerbaijani rural communities in Georgia',''),(5,3,'ru','',NULL),(6,3,'en','Education and the politics of memory in Russia and Eatern Europe',NULL),(9,4,'ru','',NULL),(10,4,'en','The embodiment of postwar reconciliation? The issue of the missing after the Georgian–Abkhazian armed conflict.',NULL);
+/*!40000 ALTER TABLE `publications_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `site_settings` WRITE;
+/*!40000 ALTER TABLE `site_settings` DISABLE KEYS */;
+INSERT INTO `site_settings` (`id`, `social_youtube_url`, `social_twitter_url`, `social_instagram_url`, `social_facebook_url`, `updated_at`) VALUES (1,'','','https://www.instagram.com/cisrberlin/','https://www.facebook.com/cisrberlin','2026-04-22 16:19:33');
+/*!40000 ALTER TABLE `site_settings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `site_settings_translations` WRITE;
+/*!40000 ALTER TABLE `site_settings_translations` DISABLE KEYS */;
+INSERT INTO `site_settings_translations` (`id`, `site_settings_id`, `locale`, `footer_copyright`) VALUES (1,1,'en','Copyright © 2026 KANT Project. All rights reserved.'),(2,1,'ru','Copyright © 2026 KANT Project. All rights reserved.');
+/*!40000 ALTER TABLE `site_settings_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+

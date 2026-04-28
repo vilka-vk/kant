@@ -149,8 +149,7 @@
 
   /* ===================== LAYOUT ===================== */
 
-  --layout-max-width: 1440px;
-  --layout-content-width: 1320px;
+  --layout-content-width: 1920px;
   --layout-header-height: 88px;
   --layout-header-padding-x: 60px;
   --layout-header-padding-y: 24px;

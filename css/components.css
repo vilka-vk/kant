@@ -477,7 +477,7 @@ ul, ol {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: var(--layout-max-width);
+  max-width: var(--layout-content-width);
   margin: 0 auto;
 }
 
@@ -839,9 +839,9 @@ ul, ol {
   flex-direction: column;
   align-items: center;
   gap: 120px;
-  max-width: 1920px;
   min-width: 320px;
   padding: 120px 60px 120px;
+  margin: 0 auto;
 }
 
 .section {
@@ -918,7 +918,7 @@ ul, ol {
 /* Figma: Subtitle (node 580:328) — positioned within content wrapper */
 .hero__subtitle {
   position: absolute;
-  left: 376px;
+  left: 436px;
   bottom: 86px;
 }
 
@@ -1569,14 +1569,19 @@ ul, ol {
 .footer {
   position: relative;
   z-index: 1;
+  width: 100%;
+  padding: var(--space-2xl) var(--layout-header-padding-x);
+  background-color: var(--color-black);
+}
+
+.footer__wrapper {
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas: "logo copyright socials";
   align-items: center;
   width: 100%;
-  height: 96px;
-  padding: 36px 60px;
-  background-color: var(--color-black);
+  max-width: var(--layout-content-width);
+  margin: 0 auto;
 }
 
 .footer__logo {
@@ -1687,7 +1692,7 @@ ul, ol {
   .hero          { padding-left: 32px; padding-right: 32px; }
   .hero__content { max-width: 600px; padding: 0 32px; }
   .hero__crease  { width: 280px; height: 245px; }
-  .hero__subtitle { left: 260px; bottom: 60px; }
+  .hero__subtitle { left: 290px; bottom: 56px; }
 
   /* --- About — stack on tablet too (820px is too narrow for side-by-side) --- */
   .about {
@@ -1763,7 +1768,7 @@ ul, ol {
   .btn-interlinking { width: 100%; }
 
   /* --- Footer --- */
-  .footer             { padding: 36px 32px; }
+  .footer             { padding: var(--space-2xl) var(--space-xl); }
   .footer__copyright  { font-size: 12px; max-width: 52%; }
 
   .module-hero { min-height: 640px; }
@@ -1802,7 +1807,7 @@ ul, ol {
   .section { gap: 16px; }
 
   /* --- Typography — Figma keeps type LARGE on mobile --- */
-  .text-h1             { font-size: 56px; line-height: 0.88; }
+  .text-h1             { font-size: 46px; line-height: 0.88; margin-bottom: 4px; }
   .text-h2             { font-size: 40px; letter-spacing: 0.8px; }
   .text-h3             { font-size: 19px; line-height: 21px; letter-spacing: 0.19px; }
   .text-descriptor     { font-size: 14px; }
@@ -2099,13 +2104,14 @@ ul, ol {
 
   /* --- Footer --- */
   .footer {
+    padding: var(--space-2xl) var(--space-md);
+  }
+  .footer__wrapper {
     grid-template-columns: 1fr auto;
     grid-template-areas:
       "logo socials"
       "copyright copyright";
-    height: auto;
     row-gap: var(--space-md);
-    padding: 36px 16px;
   }
   .footer__socials    { gap: var(--space-md); }
   .footer__copyright  { margin-top: var(--space-md); max-width: none; }
@@ -2149,6 +2155,10 @@ ul, ol {
   #about {
     scroll-margin-top: 92px;
   }
+}
+
+@media (max-width: 390px) {
+  .text-h1 { font-size: 36px; }
 }
 
 

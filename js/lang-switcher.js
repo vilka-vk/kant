@@ -83,11 +83,17 @@
       url.pathname = '/' + locale.toLowerCase() + '/';
       url.searchParams.delete('lang');
     } else {
-      if (locale === DEFAULT_LOCALE) {
-        url.searchParams.delete('lang');
-      } else {
-        url.searchParams.set('lang', locale.toLowerCase());
+      var rawPath = String(url.pathname || '/');
+      var normalizedPath = rawPath.charAt(0) === '/' ? rawPath : '/' + rawPath;
+      if (normalizedPath.toLowerCase().endsWith('/index.html')) {
+        normalizedPath = normalizedPath.slice(0, -'/index.html'.length) || '/';
       }
+      if (normalizedPath === '/') {
+        url.pathname = '/' + locale.toLowerCase() + '/';
+      } else {
+        url.pathname = '/' + locale.toLowerCase() + normalizedPath;
+      }
+      url.searchParams.delete('lang');
     }
     window.history.replaceState({}, '', url.toString());
   }

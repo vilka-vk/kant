@@ -561,6 +561,17 @@ if ($editId > 0) {
     $readings = $pdo->prepare('SELECT
       mr.*,
       mrrt.custom_title,
+      COALESCE(
+        NULLIF(mrrt.custom_title, \'\'),
+        (
+          SELECT mrrt_any.custom_title
+          FROM module_readings_translations mrrt_any
+          WHERE mrrt_any.module_reading_id = mr.id AND TRIM(COALESCE(mrrt_any.custom_title, \'\')) <> \'\'
+          ORDER BY mrrt_any.locale ASC
+          LIMIT 1
+        ),
+        \'\'
+      ) AS custom_title_resolved,
       p.file_path AS publication_file_path,
       p.external_url AS publication_external_url,
       p.cover_image_path AS publication_cover_image_path,
@@ -1002,7 +1013,7 @@ admin_header(tr('Модули', 'Modules'));
               $titleValue = '#' . $linkedPublicationId;
           }
       } else {
-          $titleValue = trim((string) ($r['custom_title'] ?? ''));
+          $titleValue = trim((string) ($r['custom_title_resolved'] ?? $r['custom_title'] ?? ''));
           if ($titleValue === '') {
               $titleValue = '';
           }

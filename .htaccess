@@ -1,3 +1,4 @@
+Options -MultiViews
 RewriteEngine On
 
 # Keep real files/directories accessible as-is.

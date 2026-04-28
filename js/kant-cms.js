@@ -153,14 +153,6 @@
     }
   }
 
-  function refreshScrollAnimations() {
-    if (window.ScrollTrigger && typeof window.ScrollTrigger.refresh === 'function') {
-      window.requestAnimationFrame(function () {
-        window.ScrollTrigger.refresh();
-      });
-    }
-  }
-
   function renderFooter(settings) {
     setText('.footer__copyright', settings.footer_copyright || '');
     var links = document.querySelectorAll('.footer__socials a.footer__social');
@@ -596,7 +588,6 @@
           })
         ];
         await Promise.allSettled(homeRequests);
-        refreshScrollAnimations();
         return;
       }
 
@@ -617,7 +608,6 @@
         setImg('.hero .hero__bg', heroModules.background_image_path || '');
         renderAbout(aboutModules);
         renderModulesList(listModules, listModules.length);
-        refreshScrollAnimations();
         return;
       }
 
@@ -638,7 +628,6 @@
         setImg('.hero .hero__bg', heroPublications.background_image_path || '');
         renderPublicationTabs(publicationTypes, locale);
         renderPublications(pubs, '.publications.publications--grid');
-        refreshScrollAnimations();
         return;
       }
 
@@ -672,7 +661,6 @@
           }
           var readings = (await apiGet('modules/' + moduleItem.id + '/readings', locale)).data || [];
           renderModuleDetail(moduleItem, transcripts, readings, locale, moduleList);
-          refreshScrollAnimations();
         }
       }
     } catch (err) {

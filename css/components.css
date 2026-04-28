@@ -864,6 +864,17 @@ ul, ol {
   transform: none !important;
 }
 
+/* Disable residual transitions for modules page content blocks. */
+#about,
+#about *,
+#modules .modules__program,
+#modules .modules__program * {
+  animation: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 
 /* ===================== HEADER (FIXED) ===================== */
 

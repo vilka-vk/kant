@@ -853,6 +853,17 @@ ul, ol {
   max-width: var(--layout-content-width);
 }
 
+/* Hard-disable legacy scroll-reveal visual states (cache-safe). */
+.main .section,
+.main .module-block,
+.main .section__title,
+.main .module-label,
+.main .module-title,
+.module-nav-pair .btn-interlinking {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 
 /* ===================== HEADER (FIXED) ===================== */
 

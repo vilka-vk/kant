@@ -1681,7 +1681,7 @@ ul, ol {
   .text-card-number    { font-size: 120px; letter-spacing: 1.6px; }
 
   /* --- Header --- */
-  .header       { height: 72px; padding: 16px 32px; }
+  .header       { height: var(--layout-header-height-tablet); padding: var(--layout-header-padding-y-tablet) var(--layout-header-padding-x-tablet); }
   .header__menu { gap: 32px; }
   .nav          { gap: 24px; }
   .nav__link    { font-size: 16px; }
@@ -1814,7 +1814,7 @@ ul, ol {
   .text-card-number    { font-size: 100px; letter-spacing: 1.64px; }
 
   /* --- Header — same height, hamburger replaces nav (Figma: h-[88px] px-[16px] py-[24px]) --- */
-  .header { padding: 24px 16px; }
+  .header { padding: var(--layout-header-padding-y-mobile) var(--layout-header-padding-x-mobile); }
   .nav { display: none; }
   .hamburger { display: flex; }
   .header__menu { position: static; }

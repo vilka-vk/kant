@@ -153,6 +153,11 @@
   --layout-header-height: 88px;
   --layout-header-padding-x: 60px;
   --layout-header-padding-y: 24px;
+  --layout-header-height-tablet: 72px;
+  --layout-header-padding-x-tablet: 32px;
+  --layout-header-padding-y-tablet: 16px;
+  --layout-header-padding-x-mobile: 16px;
+  --layout-header-padding-y-mobile: 24px;
 
 
   /* ===================== TRANSITIONS ===================== */

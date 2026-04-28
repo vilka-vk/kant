@@ -189,6 +189,23 @@
     });
   }
 
+  function resolveReadingTitle(reading) {
+    if (!reading) return '';
+    return String(
+      reading.display_title ||
+      reading.custom_title ||
+      (reading.linked_publication ? reading.linked_publication.title : '') ||
+      ''
+    ).trim();
+  }
+
+  function hasReadableReading(readings) {
+    if (!Array.isArray(readings) || !readings.length) return false;
+    return readings.some(function (reading) {
+      return !!resolveReadingTitle(reading);
+    });
+  }
+
   function renderAbout(about) {
     setText('.about__sticker-text', stripHtml(about.sticker_text || ''));
     setHtml('#about-modal .modal__content', about.modal_body || '');
@@ -468,14 +485,17 @@
     var readingsGrid = document.querySelector('.module-publications');
     var readingsSection = readingsGrid ? readingsGrid.closest('.module-block') : null;
     var effectiveReadings = Array.isArray(readings) ? readings : [];
+    var readableReadings = effectiveReadings.filter(function (r) {
+      return !!resolveReadingTitle(r);
+    });
     if (readingsSection) {
-      readingsSection.style.display = effectiveReadings.length ? '' : 'none';
+      readingsSection.style.display = readableReadings.length ? '' : 'none';
     }
-    if (readingsGrid && effectiveReadings.length) {
+    if (readingsGrid && readableReadings.length) {
       readingsGrid.innerHTML = '';
-      effectiveReadings.forEach(function (r) {
+      readableReadings.forEach(function (r) {
         var link = r.custom_file_path || r.custom_url || (r.linked_publication ? (r.linked_publication.file_path || r.linked_publication.external_url) : '#');
-        var title = r.display_title || r.custom_title || (r.linked_publication ? r.linked_publication.title : '');
+        var title = resolveReadingTitle(r);
         var cover = r.custom_cover_image_path || (r.linked_publication ? r.linked_publication.cover_image_path : '') || 'assets/images/publication-3.svg';
         var card = document.createElement('a');
         card.className = 'publication-item';
@@ -677,6 +697,12 @@
             transcripts = Array.isArray(moduleItem.transcripts) ? moduleItem.transcripts : [];
           }
           var readings = (await apiGet('modules/' + moduleItem.id + '/readings', locale)).data || [];
+          if (locale !== DEFAULT_LOCALE && !hasReadableReading(readings)) {
+            var fallbackReadings = (await apiGet('modules/' + moduleItem.id + '/readings', DEFAULT_LOCALE)).data || [];
+            if (hasReadableReading(fallbackReadings)) {
+              readings = fallbackReadings;
+            }
+          }
           renderModuleDetail(moduleItem, transcripts, readings, locale, moduleList);
           refreshScrollAnimations();
         }

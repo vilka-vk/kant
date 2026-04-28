@@ -11,9 +11,24 @@
 
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon-light.svg" media="(prefers-color-scheme: light)">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon-dark.svg" media="(prefers-color-scheme: dark)">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon-light.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-light.svg" id="site-favicon">
+  <script>
+    (function () {
+      var mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      if (!mql) return;
+      var favicon = document.getElementById('site-favicon');
+      if (!favicon) return;
+      var update = function () {
+        favicon.setAttribute('href', mql.matches ? 'assets/favicon-dark.svg' : 'assets/favicon-light.svg');
+      };
+      update();
+      if (typeof mql.addEventListener === 'function') {
+        mql.addEventListener('change', update);
+      } else if (typeof mql.addListener === 'function') {
+        mql.addListener(update);
+      }
+    })();
+  </script>
 </head>
 <body>
 

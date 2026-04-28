@@ -64,6 +64,15 @@
     var url = new URL(window.location.href);
     var path = String(url.pathname || '').toLowerCase();
     var cleanPath = path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
+    var localePrefixMatch = cleanPath.match(/^\/(en|ru)(\/.*)?$/i);
+    if (localePrefixMatch) {
+      var suffix = localePrefixMatch[2] || '/';
+      url.pathname = '/' + locale.toLowerCase() + suffix;
+      url.searchParams.delete('lang');
+      window.history.replaceState({}, '', url.toString());
+      return;
+    }
+
     var isHomePath = cleanPath === '' ||
       cleanPath === '/' ||
       cleanPath === '/index.html' ||

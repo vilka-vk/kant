@@ -859,9 +859,13 @@ ul, ol {
 .main .section__title,
 .main .module-label,
 .main .module-title,
+.main .section > .about,
+.main .section > .modules__program,
 .module-nav-pair .btn-interlinking {
   opacity: 1 !important;
   transform: none !important;
+  animation: none !important;
+  transition: none !important;
 }
 
 

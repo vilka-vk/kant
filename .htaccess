@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Keep real files/directories accessible as-is.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Language-prefixed home URLs -> single home document.
+RewriteRule ^(en|ru)/?$ index.html [L,QSA]

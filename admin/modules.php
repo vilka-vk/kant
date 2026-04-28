@@ -1004,7 +1004,7 @@ admin_header(tr('Модули', 'Modules'));
       } else {
           $titleValue = trim((string) ($r['custom_title'] ?? ''));
           if ($titleValue === '') {
-              $titleValue = trim((string) ($r['custom_file_path'] ?? $r['custom_url'] ?? ''));
+              $titleValue = '';
           }
       }
       $typeValue = $linkedPublicationId > 0
@@ -1054,7 +1054,7 @@ admin_header(tr('Модули', 'Modules'));
       <div><label><?= h(tr('Загрузить изображение обложки', 'Upload cover image')) ?></label><input type="file" name="custom_cover_upload" id="reading-custom-cover-upload" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
     </div>
     <div id="reading-custom-titles">
-      <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label><?= h(tr('Заголовок (', 'Title (')) ?><?= h(strtoupper($locale)) ?>)</label><input name="custom_title_<?= h($locale) ?>" value="<?= h((string) (($editReadingTitles[$locale] ?? [])['custom_title'] ?? '')) ?>"></div><?php endforeach; ?>
+      <?php foreach ($locales as $locale): ?><div style="margin-top:8px"><label><?= h(tr('Название (', 'Name (')) ?><?= h(strtoupper($locale)) ?>)</label><input name="custom_title_<?= h($locale) ?>" value="<?= h((string) (($editReadingTitles[$locale] ?? [])['custom_title'] ?? '')) ?>"></div><?php endforeach; ?>
     </div>
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
   </form>

@@ -911,7 +911,15 @@ ul, ol {
   width: 100%;
   max-width: 1009px;
   height: auto;
-  padding: 0 60px;
+  padding: 0 var(--layout-header-padding-x);
+}
+
+@media (min-width: 1921px) {
+  .hero__content {
+    left: 50%;
+    max-width: var(--layout-content-width);
+    transform: translate(-50%, -50%);
+  }
 }
 
 

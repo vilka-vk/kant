@@ -17,6 +17,11 @@
   }
 
   function currentLocale() {
+    var path = String(window.location.pathname || '').toLowerCase();
+    var pathSegments = path.split('/').filter(Boolean);
+    var pathLocale = pathSegments.length ? (pathSegments[0] || '').toLowerCase() : '';
+    if (pathLocale === 'en' || pathLocale === 'ru') return pathLocale;
+
     var params = new URLSearchParams(window.location.search);
     var urlLocale = (params.get('lang') || '').toLowerCase();
     if (urlLocale) return urlLocale;
@@ -572,7 +577,8 @@
     try {
       var path = window.location.pathname.toLowerCase();
       var cleanPath = path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
-      if (cleanPath.endsWith('/index.html') || cleanPath === '/' || cleanPath.endsWith('/kant')) {
+      var homePathMatch = /^\/(en|ru)$/i.test(cleanPath);
+      if (cleanPath.endsWith('/index.html') || cleanPath === '/' || cleanPath.endsWith('/kant') || homePathMatch) {
         var homeRequests = [
           apiGet('site-settings', locale).then(function (res) {
             renderFooter((res && res.data) || {});

@@ -25,8 +25,17 @@
   }
 
   function getLocaleFromUrl() {
+    var fromPath = getLocaleFromPath();
+    if (fromPath) return fromPath;
     var params = new URLSearchParams(window.location.search);
     return normalizeLocale(params.get('lang'));
+  }
+
+  function getLocaleFromPath() {
+    var path = String(window.location.pathname || '').toLowerCase();
+    var segments = path.split('/').filter(Boolean);
+    if (!segments.length) return null;
+    return normalizeLocale(segments[0]);
   }
 
   function getInitialLocale() {
@@ -53,10 +62,23 @@
 
   function setLocaleInUrl(locale) {
     var url = new URL(window.location.href);
-    if (locale === DEFAULT_LOCALE) {
+    var path = String(url.pathname || '').toLowerCase();
+    var cleanPath = path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
+    var isHomePath = cleanPath === '' ||
+      cleanPath === '/' ||
+      cleanPath === '/index.html' ||
+      cleanPath === '/kant' ||
+      /^\/[a-z]{2}$/i.test(cleanPath);
+
+    if (isHomePath) {
+      url.pathname = '/' + locale.toLowerCase() + '/';
       url.searchParams.delete('lang');
     } else {
-      url.searchParams.set('lang', locale.toLowerCase());
+      if (locale === DEFAULT_LOCALE) {
+        url.searchParams.delete('lang');
+      } else {
+        url.searchParams.set('lang', locale.toLowerCase());
+      }
     }
     window.history.replaceState({}, '', url.toString());
   }

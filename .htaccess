@@ -7,3 +7,9 @@ RewriteRule ^ - [L]
 
 # Language-prefixed home URLs -> single home document.
 RewriteRule ^(en|ru)/?$ index.html [L,QSA]
+
+# Language-prefixed inner paths -> same file without locale segment.
+# Examples:
+# /en/modules.html      -> /modules.html
+# /ru/publications.html -> /publications.html
+RewriteRule ^(en|ru)/(.*)$ $2 [L,QSA]

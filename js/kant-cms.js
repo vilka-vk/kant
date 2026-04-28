@@ -512,8 +512,10 @@
     var readableReadings = effectiveReadings.filter(function (r) {
       return !!resolveReadingTitle(r, locale, DEFAULT_LOCALE);
     });
+    var hasExistingReadingCards = readingsGrid ? readingsGrid.querySelectorAll('.publication-item').length > 0 : false;
+    var shouldKeepVisible = readableReadings.length > 0 || hasExistingReadingCards || effectiveReadings.length > 0;
     if (readingsSection) {
-      readingsSection.style.display = readableReadings.length ? '' : 'none';
+      readingsSection.style.display = shouldKeepVisible ? '' : 'none';
     }
     if (readingsGrid && readableReadings.length) {
       readingsGrid.innerHTML = '';

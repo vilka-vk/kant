@@ -11,5 +11,6 @@ LOCAL-SETUP-OSPanel-6-RU.md
 .cursor/
 .tmp-vvveb-admin/
 config.local.php
+sftp.json
 ADMIN-PASSWORD-RESET.md
 ADMIN-CREATE-USER.md

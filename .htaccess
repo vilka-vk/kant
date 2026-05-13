@@ -1,16 +1,19 @@
 Options -MultiViews
 RewriteEngine On
+RewriteBase /
 
 # Keep real files/directories accessible as-is.
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# Clean URLs -> HTML files.
+RewriteRule ^modules/?$      modules.html      [L,QSA]
+RewriteRule ^publications/?$ publications.html [L,QSA]
+RewriteRule ^module/?$       module.html       [L,QSA]
+
 # Language-prefixed home URLs -> single home document.
 RewriteRule ^(en|ru)/?$ index.html [L,QSA]
 
 # Language-prefixed inner paths -> same file without locale segment.
-# Examples:
-# /en/modules.html      -> /modules.html
-# /ru/publications.html -> /publications.html
 RewriteRule ^(en|ru)/(.*)$ $2 [L,QSA]

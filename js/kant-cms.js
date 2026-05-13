@@ -272,7 +272,7 @@
     var lectureLabel = locale === 'ru' ? 'Лекция' : 'Lecture';
     var presentationLabel = locale === 'ru' ? 'Презентация' : 'Presentation';
     modules.slice(0, limit).forEach(function (m) {
-      var href = 'module.html?slug=' + encodeURIComponent(m.slug);
+      var href = 'module?slug=' + encodeURIComponent(m.slug);
       var moduleKinds = [];
       if (Number(m.has_lecture) > 0) moduleKinds.push(lectureLabel);
       if (Number(m.has_presentation) > 0) moduleKinds.push(presentationLabel);
@@ -577,7 +577,7 @@
 
       function applyModuleNav(anchor, item) {
         if (!anchor || !item) return;
-        anchor.setAttribute('href', 'module.html?slug=' + encodeURIComponent(item.slug || ''));
+        anchor.setAttribute('href', 'module?slug=' + encodeURIComponent(item.slug || ''));
         var textEl = anchor.querySelector('.btn-interlinking__text');
         if (textEl) {
           textEl.innerHTML = '<strong>' + moduleNavLabel(item) + '</strong>';

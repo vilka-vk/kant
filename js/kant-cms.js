@@ -656,18 +656,15 @@
         var modulesData = await Promise.all([
           apiGet('site-settings', locale),
           apiGet('hero-sections?page_key=modules', locale),
-          apiGet('about-project', locale),
           apiGet('modules', locale)
         ]);
         var siteModules = (modulesData[0] && modulesData[0].data) || {};
         var heroModules = (modulesData[1] && modulesData[1].data) || {};
-        var aboutModules = (modulesData[2] && modulesData[2].data) || {};
-        var listModules = (modulesData[3] && modulesData[3].data) || [];
+        var listModules = (modulesData[2] && modulesData[2].data) || [];
         renderFooter(siteModules);
         setText('.hero__headline', heroModules.title || (locale === 'ru' ? 'Модули' : 'Modules'));
         setText('.hero__subtitle', heroModules.subtitle || '');
         setImg('.hero .hero__bg', heroModules.background_image_path || '');
-        renderAbout(aboutModules);
         renderModulesList(listModules, listModules.length);
         refreshScrollAnimations();
         return;

@@ -43,7 +43,7 @@
         <nav class="nav">
           <a href="modules" class="nav__link nav__link--active" data-i18n-key="navModules">Modules</a>
           <a href="publications" class="nav__link" data-i18n-key="navPublications">Publications</a>
-          <a href="#about" class="nav__link" data-i18n-key="navAbout">About</a>
+          <a href="/#about" class="nav__link" data-i18n-key="navAbout">About</a>
         </nav>
         <div class="lang-switcher" role="group" aria-label="Site language">
           <button class="lang-switcher__option is-active" type="button" aria-pressed="true" data-lang="EN">EN</button>
@@ -79,45 +79,7 @@
   </section>
 
   <main class="main">
-    <section class="section" id="about">
-      <h2 class="section__title text-h2" data-i18n-key="homeAboutTitle">About Project</h2>
-      <div class="about">
-        <div class="about__left">
-          <div class="tabs">
-            <button class="tab tab--active" data-tab="0">EN</button>
-            <button class="tab" data-tab="1">RU</button>
-          </div>
-          <div class="about__player">
-            <div class="about__player-panel is-active" data-panel="0">
-              <iframe
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="Perpetual Peace — intro video (EN)"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-              ></iframe>
-            </div>
-            <div class="about__player-panel" data-panel="1">
-              <iframe
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="Вечный мир — вступительное видео (RU)"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-              ></iframe>
-            </div>
-          </div>
-        </div>
-        <div class="about__right">
-          <div class="about__sticker position__block-perforation--top">
-            <div class="perforated-card_top"></div>
-            <p class="about__sticker-text text-paragraph-caps">People have always dreamed of peace but constantly waged war. Will it ever be possible to achieve a lasting peace? The German philosopher Immanuel Kant proposed an answer to this question in his treatise Perpetual Peace. The 300th anniversary of Kant's birth is an opportunity to consider how relevant the ideas of this thinker from Königsberg still are today.</p>
-          </div>
-          <a href="#" class="btn btn-primary about__read-more" style="width:100%;" data-i18n-key="readMoreBtn">Read more</a>
-        </div>
-      </div>
-    </section>
-
     <section class="section" id="modules">
-      <h2 class="section__title text-h2" data-i18n-key="homeModulesTitle">Modules</h2>
       <div class="modules__program">
         <div class="modules__cards">
           <a href="module" class="card-link perforated_row">
@@ -165,24 +127,6 @@
     </section>
   </main>
 
-  <div class="modal" id="about-modal" aria-hidden="true" aria-labelledby="about-modal-title">
-    <div class="modal__dialog">
-      <button class="modal__close" type="button" aria-label="Close dialog">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M6 6L18 18" />
-          <path d="M18 6L6 18" />
-        </svg>
-      </button>
-      <div class="modal__content">
-        <p id="about-modal-title" class="text-paragraph">
-          People have always dreamed of peace but constantly waged war. Will it ever be possible to achieve a lasting peace?
-        </p>
-        <p class="text-paragraph">
-          The German philosopher Immanuel Kant proposed an answer to this question in his treatise Perpetual Peace. The 300th anniversary of Kant's birth is an opportunity to consider how relevant the ideas of this thinker from Königsberg still are today.
-        </p>
-      </div>
-    </div>
-  </div>
 
   <div class="footer-decore">
     <img class="logo-page-decore" src="assets/logo-page-decore.svg" alt="KANT">
@@ -226,11 +170,9 @@
   </footer>
 </div>
 
-<script src="js/tabs.js"></script>
 <script src="js/locales-config.js"></script>
 <script src="js/lang-switcher.js"></script>
 <script src="js/mobile-menu.js"></script>
-<script src="js/about-modal.js"></script>
 <script src="js/kant-cms.js"></script>
 </body>
 </html>

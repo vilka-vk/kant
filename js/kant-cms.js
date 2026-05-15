@@ -308,7 +308,7 @@
       card.setAttribute('data-category', category);
       card.innerHTML =
         '<img class="publication-item__image" src="' + (p.cover_image_path || 'assets/images/publication-3.svg') + '" alt="Publication cover">' +
-        '<p class="publication-item__title text-paragraph-caps">' + (p.title || '') + '</p>';
+        '<p class="publication-item__title text-paragraph">' + (p.title || '') + '</p>';
       list.appendChild(card);
     });
   }
@@ -528,7 +528,7 @@
         card.href = link || '#';
         card.innerHTML =
           '<img class="publication-item__image" src="' + cover + '" alt="Publication cover">' +
-          '<p class="publication-item__title text-paragraph-caps">' + (title || '') + '</p>';
+          '<p class="publication-item__title text-paragraph">' + (title || '') + '</p>';
         readingsGrid.appendChild(card);
       });
     }

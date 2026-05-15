@@ -629,6 +629,10 @@
           apiGet('site-settings', locale).then(function (res) {
             renderFooter((res && res.data) || {});
           }),
+          apiGet('hero-sections?page_key=home', locale).then(function (res) {
+            var heroHome = (res && res.data) || {};
+            setImg('.hero .hero__bg', heroHome.background_image_path || '');
+          }),
           apiGet('about-project', locale).then(function (res) {
             renderAbout((res && res.data) || {});
           }),

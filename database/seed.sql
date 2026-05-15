@@ -42,13 +42,13 @@ UNLOCK TABLES;
 
 LOCK TABLES `hero_sections` WRITE;
 /*!40000 ALTER TABLE `hero_sections` DISABLE KEYS */;
-INSERT INTO `hero_sections` (`id`, `page_key`, `subtitle_enabled`, `background_image_path`) VALUES (1,'modules',0,'/uploads/hero/2026/04/hero_modules-d6305299.png'),(2,'module_detail',1,''),(3,'publications',0,'/uploads/hero/2026/04/Publications_BG-2aadd8c6.png');
+INSERT INTO `hero_sections` (`id`, `page_key`, `subtitle_enabled`, `background_image_path`) VALUES (1,'modules',0,'/uploads/hero/2026/04/hero_modules-d6305299.png'),(2,'module_detail',1,''),(3,'publications',0,'/uploads/hero/2026/04/Publications_BG-2aadd8c6.png'),(4,'home',1,'assets/images/hero-bg.jpg');
 /*!40000 ALTER TABLE `hero_sections` ENABLE KEYS */;
 UNLOCK TABLES;
 
 LOCK TABLES `hero_sections_translations` WRITE;
 /*!40000 ALTER TABLE `hero_sections_translations` DISABLE KEYS */;
-INSERT INTO `hero_sections_translations` (`id`, `hero_section_id`, `locale`, `title`, `subtitle`) VALUES (1,1,'ru','Модули',''),(2,1,'en','Modules',''),(3,3,'ru','Публикации',''),(4,3,'en','Publications','');
+INSERT INTO `hero_sections_translations` (`id`, `hero_section_id`, `locale`, `title`, `subtitle`) VALUES (1,1,'ru','Модули',''),(2,1,'en','Modules',''),(3,3,'ru','Публикации',''),(4,3,'en','Publications',''),(5,4,'ru','Главная',''),(6,4,'en','Home','');
 /*!40000 ALTER TABLE `hero_sections_translations` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -4,6 +4,7 @@ require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/layout.php';
+require __DIR__ . '/lib/uploads.php';
 
 require_auth();
 $pdo = db();
@@ -13,6 +14,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_check($_POST['_csrf'] ?? null)) {
         http_response_code(400);
         exit('Bad CSRF token');
+    }
+
+    $action = (string) ($_POST['action'] ?? 'save_settings');
+
+    if ($action === 'save_home_page_hero') {
+        $heroRow = $pdo->prepare('SELECT id, background_image_path FROM hero_sections WHERE page_key = :page_key LIMIT 1');
+        $heroRow->execute(['page_key' => 'home']);
+        $hero = $heroRow->fetch() ?: null;
+        $previousHeroBg = trim((string) ($hero['background_image_path'] ?? ''));
+        $heroBg = $previousHeroBg;
+        try {
+            $uploadedHero = upload_public_file('hero_home_background_file', 'hero', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']);
+            if ($uploadedHero) {
+                $heroBg = $uploadedHero;
+            }
+        } catch (Throwable $e) {
+            redirect('/admin/site-settings.php?error=' . urlencode($e->getMessage()));
+        }
+        if ($hero && (int) $hero['id'] > 0) {
+            $heroId = (int) $hero['id'];
+            $pdo->prepare('UPDATE hero_sections SET background_image_path = :background_image_path WHERE id = :id')
+                ->execute([
+                    'id' => $heroId,
+                    'background_image_path' => $heroBg,
+                ]);
+        } else {
+            $pdo->prepare('INSERT INTO hero_sections (page_key, subtitle_enabled, background_image_path) VALUES (:page_key, 1, :background_image_path)')
+                ->execute([
+                    'page_key' => 'home',
+                    'background_image_path' => $heroBg !== '' ? $heroBg : 'assets/images/hero-bg.jpg',
+                ]);
+            $heroId = (int) $pdo->lastInsertId();
+        }
+        if ($heroBg !== '' && $previousHeroBg !== '' && $heroBg !== $previousHeroBg) {
+            delete_public_file($previousHeroBg);
+        }
+        foreach ($locales as $locale) {
+            $title = $locale === 'ru' ? 'Главная' : 'Home';
+            $pdo->prepare('INSERT INTO hero_sections_translations (hero_section_id, locale, title, subtitle)
+              VALUES (:hero_section_id, :locale, :title, :subtitle)
+              ON DUPLICATE KEY UPDATE title = VALUES(title)')
+                ->execute([
+                    'hero_section_id' => $heroId,
+                    'locale' => $locale,
+                    'title' => $title,
+                    'subtitle' => '',
+                ]);
+        }
+        redirect('/admin/site-settings.php?saved_hero=1');
     }
 
     $pdo->prepare('UPDATE site_settings SET
@@ -44,11 +94,21 @@ foreach ($tr as $row) {
     $trMap[$row['locale']] = $row['footer_copyright'];
 }
 
+$heroHomeStmt = $pdo->prepare('SELECT * FROM hero_sections WHERE page_key = :page_key LIMIT 1');
+$heroHomeStmt->execute(['page_key' => 'home']);
+$heroHome = $heroHomeStmt->fetch() ?: [];
+$heroHomePreview = (string) ($heroHome['background_image_path'] ?? '');
+if ($heroHomePreview !== '' && !preg_match('#^([a-z]+:)?//#i', $heroHomePreview) && !str_starts_with($heroHomePreview, '/')) {
+    $heroHomePreview = '/' . $heroHomePreview;
+}
+
 admin_header(tr('Настройки сайта', 'Site Settings'));
 ?>
 <div class="card">
   <h1><?= h(tr('Настройки сайта', 'Site settings')) ?></h1>
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero главной сохранен.', 'Home hero saved.')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <div class="grid">
@@ -65,6 +125,23 @@ admin_header(tr('Настройки сайта', 'Site Settings'));
       </div>
     <?php endforeach; ?>
     <button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button>
+  </form>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2><?= h(tr('Hero главной страницы', 'Home page hero')) ?></h2>
+  <p class="muted"><?= h(tr('Фоновое изображение в первом блоке на главной.', 'Background image for the first block on the home page.')) ?></p>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="save_home_page_hero">
+    <div class="grid">
+      <div><label><?= h(tr('Текущий путь', 'Current path')) ?></label><input value="<?= h((string) ($heroHome['background_image_path'] ?? '')) ?>" disabled></div>
+      <div><label><?= h(tr('Загрузить изображение', 'Upload image')) ?></label><input type="file" name="hero_home_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+    </div>
+    <?php if ($heroHomePreview !== ''): ?>
+      <p style="margin-top:12px"><img class="table-preview" src="<?= h($heroHomePreview) ?>" alt="<?= h(tr('Превью hero', 'Hero preview')) ?>" style="max-width:320px;height:auto"></p>
+    <?php endif; ?>
+    <div class="actions" style="margin-top:12px"><button type="submit"><?= h(tr('Сохранить hero', 'Save hero')) ?></button></div>
   </form>
 </div>
 <?php

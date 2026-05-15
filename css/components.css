@@ -1317,13 +1317,13 @@ ul, ol {
   padding-top: 64px;
 }
 
-.position__block-title {
+/*.position__block-title {
   font-family: var(--font-body);
   font-size: var(--text-paragraph-caps-size);
   font-weight: var(--weight-regular);
   line-height: normal;
   text-transform: uppercase;
-}
+}*/
 
 .position__block-body {
   font-family: var(--font-body);
@@ -1769,7 +1769,7 @@ ul, ol {
     height: 52px;
   }
   .position__block-body  { font-size: 14px; }
-  .position__block-title { font-size: 16px; }
+  /*.position__block-title { font-size: 16px; }*/
 
   /* --- Publications --- */
   .publications            { gap: 32px; }
@@ -1991,7 +1991,7 @@ ul, ol {
     padding-top: 48px; 
   }
   
-  .position__block-title { font-size: 18px; }
+  /*.position__block-title { font-size: 18px; }*/
   .position__block-body  { font-size: 16px; }
   .position__block-icon {
     width: 44px;

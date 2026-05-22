@@ -512,12 +512,10 @@
     var readableReadings = effectiveReadings.filter(function (r) {
       return !!resolveReadingTitle(r, locale, DEFAULT_LOCALE);
     });
-    var hasExistingReadingCards = readingsGrid ? readingsGrid.querySelectorAll('.publication-item').length > 0 : false;
-    var shouldKeepVisible = readableReadings.length > 0 || hasExistingReadingCards || effectiveReadings.length > 0;
     if (readingsSection) {
-      readingsSection.style.display = shouldKeepVisible ? '' : 'none';
+      readingsSection.style.display = readableReadings.length > 0 ? '' : 'none';
     }
-    if (readingsGrid && readableReadings.length) {
+    if (readingsGrid) {
       readingsGrid.innerHTML = '';
       readableReadings.forEach(function (r) {
         var link = r.custom_file_path || r.custom_url || (r.linked_publication ? (r.linked_publication.file_path || r.linked_publication.external_url) : '#');

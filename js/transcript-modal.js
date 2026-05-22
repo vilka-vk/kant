@@ -1,9 +1,8 @@
 (function () {
   'use strict';
 
-  var trigger = document.querySelector('[data-transcript-open]');
   var modal = document.getElementById('transcript-modal');
-  if (!trigger || !modal) return;
+  if (!modal) return;
 
   var dialog = modal.querySelector('.modal__dialog');
   var closeBtn = modal.querySelector('.modal__close');
@@ -46,7 +45,9 @@
     }
   }
 
-  trigger.addEventListener('click', function (event) {
+  document.addEventListener('click', function (event) {
+    var trigger = event.target.closest('[data-transcript-open]');
+    if (!trigger) return;
     event.preventDefault();
     setOpen(true);
   });

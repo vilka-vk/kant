@@ -178,12 +178,19 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
                 $componentPayload['transcripts'][] = $transcriptPayload;
             }
 
+            $hasVideos = !empty($componentPayload['videos']);
+            $hasTranscripts = !empty($componentPayload['transcripts']);
+            $hasLiterature = trim((string) ($componentPayload['literature_html'] ?? '')) !== '';
+            if (!$hasVideos && !$hasTranscripts && !$hasLiterature) {
+                continue;
+            }
+
             $payload['components'][] = $componentPayload;
-            if (empty($payload['lecture_videos']) && !empty($componentPayload['videos'])) {
+            if (empty($payload['lecture_videos']) && $hasVideos) {
                 $payload['lecture_videos'] = $componentPayload['videos'];
                 $payload['lecture_title'] = $componentPayload['block_title'] ?? '';
             }
-            if (empty($payload['presentation_videos']) && !empty($componentPayload['videos'])) {
+            if (empty($payload['presentation_videos']) && $hasVideos) {
                 $payload['presentation_videos'] = $componentPayload['videos'];
                 $payload['presentation_title'] = $componentPayload['block_title'] ?? '';
             }

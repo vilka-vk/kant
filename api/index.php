@@ -5,6 +5,8 @@ require __DIR__ . '/../admin/lib/bootstrap.php';
 require __DIR__ . '/../admin/lib/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 $pdo = db();
 $defaultLocale = $config['app']['default_locale'];
@@ -27,6 +29,11 @@ if ($routeFromQuery !== '') {
     $prefix = '/api/';
     $route = str_starts_with($uriPath, $prefix) ? substr($uriPath, strlen($prefix)) : '';
     $route = trim($route, '/');
+}
+
+function translation_html_has_content(string $html): bool
+{
+    return trim(strip_tags(html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8'))) !== '';
 }
 
 function out(array $data, string $lang, bool $fallbackUsed = false): void
@@ -161,6 +168,17 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
             $componentPayload['block_title'] = trim((string) ($componentPayload['block_title'] ?? ''));
             $componentPayload['name'] = trim((string) ($componentPayload['name'] ?? ''));
             $componentPayload['literature_html'] = (string) ($componentPayload['literature_html'] ?? '');
+            if (!translation_html_has_content($componentPayload['literature_html'])) {
+                $anyLitStmt = $pdo->prepare('SELECT literature_html FROM module_components_translations
+                  WHERE module_component_id = :id AND TRIM(COALESCE(literature_html, "")) <> ""
+                  ORDER BY CASE WHEN locale = :locale THEN 0 ELSE 1 END, locale ASC
+                  LIMIT 1');
+                $anyLitStmt->execute(['id' => (int) $componentRow['id'], 'locale' => $locale]);
+                $anyLit = $anyLitStmt->fetchColumn();
+                if ($anyLit !== false) {
+                    $componentPayload['literature_html'] = (string) $anyLit;
+                }
+            }
 
             $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order
               FROM module_component_videos WHERE module_component_id = :component_id ORDER BY sort_order ASC, id ASC');
@@ -180,7 +198,7 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
 
             $hasVideos = !empty($componentPayload['videos']);
             $hasTranscripts = !empty($componentPayload['transcripts']);
-            $hasLiterature = trim((string) ($componentPayload['literature_html'] ?? '')) !== '';
+            $hasLiterature = translation_html_has_content((string) ($componentPayload['literature_html'] ?? ''));
             if (!$hasVideos && !$hasTranscripts && !$hasLiterature) {
                 continue;
             }
@@ -197,8 +215,27 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
             if (!empty($componentPayload['transcripts'])) {
                 $payload['transcripts'] = array_merge($payload['transcripts'], $componentPayload['transcripts']);
             }
-            if (trim((string) ($componentPayload['literature_html'] ?? '')) !== '' && trim((string) ($payload['literature_html'] ?? '')) === '') {
+            if ($hasLiterature && !translation_html_has_content((string) ($payload['literature_html'] ?? ''))) {
                 $payload['literature_html'] = $componentPayload['literature_html'];
+            }
+        }
+
+        if (translation_html_has_content((string) ($payload['literature_html'] ?? ''))) {
+            $moduleLiterature = (string) $payload['literature_html'];
+            $literatureAttached = false;
+            foreach ($payload['components'] as &$componentRow) {
+                if (!empty($componentRow['videos']) && !translation_html_has_content((string) ($componentRow['literature_html'] ?? ''))) {
+                    $componentRow['literature_html'] = $moduleLiterature;
+                    $literatureAttached = true;
+                    break;
+                }
+            }
+            unset($componentRow);
+            if (!$literatureAttached && !empty($payload['components'])) {
+                $firstKey = array_key_first($payload['components']);
+                if (!translation_html_has_content((string) ($payload['components'][$firstKey]['literature_html'] ?? ''))) {
+                    $payload['components'][$firstKey]['literature_html'] = $moduleLiterature;
+                }
             }
         }
     } else {

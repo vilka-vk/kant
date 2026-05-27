@@ -14,10 +14,6 @@ $moduleTranslationsHasFormats = (bool) $pdo->query("SELECT COUNT(*)
   WHERE TABLE_SCHEMA = DATABASE()
     AND TABLE_NAME = 'modules_translations'
     AND COLUMN_NAME = 'formats'")->fetchColumn();
-$moduleComponentsEnabled = (bool) $pdo->query("SELECT COUNT(*)
-  FROM information_schema.TABLES
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'module_components'")->fetchColumn();
 
 $routeFromQuery = trim((string) ($_GET['route'] ?? ''));
 if ($routeFromQuery !== '') {
@@ -91,29 +87,15 @@ if ($route === 'our-position') {
 }
 
 if ($route === 'modules') {
-    $hasLectureSql = $moduleComponentsEnabled
-        ? 'CASE WHEN EXISTS (
-            SELECT 1 FROM module_components mc
-            JOIN module_component_videos mcv ON mcv.module_component_id = mc.id
-            WHERE mc.module_id = m.id
-          ) THEN 1 ELSE 0 END'
-        : 'CASE WHEN EXISTS (
-            SELECT 1 FROM module_lecture_videos mlv WHERE mlv.module_id = m.id
-          ) THEN 1 ELSE 0 END';
-    $hasPresentationSql = $moduleComponentsEnabled
-        ? 'CASE WHEN EXISTS (
-            SELECT 1 FROM module_components mc
-            JOIN module_component_videos mcv ON mcv.module_component_id = mc.id
-            WHERE mc.module_id = m.id AND mc.sort_order >= 2
-          ) THEN 1 ELSE 0 END'
-        : 'CASE WHEN EXISTS (
-            SELECT 1 FROM module_presentation_videos mpv WHERE mpv.module_id = m.id
-          ) THEN 1 ELSE 0 END';
-    $rows = $pdo->query("SELECT m.*,
-      {$hasLectureSql} AS has_lecture,
-      {$hasPresentationSql} AS has_presentation
+    $rows = $pdo->query('SELECT m.*,
+      CASE WHEN EXISTS (
+        SELECT 1 FROM module_lecture_videos mlv WHERE mlv.module_id = m.id
+      ) THEN 1 ELSE 0 END AS has_lecture,
+      CASE WHEN EXISTS (
+        SELECT 1 FROM module_presentation_videos mpv WHERE mpv.module_id = m.id
+      ) THEN 1 ELSE 0 END AS has_presentation
       FROM modules m
-      ORDER BY m.sort_order ASC, m.id ASC")->fetchAll();
+      ORDER BY m.sort_order ASC, m.id ASC')->fetchAll();
     $result = [];
     foreach ($rows as $row) {
         $row['hero_background_image_path'] = normalize_public_asset_path((string) ($row['hero_background_image_path'] ?? ''));
@@ -143,72 +125,27 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
     foreach ($allStmt->fetchAll() as $trRow) {
         $translations[strtolower((string) $trRow['locale'])] = $trRow;
     }
+    $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order FROM module_lecture_videos WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
+    $videosStmt->execute(['module_id' => (int) $row['id']]);
+    $lectureVideos = $videosStmt->fetchAll();
+    $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order FROM module_presentation_videos WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
+    $videosStmt->execute(['module_id' => (int) $row['id']]);
+    $presentationVideos = $videosStmt->fetchAll();
     $payload = array_merge($row, $tr);
     $payload['hero_background_image_path'] = normalize_public_asset_path((string) ($payload['hero_background_image_path'] ?? ''));
     $payload['presentation_file_path'] = normalize_public_asset_path((string) ($payload['presentation_file_path'] ?? ''));
     $payload['translations'] = $translations;
-    $payload['components'] = [];
-    $payload['lecture_videos'] = [];
-    $payload['presentation_videos'] = [];
+    $payload['lecture_videos'] = $lectureVideos;
+    $payload['presentation_videos'] = $presentationVideos;
+    $transcriptsStmt = $pdo->prepare('SELECT * FROM module_transcripts WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
+    $transcriptsStmt->execute(['module_id' => (int) $row['id']]);
+    $transcriptRows = $transcriptsStmt->fetchAll();
     $payload['transcripts'] = [];
-
-    if ($moduleComponentsEnabled) {
-        $componentsStmt = $pdo->prepare('SELECT * FROM module_components WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
-        $componentsStmt->execute(['module_id' => (int) $row['id']]);
-        foreach ($componentsStmt->fetchAll() as $componentRow) {
-            $componentTr = translated_row($pdo, 'module_components_translations', 'module_component_id', (int) $componentRow['id'], $locale, $defaultLocale) ?: [];
-            $componentPayload = array_merge($componentRow, $componentTr);
-            $componentPayload['block_title'] = trim((string) ($componentPayload['block_title'] ?? ''));
-            $componentPayload['name'] = trim((string) ($componentPayload['name'] ?? ''));
-            $componentPayload['literature_html'] = (string) ($componentPayload['literature_html'] ?? '');
-
-            $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order
-              FROM module_component_videos WHERE module_component_id = :component_id ORDER BY sort_order ASC, id ASC');
-            $videosStmt->execute(['component_id' => (int) $componentRow['id']]);
-            $componentPayload['videos'] = $videosStmt->fetchAll();
-
-            $transcriptsStmt = $pdo->prepare('SELECT * FROM module_transcripts
-              WHERE module_component_id = :component_id ORDER BY sort_order ASC, id ASC');
-            $transcriptsStmt->execute(['component_id' => (int) $componentRow['id']]);
-            $componentPayload['transcripts'] = [];
-            foreach ($transcriptsStmt->fetchAll() as $transcriptRow) {
-                $transcriptTr = translated_row($pdo, 'module_transcripts_translations', 'module_transcript_id', (int) $transcriptRow['id'], $locale, $defaultLocale) ?: [];
-                $transcriptPayload = array_merge($transcriptRow, $transcriptTr);
-                $transcriptPayload['file_path'] = normalize_public_asset_path((string) ($transcriptPayload['file_path'] ?? ''));
-                $componentPayload['transcripts'][] = $transcriptPayload;
-            }
-
-            $payload['components'][] = $componentPayload;
-            if (empty($payload['lecture_videos']) && !empty($componentPayload['videos'])) {
-                $payload['lecture_videos'] = $componentPayload['videos'];
-                $payload['lecture_title'] = $componentPayload['block_title'] ?? '';
-            }
-            if (empty($payload['presentation_videos']) && !empty($componentPayload['videos'])) {
-                $payload['presentation_videos'] = $componentPayload['videos'];
-                $payload['presentation_title'] = $componentPayload['block_title'] ?? '';
-            }
-            if (!empty($componentPayload['transcripts'])) {
-                $payload['transcripts'] = array_merge($payload['transcripts'], $componentPayload['transcripts']);
-            }
-            if (trim((string) ($componentPayload['literature_html'] ?? '')) !== '' && trim((string) ($payload['literature_html'] ?? '')) === '') {
-                $payload['literature_html'] = $componentPayload['literature_html'];
-            }
-        }
-    } else {
-        $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order FROM module_lecture_videos WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
-        $videosStmt->execute(['module_id' => (int) $row['id']]);
-        $payload['lecture_videos'] = $videosStmt->fetchAll();
-        $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order FROM module_presentation_videos WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
-        $videosStmt->execute(['module_id' => (int) $row['id']]);
-        $payload['presentation_videos'] = $videosStmt->fetchAll();
-        $transcriptsStmt = $pdo->prepare('SELECT * FROM module_transcripts WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
-        $transcriptsStmt->execute(['module_id' => (int) $row['id']]);
-        foreach ($transcriptsStmt->fetchAll() as $transcriptRow) {
-            $transcriptTr = translated_row($pdo, 'module_transcripts_translations', 'module_transcript_id', (int) $transcriptRow['id'], $locale, $defaultLocale) ?: [];
-            $transcriptPayload = array_merge($transcriptRow, $transcriptTr);
-            $transcriptPayload['file_path'] = normalize_public_asset_path((string) ($transcriptPayload['file_path'] ?? ''));
-            $payload['transcripts'][] = $transcriptPayload;
-        }
+    foreach ($transcriptRows as $transcriptRow) {
+        $transcriptTr = translated_row($pdo, 'module_transcripts_translations', 'module_transcript_id', (int) $transcriptRow['id'], $locale, $defaultLocale) ?: [];
+        $transcriptPayload = array_merge($transcriptRow, $transcriptTr);
+        $transcriptPayload['file_path'] = normalize_public_asset_path((string) ($transcriptPayload['file_path'] ?? ''));
+        $payload['transcripts'][] = $transcriptPayload;
     }
     out($payload, $locale);
 }

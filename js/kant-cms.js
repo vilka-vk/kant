@@ -2,7 +2,6 @@
   'use strict';
 
   var API_BASE = '/api/index.php';
-  var KANT_BUILD = '20260522a';
   var DEFAULT_LOCALE = 'ru';
   var STORAGE_KEY = 'kant-locale';
   var currentPath = window.location.pathname.toLowerCase();
@@ -419,52 +418,11 @@
     var moduleMain = document.querySelector('.module-main');
     var readingsSection = document.getElementById('module-readings-section');
 
-    function htmlHasContent(html) {
-      var el = document.createElement('div');
-      el.innerHTML = html || '';
-      return (el.textContent || '').trim().length > 0;
-    }
-
-    function getModuleLiteratureHtml(moduleItem, activeLocale) {
-      var html = String(moduleItem.literature_html || '');
-      if (!htmlHasContent(html) && moduleItem.translations) {
-        var normalized = String(activeLocale || '').toLowerCase();
-        if (moduleItem.translations[normalized] && moduleItem.translations[normalized].literature_html) {
-          html = String(moduleItem.translations[normalized].literature_html || '');
-        } else {
-          Object.keys(moduleItem.translations).some(function (key) {
-            var candidate = String(moduleItem.translations[key].literature_html || '');
-            if (htmlHasContent(candidate)) {
-              html = candidate;
-              return true;
-            }
-            return false;
-          });
-        }
-      }
-      return htmlHasContent(html) ? html : '';
-    }
-
-    function attachModuleLiteratureToComponents(componentsList, moduleItem, activeLocale) {
-      var moduleLiterature = getModuleLiteratureHtml(moduleItem, activeLocale);
-      if (!moduleLiterature) return componentsList;
-      var attached = false;
-      componentsList.forEach(function (component) {
-        if (!attached && Array.isArray(component.videos) && component.videos.length && !htmlHasContent(component.literature_html)) {
-          component.literature_html = moduleLiterature;
-          attached = true;
-        }
-      });
-      if (!attached && componentsList.length && !htmlHasContent(componentsList[0].literature_html)) {
-        componentsList[0].literature_html = moduleLiterature;
-      }
-      return componentsList;
-    }
-
     function isRenderableComponent(component) {
       var videos = Array.isArray(component.videos) ? component.videos : [];
       var componentTranscripts = Array.isArray(component.transcripts) ? component.transcripts : [];
-      return videos.length > 0 || componentTranscripts.length > 0 || htmlHasContent(component.literature_html);
+      var literatureHtml = String(component.literature_html || '').trim();
+      return videos.length > 0 || componentTranscripts.length > 0 || literatureHtml !== '';
     }
 
     function populateTranscriptModal(items) {
@@ -546,7 +504,6 @@
       }
       components = legacyItems;
     }
-    components = attachModuleLiteratureToComponents(components, moduleItem, locale);
     components = components.filter(isRenderableComponent);
 
     if (moduleMain) {
@@ -558,7 +515,7 @@
         var componentTranscripts = Array.isArray(component.transcripts) ? component.transcripts : [];
         var blockTitle = String(component.block_title || '').trim();
         var componentName = String(component.name || '').trim();
-        var literatureHtml = String(component.literature_html || '');
+        var literatureHtml = String(component.literature_html || '').trim();
 
         var section = document.createElement('section');
         section.className = 'section module-block module-block--cms-component';
@@ -568,8 +525,8 @@
           '<div class="module-video-wrap">' +
             '<div class="tabs"></div>' +
             '<div class="about__player module-player"></div>' +
-            '<div class="module-links"></div>' +
-          '</div>';
+          '</div>' +
+          '<div class="module-links"></div>';
 
         var labelEl = section.querySelector('.module-label');
         labelEl.textContent = blockTitle;
@@ -585,8 +542,7 @@
         if (videos.length) {
           renderComponentVideos(videos, tabsWrap, playerWrap);
         } else {
-          if (tabsWrap) tabsWrap.style.display = 'none';
-          if (playerWrap) playerWrap.style.display = 'none';
+          videoWrap.style.display = 'none';
         }
 
         if (componentTranscripts.length) {
@@ -603,7 +559,7 @@
           });
           linksWrap.appendChild(transcriptLink);
         }
-        if (htmlHasContent(literatureHtml)) {
+        if (literatureHtml !== '') {
           var literatureLink = document.createElement('a');
           literatureLink.href = '#';
           literatureLink.className = 'module-link-action card-link__action';
@@ -857,11 +813,5 @@
         setTimeout(hydratePage, 0);
       });
     });
-  });
-
-  window.addEventListener('pageshow', function (event) {
-    if (event.persisted) {
-      hydratePage();
-    }
   });
 })();

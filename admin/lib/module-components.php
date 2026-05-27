@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 
+function component_literature_has_content(string $html): bool
+{
+    return trim(strip_tags(html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8'))) !== '';
+}
+
 function module_components_table_exists(PDO $pdo): bool
 {
     return (bool) $pdo->query("SELECT COUNT(*)
@@ -23,17 +28,28 @@ function fetch_module_components(PDO $pdo, int $moduleId, string $locale): array
         EXISTS(
           SELECT 1 FROM module_transcripts mt WHERE mt.module_component_id = mc.id LIMIT 1
         ) AS has_transcripts,
-        EXISTS(
-          SELECT 1 FROM module_components_translations mctl
-          WHERE mctl.module_component_id = mc.id AND TRIM(COALESCE(mctl.literature_html, "")) <> ""
-        ) AS has_literature
+        0 AS has_literature
       FROM module_components mc
       LEFT JOIN module_components_translations mct
         ON mct.module_component_id = mc.id AND mct.locale = :locale
       WHERE mc.module_id = :module_id
       ORDER BY mc.sort_order ASC, mc.id ASC');
     $stmt->execute(['module_id' => $moduleId, 'locale' => $locale]);
-    return $stmt->fetchAll();
+    $rows = $stmt->fetchAll();
+    $literatureStmt = $pdo->prepare('SELECT literature_html FROM module_components_translations WHERE module_component_id = :id');
+    foreach ($rows as &$row) {
+        $literatureStmt->execute(['id' => (int) $row['id']]);
+        $row['has_literature'] = 0;
+        foreach ($literatureStmt->fetchAll() as $literatureRow) {
+            if (component_literature_has_content((string) ($literatureRow['literature_html'] ?? ''))) {
+                $row['has_literature'] = 1;
+                break;
+            }
+        }
+    }
+    unset($row);
+
+    return $rows;
 }
 
 function fetch_component_translations(PDO $pdo, int $componentId): array

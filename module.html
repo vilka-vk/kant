@@ -79,7 +79,74 @@
   </section>
 
   <main class="main module-main">
-    <section class="section module-block" id="module-readings-section">
+    <div id="module-components-root"></div>
+
+    <section class="section module-block module-block--legacy-lecture" hidden>
+      <h2 class="module-label" data-i18n-key="moduleLectureTitle">Лекция:</h2>
+      <h3 class="module-title">«Гремит и гремит войны барабан»: Истоки современного милитаризма</h3>
+      <div class="module-video-wrap">
+        <div class="tabs">
+          <button class="tab tab--active" type="button" data-tab="0">RU</button>
+          <button class="tab" type="button" data-tab="1">EN</button>
+        </div>
+        <div class="about__player module-player">
+          <div class="about__player-panel is-active" data-panel="0">
+            <iframe
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+              title="Модуль 1 — лекция (RU)"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <div class="about__player-panel" data-panel="1">
+            <iframe
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+              title="Module 1 — lecture (EN)"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+        <div class="module-links">
+          <a href="#" class="module-link-action card-link__action" data-transcript-open>
+            <span class="card-link__action-label" data-i18n-key="transcriptLink">Транскрипции</span>
+            <span class="btn-arrow module-link-action__arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1.70588 24C1.24314 24 0.843137 23.8314 0.505882 23.4941C0.168627 23.1569 0 22.7569 0 22.2941V1.70588C0 1.24314 0.168627 0.843137 0.505882 0.505882C0.843137 0.168627 1.24314 0 1.70588 0H22.2824C22.7451 0 23.1451 0.168627 23.4824 0.505882C23.8274 0.835294 24 1.23137 24 1.69412V22.2941C24 22.7569 23.8314 23.1569 23.4941 23.4941C23.1569 23.8314 22.7569 24 22.2941 24H1.70588ZM15.2588 16.5529L20.1176 12L15.2588 7.44706V10.8353H4.25882V13.1647H15.2588V16.5529Z"/>
+              </svg>
+            </span>
+          </a>
+          <a href="#" class="module-link-action card-link__action" data-literature-open>
+            <span class="card-link__action-label" data-i18n-key="literatureLink">Список литературы</span>
+            <span class="btn-arrow module-link-action__arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1.70588 24C1.24314 24 0.843137 23.8314 0.505882 23.4941C0.168627 23.1569 0 22.7569 0 22.2941V1.70588C0 1.24314 0.168627 0.843137 0.505882 0.505882C0.843137 0.168627 1.24314 0 1.70588 0H22.2824C22.7451 0 23.1451 0.168627 23.4824 0.505882C23.8274 0.835294 24 1.23137 24 1.69412V22.2941C24 22.7569 23.8314 23.1569 23.4941 23.4941C23.1569 23.8314 22.7569 24 22.2941 24H1.70588ZM15.2588 16.5529L20.1176 12L15.2588 7.44706V10.8353H4.25882V13.1647H15.2588V16.5529Z"/>
+              </svg>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section module-block module-block--legacy-presentation" hidden>
+      <h2 class="module-label" data-i18n-key="modulePresentationTitle">Презентация:</h2>
+      <h3 class="module-title">«Планета наша похожа на новобранца, потеющего на марше»: Истоки современного милитаризма. Опыт критического обзора</h3>
+      <div class="module-video-wrap">
+        <div class="about__player module-player">
+          <div class="about__player-panel is-active" data-panel="0">
+            <iframe
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+              title="Модуль 1 — презентация"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+        <div class="module-links module-links--single"></div>
+      </div>
+    </section>
+
+    <section class="section module-block">
       <h2 class="module-label" data-i18n-key="readingsTitle">Материалы для чтения:</h2>
       <div class="publications module-publications">
         <a href="#" class="publication-item">

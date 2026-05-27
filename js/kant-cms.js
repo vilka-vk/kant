@@ -415,15 +415,11 @@
     var transcriptLabel = locale === 'ru' ? 'Транскрипции' : 'Transcripts';
     var literatureLabel = locale === 'ru' ? 'Список литературы' : 'Literature list';
     var downloadTranscriptLabel = locale === 'ru' ? 'Скачать транскрипцию' : 'Download transcript';
-    var moduleMain = document.querySelector('.module-main');
-    var readingsSection = document.getElementById('module-readings-section');
-
-    function isRenderableComponent(component) {
-      var videos = Array.isArray(component.videos) ? component.videos : [];
-      var componentTranscripts = Array.isArray(component.transcripts) ? component.transcripts : [];
-      var literatureHtml = String(component.literature_html || '').trim();
-      return videos.length > 0 || componentTranscripts.length > 0 || literatureHtml !== '';
-    }
+    var componentsRoot = document.getElementById('module-components-root');
+    var legacyLectureBlock = document.querySelector('.module-block--legacy-lecture');
+    var legacyPresentationBlock = document.querySelector('.module-block--legacy-presentation');
+    if (legacyLectureBlock) legacyLectureBlock.style.display = 'none';
+    if (legacyPresentationBlock) legacyPresentationBlock.style.display = 'none';
 
     function populateTranscriptModal(items) {
       var transcriptsList = document.querySelector('#transcript-modal .modal__downloads');
@@ -489,7 +485,7 @@
           block_title: moduleItem.lecture_title || '',
           name: '',
           videos: moduleItem.lecture_videos,
-          transcripts: Array.isArray(moduleItem.transcripts) ? moduleItem.transcripts : [],
+          transcripts: [],
           literature_html: moduleItem.literature_html || ''
         });
       }
@@ -504,30 +500,28 @@
       }
       components = legacyItems;
     }
-    components = components.filter(isRenderableComponent);
 
-    if (moduleMain) {
-      moduleMain.querySelectorAll('.module-block--cms-component').forEach(function (node) {
-        node.remove();
-      });
+    if (componentsRoot) {
+      componentsRoot.innerHTML = '';
       components.forEach(function (component) {
         var videos = Array.isArray(component.videos) ? component.videos : [];
         var componentTranscripts = Array.isArray(component.transcripts) ? component.transcripts : [];
         var blockTitle = String(component.block_title || '').trim();
         var componentName = String(component.name || '').trim();
         var literatureHtml = String(component.literature_html || '').trim();
+        var hasLinks = componentTranscripts.length > 0 || literatureHtml !== '';
+        if (!videos.length && !blockTitle && !componentName && !hasLinks) return;
 
         var section = document.createElement('section');
-        section.className = 'section module-block module-block--cms-component';
+        section.className = 'section module-block';
         section.innerHTML =
           '<h2 class="module-label"></h2>' +
           '<h3 class="module-title"></h3>' +
           '<div class="module-video-wrap">' +
             '<div class="tabs"></div>' +
             '<div class="about__player module-player"></div>' +
-          '</div>' +
-          '<div class="module-links"></div>';
-
+            '<div class="module-links"></div>' +
+          '</div>';
         var labelEl = section.querySelector('.module-label');
         labelEl.textContent = blockTitle;
         labelEl.style.display = blockTitle ? '' : 'none';
@@ -549,13 +543,14 @@
           var transcriptLink = document.createElement('a');
           transcriptLink.href = '#';
           transcriptLink.className = 'module-link-action card-link__action';
-          transcriptLink.setAttribute('data-transcript-open', '');
           transcriptLink.innerHTML =
             '<span class="card-link__action-label">' + transcriptLabel + '</span>' +
             '<span class="btn-arrow module-link-action__arrow" aria-hidden="true">' + arrowSvg + '</span>';
           transcriptLink.addEventListener('click', function (e) {
             e.preventDefault();
             populateTranscriptModal(componentTranscripts);
+            var modal = document.getElementById('transcript-modal');
+            if (modal) modal.setAttribute('aria-hidden', 'false');
           });
           linksWrap.appendChild(transcriptLink);
         }
@@ -563,31 +558,30 @@
           var literatureLink = document.createElement('a');
           literatureLink.href = '#';
           literatureLink.className = 'module-link-action card-link__action';
-          literatureLink.setAttribute('data-literature-open', '');
           literatureLink.innerHTML =
             '<span class="card-link__action-label">' + literatureLabel + '</span>' +
             '<span class="btn-arrow module-link-action__arrow" aria-hidden="true">' + arrowSvg + '</span>';
           literatureLink.addEventListener('click', function (e) {
             e.preventDefault();
             populateLiteratureModal(literatureHtml);
+            var modal = document.getElementById('literature-modal');
+            if (modal) modal.setAttribute('aria-hidden', 'false');
           });
           linksWrap.appendChild(literatureLink);
         }
         if (!linksWrap.children.length) {
           linksWrap.style.display = 'none';
-        } else if (linksWrap.children.length === 1) {
-          linksWrap.classList.add('module-links--single');
         }
 
-        if (readingsSection) {
-          moduleMain.insertBefore(section, readingsSection);
-        } else {
-          moduleMain.appendChild(section);
-        }
+        componentsRoot.appendChild(section);
       });
     }
 
+    var transcriptLink = document.querySelector('[data-transcript-open]');
+    if (transcriptLink) transcriptLink.style.display = 'none';
+
     var readingsGrid = document.querySelector('.module-publications');
+    var readingsSection = readingsGrid ? readingsGrid.closest('.module-block') : null;
     var effectiveReadings = Array.isArray(readings) ? readings : [];
     var readableReadings = effectiveReadings.filter(function (r) {
       return !!resolveReadingTitle(r, locale, DEFAULT_LOCALE);
@@ -610,6 +604,9 @@
         readingsGrid.appendChild(card);
       });
     }
+
+    var literatureLink = document.querySelector('[data-literature-open]');
+    if (literatureLink) literatureLink.style.display = 'none';
 
     var navPair = document.querySelector('.module-nav-pair');
     var prevLink = navPair ? navPair.querySelector('.btn-interlinking--prev') : null;

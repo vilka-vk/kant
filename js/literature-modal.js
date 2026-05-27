@@ -1,8 +1,9 @@
 (function () {
   'use strict';
 
+  var trigger = document.querySelector('[data-literature-open]');
   var modal = document.getElementById('literature-modal');
-  if (!modal) return;
+  if (!trigger || !modal) return;
 
   var dialog = modal.querySelector('.modal__dialog');
   var closeBtn = modal.querySelector('.modal__close');
@@ -45,9 +46,7 @@
     }
   }
 
-  document.addEventListener('click', function (event) {
-    var trigger = event.target.closest('[data-literature-open]');
-    if (!trigger) return;
+  trigger.addEventListener('click', function (event) {
     event.preventDefault();
     setOpen(true);
   });

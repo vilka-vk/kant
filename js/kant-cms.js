@@ -189,44 +189,21 @@
     });
   }
 
-  function resolveReadingTitle(reading, locale, fallbackLocale) {
+  function resolveReadingTitle(reading) {
     if (!reading) return '';
-    var normalizedLocale = String(locale || '').toLowerCase();
-    var normalizedFallback = String(fallbackLocale || DEFAULT_LOCALE || '').toLowerCase();
-    var readingTranslations = reading.translations || {};
-    var publicationTranslations = reading.linked_publication && reading.linked_publication.translations
-      ? reading.linked_publication.translations
-      : {};
-    var fromCurrentReading = readingTranslations[normalizedLocale] && (
-      readingTranslations[normalizedLocale].display_title ||
-      readingTranslations[normalizedLocale].custom_title ||
-      readingTranslations[normalizedLocale].title
-    );
-    var fromFallbackReading = readingTranslations[normalizedFallback] && (
-      readingTranslations[normalizedFallback].display_title ||
-      readingTranslations[normalizedFallback].custom_title ||
-      readingTranslations[normalizedFallback].title
-    );
-    var fromCurrentPublication = publicationTranslations[normalizedLocale] && publicationTranslations[normalizedLocale].title;
-    var fromFallbackPublication = publicationTranslations[normalizedFallback] && publicationTranslations[normalizedFallback].title;
-
     return String(
       reading.display_title ||
       reading.custom_title ||
       reading.title ||
-      fromCurrentReading ||
-      fromFallbackReading ||
       (reading.linked_publication ? reading.linked_publication.title : '') ||
-      fromCurrentPublication ||
-      fromFallbackPublication ||
       ''
     ).trim();
   }
 
-  function hasReadableReading(readings, locale, fallbackLocale) {
+  function hasReadableReading(readings) {
     if (!Array.isArray(readings) || !readings.length) return false;
     return readings.some(function (reading) {
-      return !!resolveReadingTitle(reading, locale, fallbackLocale);
+      return !!resolveReadingTitle(reading);
     });
   }
 
@@ -510,7 +487,7 @@
     var readingsSection = readingsGrid ? readingsGrid.closest('.module-block') : null;
     var effectiveReadings = Array.isArray(readings) ? readings : [];
     var readableReadings = effectiveReadings.filter(function (r) {
-      return !!resolveReadingTitle(r, locale, DEFAULT_LOCALE);
+      return !!resolveReadingTitle(r);
     });
     if (readingsSection) {
       readingsSection.style.display = readableReadings.length > 0 ? '' : 'none';
@@ -519,7 +496,7 @@
       readingsGrid.innerHTML = '';
       readableReadings.forEach(function (r) {
         var link = r.custom_file_path || r.custom_url || (r.linked_publication ? (r.linked_publication.file_path || r.linked_publication.external_url) : '#');
-        var title = resolveReadingTitle(r, locale, DEFAULT_LOCALE);
+        var title = resolveReadingTitle(r);
         var cover = r.custom_cover_image_path || (r.linked_publication ? r.linked_publication.cover_image_path : '') || 'assets/images/publication-3.svg';
         var card = document.createElement('a');
         card.className = 'publication-item';
@@ -559,7 +536,7 @@
         return (Number(a && a.id) || 0) - (Number(b && b.id) || 0);
       });
       var currentIndex = sortedByOrder.findIndex(function (m) {
-        return Number(m && m.id) === Number(moduleItem && moduleItem.id);
+        return Number(m && (m.module_id || m.id)) === Number(moduleItem && (moduleItem.module_id || moduleItem.id));
       });
       if (currentIndex < 0) currentIndex = 0;
       var prevIndex = (currentIndex - 1 + sortedByOrder.length) % sortedByOrder.length;
@@ -711,23 +688,18 @@
         } else {
           moduleItem = moduleList[0] || null;
         }
-        if (moduleItem && moduleItem.id) {
+        var moduleId = Number(moduleItem && (moduleItem.module_id || moduleItem.id));
+        if (moduleId > 0) {
           if (!moduleItem.hero_background_image_path && moduleHeroSection.background_image_path) {
             moduleItem.hero_background_image_path = moduleHeroSection.background_image_path;
           }
           var transcripts = [];
           try {
-            transcripts = (await apiGet('modules/' + moduleItem.id + '/transcripts', locale)).data || [];
+            transcripts = (await apiGet('modules/' + moduleId + '/transcripts', locale)).data || [];
           } catch (e) {
             transcripts = Array.isArray(moduleItem.transcripts) ? moduleItem.transcripts : [];
           }
-          var readings = (await apiGet('modules/' + moduleItem.id + '/readings', locale)).data || [];
-          if (locale !== DEFAULT_LOCALE && !hasReadableReading(readings, locale, DEFAULT_LOCALE)) {
-            var fallbackReadings = (await apiGet('modules/' + moduleItem.id + '/readings', DEFAULT_LOCALE)).data || [];
-            if (hasReadableReading(fallbackReadings, DEFAULT_LOCALE, DEFAULT_LOCALE)) {
-              readings = fallbackReadings;
-            }
-          }
+          var readings = (await apiGet('modules/' + moduleId + '/readings', locale)).data || [];
           renderModuleDetail(moduleItem, transcripts, readings, locale, moduleList);
           refreshScrollAnimations();
         }

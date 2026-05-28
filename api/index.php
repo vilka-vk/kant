@@ -137,6 +137,21 @@ function load_legacy_module_components(PDO $pdo, int $moduleId, string $locale, 
     return $components;
 }
 
+function merge_entity_with_translation(array $base, array $translation): array
+{
+    if ($translation === []) {
+        return $base;
+    }
+    $entityId = (int) ($base['id'] ?? 0);
+    unset($translation['id']);
+    $merged = array_merge($base, $translation);
+    if ($entityId > 0) {
+        $merged['id'] = $entityId;
+    }
+
+    return $merged;
+}
+
 function normalize_public_asset_path(string $path): string
 {
     $value = trim(str_replace('\\', '/', $path));
@@ -215,7 +230,9 @@ if ($route === 'modules') {
         $row['hero_background_image_path'] = normalize_public_asset_path((string) ($row['hero_background_image_path'] ?? ''));
         $row['presentation_file_path'] = normalize_public_asset_path((string) ($row['presentation_file_path'] ?? ''));
         $tr = translated_row($pdo, 'modules_translations', 'module_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
-        $result[] = array_merge($row, $tr);
+        $merged = merge_entity_with_translation($row, $tr);
+        $merged['module_id'] = (int) $row['id'];
+        $result[] = $merged;
     }
     out($result, $locale);
 }
@@ -239,7 +256,8 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
     foreach ($allStmt->fetchAll() as $trRow) {
         $translations[strtolower((string) $trRow['locale'])] = $trRow;
     }
-    $payload = array_merge($row, $tr);
+    $payload = merge_entity_with_translation($row, $tr);
+    $payload['module_id'] = (int) $row['id'];
     $payload['hero_background_image_path'] = normalize_public_asset_path((string) ($payload['hero_background_image_path'] ?? ''));
     $payload['presentation_file_path'] = normalize_public_asset_path((string) ($payload['presentation_file_path'] ?? ''));
     $payload['translations'] = $translations;
@@ -247,7 +265,6 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
     $payload['lecture_videos'] = [];
     $payload['presentation_videos'] = [];
     $payload['transcripts'] = [];
-
     $moduleId = (int) $row['id'];
     if ($moduleComponentsEnabled) {
         $componentsStmt = $pdo->prepare('SELECT * FROM module_components WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
@@ -303,7 +320,7 @@ if (preg_match('#^modules/(\d+)/transcripts$#', $route, $m)) {
     $result = [];
     foreach ($rows as $row) {
         $tr = translated_row($pdo, 'module_transcripts_translations', 'module_transcript_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
-        $result[] = array_merge($row, $tr);
+        $result[] = merge_entity_with_translation($row, $tr);
     }
     out($result, $locale);
 }
@@ -316,13 +333,14 @@ if (preg_match('#^modules/(\d+)/readings$#', $route, $m)) {
     $result = [];
     foreach ($rows as $row) {
         $tr = translated_row($pdo, 'module_readings_translations', 'module_reading_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
-        $item = array_merge($row, $tr);
+        $item = merge_entity_with_translation($row, $tr);
         $item['display_title'] = trim((string) ($item['custom_title'] ?? ''));
         if ($item['display_title'] === '') {
             $titleStmt = $pdo->prepare('SELECT custom_title FROM module_readings_translations
               WHERE module_reading_id = :id AND TRIM(COALESCE(custom_title, \'\')) <> \'\'
-              ORDER BY locale ASC LIMIT 1');
-            $titleStmt->execute(['id' => (int) $row['id']]);
+              ORDER BY CASE WHEN locale = :locale THEN 0 ELSE 1 END, locale ASC
+              LIMIT 1');
+            $titleStmt->execute(['id' => (int) $row['id'], 'locale' => $locale]);
             $anyCustomTitle = $titleStmt->fetchColumn();
             if ($anyCustomTitle !== false) {
                 $item['display_title'] = trim((string) $anyCustomTitle);
@@ -334,12 +352,13 @@ if (preg_match('#^modules/(\d+)/readings$#', $route, $m)) {
             $pubBase = $pubStmt->fetch() ?: null;
             if ($pubBase) {
                 $pubTr = translated_row($pdo, 'publications_translations', 'publication_id', (int) $pubBase['id'], $locale, $defaultLocale) ?: [];
-                $linkedPublication = array_merge($pubBase, $pubTr);
+                $linkedPublication = merge_entity_with_translation($pubBase, $pubTr);
                 if (trim((string) ($linkedPublication['title'] ?? '')) === '') {
                     $pubTitleStmt = $pdo->prepare('SELECT title FROM publications_translations
                       WHERE publication_id = :id AND TRIM(COALESCE(title, \'\')) <> \'\'
-                      ORDER BY locale ASC LIMIT 1');
-                    $pubTitleStmt->execute(['id' => (int) $pubBase['id']]);
+                      ORDER BY CASE WHEN locale = :locale THEN 0 ELSE 1 END, locale ASC
+                      LIMIT 1');
+                    $pubTitleStmt->execute(['id' => (int) $pubBase['id'], 'locale' => $locale]);
                     $anyPubTitle = $pubTitleStmt->fetchColumn();
                     if ($anyPubTitle !== false) {
                         $linkedPublication['title'] = (string) $anyPubTitle;

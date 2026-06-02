@@ -46,6 +46,32 @@ function redirect(string $url): void
     exit;
 }
 
+function wysiwyg_decode(string $value): string
+{
+    $decoded = $value;
+    for ($i = 0; $i < 5; $i++) {
+        $next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($next === $decoded) {
+            break;
+        }
+        $decoded = $next;
+    }
+
+    return $decoded;
+}
+
+function wysiwyg_normalize(string $value): string
+{
+    return wysiwyg_decode(trim($value));
+}
+
+function wysiwyg_textarea_value(string $value): string
+{
+    $decoded = wysiwyg_decode($value);
+
+    return str_ireplace('</textarea>', '&lt;/textarea&gt;', $decoded);
+}
+
 function kant_wants_json_response(): bool
 {
     return ($_SERVER['HTTP_X_KANT_REORDER'] ?? '') === '1';

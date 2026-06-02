@@ -79,10 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([
             'locale' => $locale,
             'section_title' => $fixedSectionTitle,
-            'sticker_text' => trim((string) ($_POST['sticker_text_' . $locale] ?? '')),
+            'sticker_text' => wysiwyg_normalize((string) ($_POST['sticker_text_' . $locale] ?? '')),
             'video_title_primary' => '',
             'video_title_secondary' => '',
-            'modal_body' => trim((string) ($_POST['modal_body_' . $locale] ?? '')),
+            'modal_body' => wysiwyg_normalize((string) ($_POST['modal_body_' . $locale] ?? '')),
         ]);
     }
     redirect('/admin/about-project.php?saved=1');
@@ -135,14 +135,14 @@ admin_header(tr('О проекте', 'About Project'));
           <td><strong><?= h($label) ?></strong></td>
           <td>
             <?php if ($isLong): ?>
-              <textarea class="wysiwyg" rows="4" name="<?= h($key . '_' . $leftLocale) ?>"><?= h($leftValue) ?></textarea>
+              <textarea class="wysiwyg" rows="4" name="<?= h($key . '_' . $leftLocale) ?>"><?= wysiwyg_textarea_value($leftValue) ?></textarea>
             <?php else: ?>
               <input name="<?= h($key . '_' . $leftLocale) ?>" value="<?= h($leftValue) ?>">
             <?php endif; ?>
           </td>
           <td>
             <?php if ($isLong): ?>
-              <textarea class="wysiwyg" rows="4" name="<?= h($key . '_' . $rightLocale) ?>"><?= h($rightValue) ?></textarea>
+              <textarea class="wysiwyg" rows="4" name="<?= h($key . '_' . $rightLocale) ?>"><?= wysiwyg_textarea_value($rightValue) ?></textarea>
             <?php else: ?>
               <input name="<?= h($key . '_' . $rightLocale) ?>" value="<?= h($rightValue) ?>">
             <?php endif; ?>

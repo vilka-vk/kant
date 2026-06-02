@@ -622,7 +622,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $shortDescription = trim((string) ($_POST['short_description_' . $locale] ?? ''));
         $lectureTitle = $moduleComponentsEnabled ? '' : trim((string) ($_POST['lecture_title_' . $locale] ?? ''));
         $presentationTitle = $moduleComponentsEnabled ? '' : trim((string) ($_POST['presentation_title_' . $locale] ?? ''));
-        $literatureHtml = $moduleComponentsEnabled ? '' : (string) ($_POST['literature_html_' . $locale] ?? '');
+        $literatureHtml = $moduleComponentsEnabled ? '' : wysiwyg_normalize((string) ($_POST['literature_html_' . $locale] ?? ''));
         if ($moduleTranslationsHasFormats) {
             $pdo->prepare('INSERT INTO modules_translations (module_id, locale, title, short_description, formats, hero_kicker, hero_subtitle, lecture_title, presentation_title, literature_html)
               VALUES (:module_id,:locale,:title,:short_description,:formats,:hero_kicker,:hero_subtitle,:lecture_title,:presentation_title,:literature_html)
@@ -1023,14 +1023,14 @@ admin_header(tr('Модули', 'Modules'));
           <td><strong><?= h($label) ?></strong></td>
           <td>
             <?php if ($isLong): ?>
-              <textarea class="<?= h($textareaClass) ?>" rows="4" name="<?= h($fieldKey . '_' . $leftLocale) ?>"><?= h($leftValue) ?></textarea>
+              <textarea class="<?= h($textareaClass) ?>" rows="4" name="<?= h($fieldKey . '_' . $leftLocale) ?>"><?= $textareaClass === 'wysiwyg' ? wysiwyg_textarea_value($leftValue) : h($leftValue) ?></textarea>
             <?php else: ?>
               <input name="<?= h($fieldKey . '_' . $leftLocale) ?>" value="<?= h($leftValue) ?>">
             <?php endif; ?>
           </td>
           <td>
             <?php if ($isLong): ?>
-              <textarea class="<?= h($textareaClass) ?>" rows="4" name="<?= h($fieldKey . '_' . $rightLocale) ?>"><?= h($rightValue) ?></textarea>
+              <textarea class="<?= h($textareaClass) ?>" rows="4" name="<?= h($fieldKey . '_' . $rightLocale) ?>"><?= $textareaClass === 'wysiwyg' ? wysiwyg_textarea_value($rightValue) : h($rightValue) ?></textarea>
             <?php else: ?>
               <input name="<?= h($fieldKey . '_' . $rightLocale) ?>" value="<?= h($rightValue) ?>">
             <?php endif; ?>

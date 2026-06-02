@@ -196,7 +196,55 @@ function admin_footer(): void
     if (current_user()) {
         echo '</div></main></div>';
         echo '<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.5/tinymce.min.js" referrerpolicy="origin"></script>';
-        echo '<script>if(window.tinymce){tinymce.init({selector:"textarea.wysiwyg",menubar:false,height:220,plugins:"link lists code",toolbar:"undo redo | bold italic underline | bullist numlist | link | code"});}else{console.warn("TinyMCE is not loaded");}</script>';
+        echo '<script>
+window.kantNormalizeWysiwygHtml = function (html) {
+  if (!html) return html;
+  var out = html;
+  for (var i = 0; i < 5; i++) {
+    var prev = out;
+    out = out
+      .replace(/&amp;nbsp;/gi, "\u00A0")
+      .replace(/&amp;mdash;/gi, "\u2014")
+      .replace(/&amp;ndash;/gi, "\u2013")
+      .replace(/&amp;laquo;/gi, "\u00AB")
+      .replace(/&amp;raquo;/gi, "\u00BB")
+      .replace(/&amp;hellip;/gi, "\u2026")
+      .replace(/&nbsp;/gi, "\u00A0")
+      .replace(/&mdash;/gi, "\u2014")
+      .replace(/&ndash;/gi, "\u2013")
+      .replace(/&laquo;/gi, "\u00AB")
+      .replace(/&raquo;/gi, "\u00BB")
+      .replace(/&hellip;/gi, "\u2026");
+    if (out === prev) break;
+  }
+  return out;
+};
+
+if (window.tinymce) {
+  tinymce.init({
+    selector: "textarea.wysiwyg",
+    menubar: false,
+    height: 220,
+    plugins: "link lists code",
+    toolbar: "undo redo | bold italic underline | bullist numlist | link | code",
+    entity_encoding: "raw",
+    verify_html: false,
+    setup: function (editor) {
+      editor.on("init", function () {
+        var normalized = window.kantNormalizeWysiwygHtml(editor.getContent());
+        if (normalized !== editor.getContent()) {
+          editor.setContent(normalized);
+        }
+      });
+      editor.on("PastePostProcess", function (e) {
+        e.node.innerHTML = window.kantNormalizeWysiwygHtml(e.node.innerHTML);
+      });
+    }
+  });
+} else {
+  console.warn("TinyMCE is not loaded");
+}
+</script>';
         echo '<script>
 window.initKantDrawerCloseGuard = function (opts) {
   if (!opts) return;

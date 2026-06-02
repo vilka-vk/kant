@@ -195,8 +195,8 @@ declare(strict_types=1);
       <tbody>
         <tr>
           <td><strong><?= h(tr('Список литературы', 'Literature list')) ?></strong></td>
-          <td><textarea class="wysiwyg" rows="4" name="literature_html_<?= h($leftLocale) ?>"><?= h((string) (($editComponentTrMap[$leftLocale] ?? [])['literature_html'] ?? '')) ?></textarea></td>
-          <td><textarea class="wysiwyg" rows="4" name="literature_html_<?= h($rightLocale) ?>"><?= h((string) (($editComponentTrMap[$rightLocale] ?? [])['literature_html'] ?? '')) ?></textarea></td>
+          <td><textarea class="wysiwyg" rows="4" name="literature_html_<?= h($leftLocale) ?>"><?= wysiwyg_textarea_value((string) (($editComponentTrMap[$leftLocale] ?? [])['literature_html'] ?? '')) ?></textarea></td>
+          <td><textarea class="wysiwyg" rows="4" name="literature_html_<?= h($rightLocale) ?>"><?= wysiwyg_textarea_value((string) (($editComponentTrMap[$rightLocale] ?? [])['literature_html'] ?? '')) ?></textarea></td>
         </tr>
       </tbody>
     </table>

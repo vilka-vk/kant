@@ -114,7 +114,7 @@ function save_component_translations(PDO $pdo, int $componentId, array $locales,
                 'locale' => $locale,
                 'block_title' => trim((string) ($post['block_title_' . $locale] ?? '')),
                 'name' => trim((string) ($post['name_' . $locale] ?? '')),
-                'literature_html' => (string) ($post['literature_html_' . $locale] ?? ''),
+                'literature_html' => wysiwyg_normalize((string) ($post['literature_html_' . $locale] ?? '')),
             ]);
     }
 }

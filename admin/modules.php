@@ -895,11 +895,6 @@ admin_header(tr('Модули', 'Modules'));
 .table-scroll thead th{position:sticky;top:0;background:#fafafa;z-index:1}
 .filter-row{display:flex;gap:8px;align-items:center;margin:8px 0 10px}
 .filter-row input{max-width:140px}
-.component-editor-card .kant-section-head{margin-bottom:18px}
-.component-editor-card .table-scroll{margin:14px 0 24px}
-.component-editor-card .inline-help{margin:0 0 20px}
-.component-editor-card .actions{margin-top:14px}
-.component-editor-divider{margin:34px 0}
 </style>
 <?php if (!$isModuleFormOpen): ?>
 <details class="module-section card">

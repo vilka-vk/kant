@@ -115,6 +115,13 @@ body {
   margin-top: 0;
 }
 
+.card h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 17px;
+  line-height: 1.35;
+}
+
 input,
 textarea,
 select {
@@ -152,6 +159,7 @@ label {
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+  margin-top: 14px;
 }
 
 button,
@@ -328,6 +336,27 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-bottom: 18px;
+}
+
+.kant-section-head h3,
+.kant-section-head h4 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.card .table-scroll {
+  margin: 14px 0 24px;
+}
+
+.inline-help {
+  margin: 0 0 20px;
+}
+
+.card form hr,
+.card hr {
+  margin: 30px 0;
 }
 
 .kant-drawer {

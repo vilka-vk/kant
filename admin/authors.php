@@ -168,11 +168,12 @@ admin_header(tr('Авторы', 'Authors'));
 </div>
 
 <?php if ($isFormOpen): ?>
-<div class="card">
+<aside class="kant-drawer" aria-label="<?= h(tr('Форма автора', 'Author form')) ?>">
   <div class="kant-drawer-actions">
     <h2><?= h($edit ? tr('Редактирование автора', 'Edit author') : tr('Добавление автора', 'Add author')) ?></h2>
-    <a class="btn btn-secondary" href="/admin/authors.php"><?= h(tr('Закрыть', 'Close')) ?></a>
+    <a class="btn btn-secondary" href="/admin/authors.php" data-close-drawer-authors><?= h(tr('Закрыть', 'Close')) ?></a>
   </div>
+<div class="card">
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
@@ -190,9 +191,9 @@ admin_header(tr('Авторы', 'Authors'));
     <hr style="margin:16px 0">
     <?php foreach ($locales as $locale): ?>
       <div class="grid" style="margin-bottom:12px">
-        <div><label><?= h(tr('Имя', 'First name')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="first_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['first_name'] ?? '')) ?>"></div>
-        <div><label><?= h(tr('Фамилия', 'Last name')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="last_name_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['last_name'] ?? '')) ?>"></div>
-        <div><label><?= h(tr('Аффилиация', 'Affiliation')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="affiliation_<?= h($locale) ?>" value="<?= h((string) ($trMap[$locale]['affiliation'] ?? '')) ?>"></div>
+        <div><label><?= h(tr('Имя', 'First name')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="first_name_<?= h($locale) ?>" value="<?= h((string) (($trMap[$locale] ?? [])['first_name'] ?? '')) ?>"></div>
+        <div><label><?= h(tr('Фамилия', 'Last name')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="last_name_<?= h($locale) ?>" value="<?= h((string) (($trMap[$locale] ?? [])['last_name'] ?? '')) ?>"></div>
+        <div><label><?= h(tr('Аффилиация', 'Affiliation')) ?> (<?= h(strtoupper($locale)) ?>)</label><input name="affiliation_<?= h($locale) ?>" value="<?= h((string) (($trMap[$locale] ?? [])['affiliation'] ?? '')) ?>"></div>
       </div>
     <?php endforeach; ?>
     <div class="actions">
@@ -201,7 +202,35 @@ admin_header(tr('Авторы', 'Authors'));
     </div>
   </form>
 </div>
+</aside>
+
+<div class="kant-confirm-overlay" id="authors-close-confirm">
+  <div class="kant-confirm-modal">
+    <h3><?= h(tr('Есть несохранённые изменения', 'Unsaved changes')) ?></h3>
+    <p class="muted"><?= h(tr('Сохранить изменения перед закрытием формы?', 'Save changes before closing the form?')) ?></p>
+    <div class="actions">
+      <button type="button" id="authors-confirm-save"><?= h(tr('Сохранить', 'Save')) ?></button>
+      <button type="button" class="btn btn-secondary" id="authors-confirm-discard"><?= h(tr('Не сохранять', 'Discard')) ?></button>
+      <button type="button" class="btn btn-secondary" id="authors-confirm-cancel"><?= h(tr('Отмена', 'Cancel')) ?></button>
+    </div>
+  </div>
+</div>
 <?php endif; ?>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+  if (typeof window.initKantDrawerCloseGuard === 'function') {
+    window.initKantDrawerCloseGuard({
+      formSelector: '.kant-drawer form',
+      closeSelector: '[data-close-drawer-authors]',
+      overlaySelector: '#authors-close-confirm',
+      saveSelector: '#authors-confirm-save',
+      discardSelector: '#authors-confirm-discard',
+      cancelSelector: '#authors-confirm-cancel',
+      fallbackHref: '/admin/authors.php'
+    });
+  }
+});
+</script>
 <script>
 (function () {
   var tbody = document.getElementById('authors-sortable');

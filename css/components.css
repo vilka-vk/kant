@@ -1034,16 +1034,16 @@ ul, ol {
 .about__sticker {
   position: relative;
   width: 440px;
-  height: 479px;
+  height: auto;
   background-color: var(--color-beige);
 }
 
 .about__sticker-text {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 80px;
-  width: 390px;
+  position: static;
+  transform: none;
+  width: auto;
+  padding: 32px 25px 48px;
+  box-sizing: border-box;
 }
 
 

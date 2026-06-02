@@ -977,7 +977,6 @@ admin_header(tr('Модули', 'Modules'));
     <h2><?= h($editRow ? tr('Редактирование модуля', 'Edit module') : tr('Добавление модуля', 'Add module')) ?></h2>
     <a class="btn btn-secondary" href="/admin/modules.php"><?= h(tr('Назад к списку', 'Back to list')) ?></a>
   </div>
-  <h1><?= h(tr('Модули', 'Modules')) ?></h1>
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'invalid_lang'): ?><p class="err"><?= h(tr('Неверный формат кода языка. Используйте только буквы, 2-5 символов (например: en, ru, arm).', 'Language code format is invalid. Use only letters, 2-5 chars (e.g. en, ru, arm).')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error']) && $_GET['error'] === 'reading_xor'): ?><p class="err"><?= h(tr('Для материала без связанной публикации нужно указать только одно: URL или путь к файлу.', 'For reading without linked publication, exactly one of URL or file path is required.')) ?></p><?php endif; ?>

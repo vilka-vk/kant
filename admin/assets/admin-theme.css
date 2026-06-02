@@ -154,12 +154,32 @@ label {
   margin: 16px 0;
 }
 
+.card form hr:last-of-type {
+  display: none;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+  justify-content: flex-start;
   margin-top: 14px;
+}
+
+td.actions {
+  margin-top: 0;
+}
+
+td.actions form {
+  margin: 0;
+}
+
+td.actions .btn,
+td.actions button {
+  min-height: 36px;
+  font-size: 14px;
+  padding: 8px 12px;
 }
 
 button,
@@ -234,6 +254,7 @@ td {
   border-bottom: 1px solid #e6e9f2;
   padding: 10px;
   text-align: left;
+  vertical-align: middle;
 }
 
 .drag-col {
@@ -291,6 +312,10 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 16px;
+}
+
+.kant-quick-grid .card {
+  margin-bottom: 0;
 }
 
 .kant-quick-card {

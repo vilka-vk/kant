@@ -16,60 +16,55 @@ declare(strict_types=1);
 ?>
 <?php if ($moduleComponentsEnabled): ?>
 <?php if (!$isStandaloneComponentPage): ?>
-<details class="module-section card" open>
-  <summary><?= h(tr('Компоненты модуля', 'Module components')) ?></summary>
-  <div class="module-section__body">
-    <div class="kant-section-head">
-      <h4><?= h(tr('Список компонентов', 'Components list')) ?></h4>
-      <a class="btn" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=new&component_page=1"><?= h(tr('Добавить компонент', 'Add component')) ?></a>
-    </div>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th class="drag-col"></th>
-            <th><?= h(tr('Порядок', 'Order')) ?></th>
-            <th><?= h(tr('Заголовок', 'Title')) ?></th>
-            <th><?= h(tr('Название', 'Name')) ?></th>
-            <th><?= h(tr('Языки', 'Languages')) ?></th>
-            <th><?= h(tr('Транскрипции', 'Transcripts')) ?></th>
-            <th><?= h(tr('Список литературы', 'Literature list')) ?></th>
-            <th><?= h(tr('Действия', 'Actions')) ?></th>
-          </tr>
-        </thead>
-        <tbody id="components-sortable">
-          <?php foreach ($moduleComponents as $component): ?>
-            <tr data-id="<?= h((string) $component['id']) ?>">
-              <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
-              <td><?= h((string) $component['sort_order']) ?></td>
-              <td><?= h((string) ($component['block_title'] ?? '')) ?></td>
-              <td><?= h((string) ($component['name'] ?? '')) ?></td>
-              <td><?= h((string) ($component['video_languages'] ?? '')) ?></td>
-              <td><?= h(((int) ($component['has_transcripts'] ?? 0) > 0) ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
-              <td><?= h(((int) ($component['has_literature'] ?? 0) > 0) ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
-              <td class="actions compact-inputs">
-                <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=<?= h((string) $component['id']) ?>&component_page=1"><?= h(tr('Редактировать', 'Edit')) ?></a>
-                <form method="post" onsubmit="return confirm('<?= h(tr('Удалить компонент?', 'Delete component?')) ?>')">
-                  <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-                  <input type="hidden" name="action" value="delete_component">
-                  <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
-                  <input type="hidden" name="component_id" value="<?= h((string) $component['id']) ?>">
-                  <button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
-                </form>
-              </td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    </div>
-    <form method="post" id="components-reorder-form" style="display:none">
-      <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-      <input type="hidden" name="action" value="reorder_components">
-      <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
-      <div id="components-reorder-ids"></div>
-    </form>
+<div class="card module-section">
+  <div class="kant-section-head">
+    <h4><?= h(tr('Список компонентов', 'Components list')) ?></h4>
+    <a class="btn" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=new&component_page=1"><?= h(tr('Добавить компонент', 'Add component')) ?></a>
   </div>
-</details>
+  <table>
+    <thead>
+      <tr>
+        <th class="drag-col"></th>
+        <th><?= h(tr('Порядок', 'Order')) ?></th>
+        <th><?= h(tr('Заголовок', 'Title')) ?></th>
+        <th><?= h(tr('Название', 'Name')) ?></th>
+        <th><?= h(tr('Языки', 'Languages')) ?></th>
+        <th><?= h(tr('Транскрипции', 'Transcripts')) ?></th>
+        <th><?= h(tr('Список литературы', 'Literature list')) ?></th>
+        <th><?= h(tr('Действия', 'Actions')) ?></th>
+      </tr>
+    </thead>
+    <tbody id="components-sortable">
+      <?php foreach ($moduleComponents as $component): ?>
+        <tr data-id="<?= h((string) $component['id']) ?>">
+          <td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td>
+          <td><?= h((string) $component['sort_order']) ?></td>
+          <td><?= h((string) ($component['block_title'] ?? '')) ?></td>
+          <td><?= h((string) ($component['name'] ?? '')) ?></td>
+          <td><?= h((string) ($component['video_languages'] ?? '')) ?></td>
+          <td><?= h(((int) ($component['has_transcripts'] ?? 0) > 0) ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
+          <td><?= h(((int) ($component['has_literature'] ?? 0) > 0) ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
+          <td class="actions compact-inputs">
+            <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=<?= h((string) $component['id']) ?>&component_page=1"><?= h(tr('Редактировать', 'Edit')) ?></a>
+            <form method="post" onsubmit="return confirm('<?= h(tr('Удалить компонент?', 'Delete component?')) ?>')">
+              <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+              <input type="hidden" name="action" value="delete_component">
+              <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+              <input type="hidden" name="component_id" value="<?= h((string) $component['id']) ?>">
+              <button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
+            </form>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+  <form method="post" id="components-reorder-form" style="display:none">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="reorder_components">
+    <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <div id="components-reorder-ids"></div>
+  </form>
+</div>
 <?php endif; ?>
 
 <?php if ($isComponentFormOpen): ?>

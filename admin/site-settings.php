@@ -105,10 +105,25 @@ if ($heroHomePreview !== '' && !preg_match('#^([a-z]+:)?//#i', $heroHomePreview)
 admin_header(tr('Настройки сайта', 'Site Settings'));
 ?>
 <div class="card">
-  <h1><?= h(tr('Настройки сайта', 'Site settings')) ?></h1>
+  <h1><?= h(tr('Настройки подвала (footer)', 'Footer settings')) ?></h1>
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero главной сохранен.', 'Home hero saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
+  <h2><?= h(tr('Hero главной страницы', 'Home page hero')) ?></h2>
+  <p class="muted"><?= h(tr('Фоновое изображение в первом блоке на главной.', 'Background image for the first block on the home page.')) ?></p>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+    <input type="hidden" name="action" value="save_home_page_hero">
+    <div class="grid">
+      <div><label><?= h(tr('Текущий путь', 'Current path')) ?></label><input value="<?= h((string) ($heroHome['background_image_path'] ?? '')) ?>" disabled></div>
+      <div><label><?= h(tr('Загрузить изображение', 'Upload image')) ?></label><input type="file" name="hero_home_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
+    </div>
+    <?php if ($heroHomePreview !== ''): ?>
+      <p style="margin-top:12px"><img class="table-preview" src="<?= h($heroHomePreview) ?>" alt="<?= h(tr('Превью hero', 'Hero preview')) ?>" style="max-width:320px;height:auto"></p>
+    <?php endif; ?>
+    <div class="actions"><button type="submit"><?= h(tr('Сохранить hero', 'Save hero')) ?></button></div>
+  </form>
+  <hr>
   <form method="post">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <div class="grid">
@@ -124,24 +139,7 @@ admin_header(tr('Настройки сайта', 'Site Settings'));
         <textarea rows="2" name="footer_copyright_<?= h($locale) ?>"><?= h((string) ($trMap[$locale] ?? '')) ?></textarea>
       </div>
     <?php endforeach; ?>
-    <button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button>
-  </form>
-</div>
-
-<div class="card" style="margin-top:16px">
-  <h2><?= h(tr('Hero главной страницы', 'Home page hero')) ?></h2>
-  <p class="muted"><?= h(tr('Фоновое изображение в первом блоке на главной.', 'Background image for the first block on the home page.')) ?></p>
-  <form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
-    <input type="hidden" name="action" value="save_home_page_hero">
-    <div class="grid">
-      <div><label><?= h(tr('Текущий путь', 'Current path')) ?></label><input value="<?= h((string) ($heroHome['background_image_path'] ?? '')) ?>" disabled></div>
-      <div><label><?= h(tr('Загрузить изображение', 'Upload image')) ?></label><input type="file" name="hero_home_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-    </div>
-    <?php if ($heroHomePreview !== ''): ?>
-      <p style="margin-top:12px"><img class="table-preview" src="<?= h($heroHomePreview) ?>" alt="<?= h(tr('Превью hero', 'Hero preview')) ?>" style="max-width:320px;height:auto"></p>
-    <?php endif; ?>
-    <div class="actions" style="margin-top:12px"><button type="submit"><?= h(tr('Сохранить hero', 'Save hero')) ?></button></div>
+    <div class="actions"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
   </form>
 </div>
 <?php

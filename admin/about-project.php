@@ -151,13 +151,12 @@ admin_header(tr('О проекте', 'About Project'));
         <?php endforeach; ?>
       </tbody>
     </table>
-    <button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button>
+    <div class="actions"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
   </form>
 </div>
 <div class="card">
-  <h2><?= h(tr('Видео блока "О проекте" по языкам (динамические вкладки)', 'About project videos by language (dynamic tabs)')) ?></h2>
   <div class="kant-section-head">
-    <h3><?= h(tr('Список видео', 'Videos list')) ?></h3>
+    <h4><?= h(tr('Список видео', 'Videos list')) ?></h4>
     <button type="button" class="btn" data-toggle-form="about-video-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
   <table>
@@ -170,7 +169,7 @@ admin_header(tr('О проекте', 'About Project'));
         <td><?= h((string) $video['language_code']) ?></td>
         <td><a href="<?= h((string) $video['video_url']) ?>" target="_blank" rel="noopener noreferrer"><?= h((string) $video['video_url']) ?></a></td>
         <td><?= h((string) $video['video_alt']) ?></td>
-        <td>
+        <td class="actions">
           <form method="post" onsubmit="return confirm('<?= h(tr('Удалить это видео?', 'Delete this video?')) ?>')">
             <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
             <input type="hidden" name="action" value="delete_about_video">

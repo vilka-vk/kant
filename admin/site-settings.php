@@ -105,7 +105,6 @@ if ($heroHomePreview !== '' && !preg_match('#^([a-z]+:)?//#i', $heroHomePreview)
 admin_header(tr('Настройки сайта', 'Site Settings'));
 ?>
 <div class="card">
-  <h1><?= h(tr('Настройки подвала (footer)', 'Footer settings')) ?></h1>
   <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['saved_hero'])): ?><p class="ok"><?= h(tr('Hero главной сохранен.', 'Home hero saved.')) ?></p><?php endif; ?>
   <?php if (!empty($_GET['error'])): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
@@ -124,6 +123,7 @@ admin_header(tr('Настройки сайта', 'Site Settings'));
     <div class="actions"><button type="submit"><?= h(tr('Сохранить hero', 'Save hero')) ?></button></div>
   </form>
   <hr>
+  <h2><?= h(tr('Настройки подвала (footer)', 'Footer settings')) ?></h2>
   <form method="post">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <div class="grid">

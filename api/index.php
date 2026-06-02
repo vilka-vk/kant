@@ -5,6 +5,8 @@ require __DIR__ . '/../admin/lib/bootstrap.php';
 require __DIR__ . '/../admin/lib/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 $pdo = db();
 $defaultLocale = $config['app']['default_locale'];
@@ -14,6 +16,10 @@ $moduleTranslationsHasFormats = (bool) $pdo->query("SELECT COUNT(*)
   WHERE TABLE_SCHEMA = DATABASE()
     AND TABLE_NAME = 'modules_translations'
     AND COLUMN_NAME = 'formats'")->fetchColumn();
+$moduleComponentsEnabled = (bool) $pdo->query("SELECT COUNT(*)
+  FROM information_schema.TABLES
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'module_components'")->fetchColumn();
 
 $routeFromQuery = trim((string) ($_GET['route'] ?? ''));
 if ($routeFromQuery !== '') {
@@ -23,6 +29,11 @@ if ($routeFromQuery !== '') {
     $prefix = '/api/';
     $route = str_starts_with($uriPath, $prefix) ? substr($uriPath, strlen($prefix)) : '';
     $route = trim($route, '/');
+}
+
+function translation_html_has_content(string $html): bool
+{
+    return trim(strip_tags(html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8'))) !== '';
 }
 
 function out(array $data, string $lang, bool $fallbackUsed = false): void
@@ -35,6 +46,95 @@ function out(array $data, string $lang, bool $fallbackUsed = false): void
         ],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
+}
+
+function fetch_module_transcripts_payload(PDO $pdo, int $moduleId, ?int $componentId, string $locale, string $defaultLocale): array
+{
+    if ($componentId) {
+        $stmt = $pdo->prepare('SELECT * FROM module_transcripts
+          WHERE module_component_id = :component_id ORDER BY sort_order ASC, id ASC');
+        $stmt->execute(['component_id' => $componentId]);
+    } else {
+        $stmt = $pdo->prepare('SELECT * FROM module_transcripts
+          WHERE module_id = :module_id AND (module_component_id IS NULL OR module_component_id = 0)
+          ORDER BY sort_order ASC, id ASC');
+        $stmt->execute(['module_id' => $moduleId]);
+    }
+    $transcripts = [];
+    foreach ($stmt->fetchAll() as $transcriptRow) {
+        $transcriptTr = translated_row($pdo, 'module_transcripts_translations', 'module_transcript_id', (int) $transcriptRow['id'], $locale, $defaultLocale) ?: [];
+        $transcriptPayload = array_merge($transcriptRow, $transcriptTr);
+        $transcriptPayload['file_path'] = normalize_public_asset_path((string) ($transcriptPayload['file_path'] ?? ''));
+        $transcripts[] = $transcriptPayload;
+    }
+
+    return $transcripts;
+}
+
+function push_module_component_if_renderable(array &$payload, array $component): void
+{
+    $hasVideos = !empty($component['videos']);
+    $hasTranscripts = !empty($component['transcripts']);
+    $hasLiterature = translation_html_has_content((string) ($component['literature_html'] ?? ''));
+    if (!$hasVideos && !$hasTranscripts && !$hasLiterature) {
+        return;
+    }
+    $payload['components'][] = $component;
+}
+
+function resolve_component_literature_html(PDO $pdo, int $componentId, string $locale, string $literatureHtml): string
+{
+    $literatureHtml = (string) $literatureHtml;
+    if (translation_html_has_content($literatureHtml)) {
+        return $literatureHtml;
+    }
+    $anyLitStmt = $pdo->prepare('SELECT literature_html FROM module_components_translations
+      WHERE module_component_id = :id AND TRIM(COALESCE(literature_html, "")) <> ""
+      ORDER BY CASE WHEN locale = :locale THEN 0 ELSE 1 END, locale ASC
+      LIMIT 1');
+    $anyLitStmt->execute(['id' => $componentId, 'locale' => $locale]);
+    $anyLit = $anyLitStmt->fetchColumn();
+    if ($anyLit !== false && translation_html_has_content((string) $anyLit)) {
+        return (string) $anyLit;
+    }
+
+    return '';
+}
+
+function load_legacy_module_components(PDO $pdo, int $moduleId, string $locale, string $defaultLocale, array $moduleTr): array
+{
+    $components = [];
+    $lectureVideosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order
+      FROM module_lecture_videos WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
+    $lectureVideosStmt->execute(['module_id' => $moduleId]);
+    $lectureVideos = $lectureVideosStmt->fetchAll();
+    if ($lectureVideos) {
+        $components[] = [
+            'block_title' => trim((string) ($moduleTr['lecture_title'] ?? '')),
+            'name' => trim((string) ($moduleTr['lecture_video_title_primary'] ?? '')),
+            'videos' => $lectureVideos,
+            'transcripts' => fetch_module_transcripts_payload($pdo, $moduleId, null, $locale, $defaultLocale),
+            'literature_html' => translation_html_has_content((string) ($moduleTr['literature_html'] ?? ''))
+                ? (string) $moduleTr['literature_html']
+                : '',
+        ];
+    }
+
+    $presentationVideosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order
+      FROM module_presentation_videos WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
+    $presentationVideosStmt->execute(['module_id' => $moduleId]);
+    $presentationVideos = $presentationVideosStmt->fetchAll();
+    if ($presentationVideos) {
+        $components[] = [
+            'block_title' => trim((string) ($moduleTr['presentation_title'] ?? '')),
+            'name' => trim((string) ($moduleTr['presentation_video_title_primary'] ?? '')),
+            'videos' => $presentationVideos,
+            'transcripts' => [],
+            'literature_html' => '',
+        ];
+    }
+
+    return $components;
 }
 
 function merge_entity_with_translation(array $base, array $translation): array
@@ -102,15 +202,29 @@ if ($route === 'our-position') {
 }
 
 if ($route === 'modules') {
-    $rows = $pdo->query('SELECT m.*,
-      CASE WHEN EXISTS (
-        SELECT 1 FROM module_lecture_videos mlv WHERE mlv.module_id = m.id
-      ) THEN 1 ELSE 0 END AS has_lecture,
-      CASE WHEN EXISTS (
-        SELECT 1 FROM module_presentation_videos mpv WHERE mpv.module_id = m.id
-      ) THEN 1 ELSE 0 END AS has_presentation
+    $hasLectureSql = $moduleComponentsEnabled
+        ? 'CASE WHEN EXISTS (
+            SELECT 1 FROM module_components mc
+            JOIN module_component_videos mcv ON mcv.module_component_id = mc.id
+            WHERE mc.module_id = m.id
+          ) THEN 1 ELSE 0 END'
+        : 'CASE WHEN EXISTS (
+            SELECT 1 FROM module_lecture_videos mlv WHERE mlv.module_id = m.id
+          ) THEN 1 ELSE 0 END';
+    $hasPresentationSql = $moduleComponentsEnabled
+        ? 'CASE WHEN EXISTS (
+            SELECT 1 FROM module_components mc
+            JOIN module_component_videos mcv ON mcv.module_component_id = mc.id
+            WHERE mc.module_id = m.id AND mc.sort_order >= 2
+          ) THEN 1 ELSE 0 END'
+        : 'CASE WHEN EXISTS (
+            SELECT 1 FROM module_presentation_videos mpv WHERE mpv.module_id = m.id
+          ) THEN 1 ELSE 0 END';
+    $rows = $pdo->query("SELECT m.*,
+      {$hasLectureSql} AS has_lecture,
+      {$hasPresentationSql} AS has_presentation
       FROM modules m
-      ORDER BY m.sort_order ASC, m.id ASC')->fetchAll();
+      ORDER BY m.sort_order ASC, m.id ASC")->fetchAll();
     $result = [];
     foreach ($rows as $row) {
         $row['hero_background_image_path'] = normalize_public_asset_path((string) ($row['hero_background_image_path'] ?? ''));
@@ -142,28 +256,58 @@ if (preg_match('#^modules/([^/]+)$#', $route, $m)) {
     foreach ($allStmt->fetchAll() as $trRow) {
         $translations[strtolower((string) $trRow['locale'])] = $trRow;
     }
-    $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order FROM module_lecture_videos WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
-    $videosStmt->execute(['module_id' => (int) $row['id']]);
-    $lectureVideos = $videosStmt->fetchAll();
-    $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order FROM module_presentation_videos WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
-    $videosStmt->execute(['module_id' => (int) $row['id']]);
-    $presentationVideos = $videosStmt->fetchAll();
     $payload = merge_entity_with_translation($row, $tr);
     $payload['module_id'] = (int) $row['id'];
     $payload['hero_background_image_path'] = normalize_public_asset_path((string) ($payload['hero_background_image_path'] ?? ''));
     $payload['presentation_file_path'] = normalize_public_asset_path((string) ($payload['presentation_file_path'] ?? ''));
     $payload['translations'] = $translations;
-    $payload['lecture_videos'] = $lectureVideos;
-    $payload['presentation_videos'] = $presentationVideos;
-    $transcriptsStmt = $pdo->prepare('SELECT * FROM module_transcripts WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
-    $transcriptsStmt->execute(['module_id' => (int) $row['id']]);
-    $transcriptRows = $transcriptsStmt->fetchAll();
+    $payload['components'] = [];
+    $payload['lecture_videos'] = [];
+    $payload['presentation_videos'] = [];
     $payload['transcripts'] = [];
-    foreach ($transcriptRows as $transcriptRow) {
-        $transcriptTr = translated_row($pdo, 'module_transcripts_translations', 'module_transcript_id', (int) $transcriptRow['id'], $locale, $defaultLocale) ?: [];
-        $transcriptPayload = merge_entity_with_translation($transcriptRow, $transcriptTr);
-        $transcriptPayload['file_path'] = normalize_public_asset_path((string) ($transcriptPayload['file_path'] ?? ''));
-        $payload['transcripts'][] = $transcriptPayload;
+    $moduleId = (int) $row['id'];
+    if ($moduleComponentsEnabled) {
+        $componentsStmt = $pdo->prepare('SELECT * FROM module_components WHERE module_id = :module_id ORDER BY sort_order ASC, id ASC');
+        $componentsStmt->execute(['module_id' => $moduleId]);
+        foreach ($componentsStmt->fetchAll() as $componentRow) {
+            $componentTr = translated_row($pdo, 'module_components_translations', 'module_component_id', (int) $componentRow['id'], $locale, $defaultLocale) ?: [];
+            $componentPayload = array_merge($componentRow, $componentTr);
+            $componentPayload['block_title'] = trim((string) ($componentPayload['block_title'] ?? ''));
+            $componentPayload['name'] = trim((string) ($componentPayload['name'] ?? ''));
+            $componentPayload['literature_html'] = resolve_component_literature_html(
+                $pdo,
+                (int) $componentRow['id'],
+                $locale,
+                (string) ($componentPayload['literature_html'] ?? '')
+            );
+
+            $videosStmt = $pdo->prepare('SELECT language_code, video_url, video_alt, sort_order
+              FROM module_component_videos WHERE module_component_id = :component_id ORDER BY sort_order ASC, id ASC');
+            $videosStmt->execute(['component_id' => (int) $componentRow['id']]);
+            $componentPayload['videos'] = $videosStmt->fetchAll();
+            $componentPayload['transcripts'] = fetch_module_transcripts_payload(
+                $pdo,
+                $moduleId,
+                (int) $componentRow['id'],
+                $locale,
+                $defaultLocale
+            );
+            push_module_component_if_renderable($payload, $componentPayload);
+        }
+        if (empty($payload['components'])) {
+            foreach (load_legacy_module_components($pdo, $moduleId, $locale, $defaultLocale, $payload) as $legacyComponent) {
+                push_module_component_if_renderable($payload, $legacyComponent);
+            }
+        }
+    } else {
+        foreach (load_legacy_module_components($pdo, $moduleId, $locale, $defaultLocale, $payload) as $legacyComponent) {
+            push_module_component_if_renderable($payload, $legacyComponent);
+        }
+    }
+    foreach ($payload['components'] as $componentRow) {
+        if (!empty($componentRow['transcripts'])) {
+            $payload['transcripts'] = array_merge($payload['transcripts'], $componentRow['transcripts']);
+        }
     }
     out($payload, $locale);
 }

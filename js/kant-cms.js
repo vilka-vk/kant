@@ -2,6 +2,8 @@
   'use strict';
 
   var API_BASE = '/api/index.php';
+  var KANT_BUILD = '20260522c';
+  var moduleDetailRequestId = 0;
   var DEFAULT_LOCALE = 'ru';
   var STORAGE_KEY = 'kant-locale';
   var currentPath = window.location.pathname.toLowerCase();
@@ -373,6 +375,41 @@
     });
   }
 
+  function removeLegacyModuleBlocks() {
+    document.querySelectorAll('.module-block--legacy-lecture, .module-block--legacy-presentation').forEach(function (node) {
+      node.remove();
+    });
+    var moduleMain = document.querySelector('.module-main');
+    var componentsRoot = document.getElementById('module-components-root');
+    var readingsSection = document.getElementById('module-readings-section');
+    if (!moduleMain) return;
+    Array.from(moduleMain.children).forEach(function (child) {
+      if (child === componentsRoot || child === readingsSection || child.classList.contains('module-nav-pair')) {
+        return;
+      }
+      if (child.classList.contains('module-block--cms-component') ||
+          (child.classList.contains('module-block') && child.id !== 'module-readings-section')) {
+        child.remove();
+      }
+    });
+  }
+
+  function clearModuleComponentsRoot() {
+    removeLegacyModuleBlocks();
+    var componentsRoot = document.getElementById('module-components-root');
+    if (componentsRoot) {
+      componentsRoot.innerHTML = '';
+      componentsRoot.style.display = '';
+      return;
+    }
+    var moduleMain = document.querySelector('.module-main');
+    if (moduleMain) {
+      moduleMain.querySelectorAll('.module-block--cms-component').forEach(function (node) {
+        node.remove();
+      });
+    }
+  }
+
   function renderModuleDetail(moduleItem, transcripts, readings, locale, moduleList) {
     if (!moduleItem) return;
     var moduleWord = locale === 'ru' ? 'Модуль' : 'Module';
@@ -385,106 +422,177 @@
       heroSubtitle.style.display = moduleShortDescription ? '' : 'none';
     }
     setImg('.module-hero .hero__bg', moduleItem.hero_background_image_path || '');
-    var lectureBlock = document.querySelector('.module-main .module-block:nth-of-type(1)');
-    var presentationBlock = document.querySelector('.module-main .module-block:nth-of-type(2)');
-    setText('.module-main .module-block:nth-of-type(1) .module-title', moduleItem.lecture_title || '');
-    setText('.module-main .module-block:nth-of-type(2) .module-title', moduleItem.presentation_title || '');
+    var arrowSvg =
+      '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M1.70588 24C1.24314 24 0.843137 23.8314 0.505882 23.4941C0.168627 23.1569 0 22.7569 0 22.2941V1.70588C0 1.24314 0.168627 0.843137 0.505882 0.505882C0.843137 0.168627 1.24314 0 1.70588 0H22.2824C22.7451 0 23.1451 0.168627 23.4824 0.505882C23.8274 0.835294 24 1.23137 24 1.69412V22.2941C24 22.7569 23.8314 23.1569 23.4941 23.4941C23.1569 23.8314 22.7569 24 22.2941 24H1.70588ZM15.2588 16.5529L20.1176 12L15.2588 7.44706V10.8353H4.25882V13.1647H15.2588V16.5529Z"/>' +
+      '</svg>';
+    var transcriptLabel = locale === 'ru' ? 'Транскрипции' : 'Transcripts';
+    var literatureLabel = locale === 'ru' ? 'Список литературы' : 'Literature list';
+    var downloadTranscriptLabel = locale === 'ru' ? 'Скачать транскрипцию' : 'Download transcript';
+    var moduleMain = document.querySelector('.module-main');
+    var componentsRoot = document.getElementById('module-components-root');
+    var readingsSection = document.getElementById('module-readings-section');
 
-    var lectureTabsWrap = document.querySelector('.module-main .module-block:nth-of-type(1) .tabs');
-    var lecturePlayerWrap = document.querySelector('.module-main .module-block:nth-of-type(1) .about__player.module-player');
-    var lectureVideos = Array.isArray(moduleItem.lecture_videos) ? moduleItem.lecture_videos : [];
-    if (lectureBlock) {
-      lectureBlock.style.display = lectureVideos.length ? '' : 'none';
+    function htmlHasContent(html) {
+      var el = document.createElement('div');
+      el.innerHTML = html || '';
+      return (el.textContent || '').trim().length > 0;
     }
-    if (lectureTabsWrap && lecturePlayerWrap && lectureVideos.length) {
-      lectureTabsWrap.innerHTML = '';
-      lecturePlayerWrap.innerHTML = '';
-      lectureVideos.forEach(function (video, idx) {
-        var lang = (video.language_code || '').toUpperCase() || ('V' + (idx + 1));
-        var tab = document.createElement('button');
-        tab.className = 'tab' + (idx === 0 ? ' tab--active' : '');
-        tab.type = 'button';
-        tab.setAttribute('data-tab', String(idx));
-        tab.textContent = lang;
-        lectureTabsWrap.appendChild(tab);
 
-        var panel = document.createElement('div');
-        panel.className = 'about__player-panel' + (idx === 0 ? ' is-active' : '');
-        panel.setAttribute('data-panel', String(idx));
-        panel.innerHTML = renderVideoMarkup(video.video_url, video.video_alt || ('Lecture video ' + lang));
-        lecturePlayerWrap.appendChild(panel);
-
-        tab.addEventListener('click', function () {
-          lectureTabsWrap.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('tab--active'); });
-          lecturePlayerWrap.querySelectorAll('.about__player-panel').forEach(function (x) { x.classList.remove('is-active'); });
-          tab.classList.add('tab--active');
-          panel.classList.add('is-active');
-        });
-      });
+    function isRenderableComponent(component) {
+      var videos = Array.isArray(component.videos) ? component.videos : [];
+      var componentTranscripts = Array.isArray(component.transcripts) ? component.transcripts : [];
+      return videos.length > 0 || componentTranscripts.length > 0 || htmlHasContent(component.literature_html);
     }
-    var presentationFrame = document.querySelector('.module-main .module-block:nth-of-type(2) iframe');
-    var presentationVideos = Array.isArray(moduleItem.presentation_videos) ? moduleItem.presentation_videos : [];
-    if (presentationBlock) {
-      presentationBlock.style.display = presentationVideos.length ? '' : 'none';
-    }
-    var presentationTabsWrap = document.querySelector('.module-main .module-block:nth-of-type(2) .tabs');
-    var presentationPlayerWrap = document.querySelector('.module-main .module-block:nth-of-type(2) .about__player.module-player');
-    if (!presentationTabsWrap && presentationPlayerWrap) {
-      presentationTabsWrap = document.createElement('div');
-      presentationTabsWrap.className = 'tabs';
-      presentationPlayerWrap.parentNode.insertBefore(presentationTabsWrap, presentationPlayerWrap);
-    }
-    if (presentationTabsWrap && presentationPlayerWrap && presentationVideos.length) {
-      presentationTabsWrap.innerHTML = '';
-      presentationPlayerWrap.innerHTML = '';
-      presentationVideos.forEach(function (video, idx) {
-        var lang = (video.language_code || '').toUpperCase() || ('V' + (idx + 1));
-        var tab = document.createElement('button');
-        tab.className = 'tab' + (idx === 0 ? ' tab--active' : '');
-        tab.type = 'button';
-        tab.setAttribute('data-tab', String(idx));
-        tab.textContent = lang;
-        presentationTabsWrap.appendChild(tab);
 
-        var panel = document.createElement('div');
-        panel.className = 'about__player-panel' + (idx === 0 ? ' is-active' : '');
-        panel.setAttribute('data-panel', String(idx));
-        panel.innerHTML = renderVideoMarkup(video.video_url, video.video_alt || ('Presentation video ' + lang));
-        presentationPlayerWrap.appendChild(panel);
-
-        tab.addEventListener('click', function () {
-          presentationTabsWrap.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('tab--active'); });
-          presentationPlayerWrap.querySelectorAll('.about__player-panel').forEach(function (x) { x.classList.remove('is-active'); });
-          tab.classList.add('tab--active');
-          panel.classList.add('is-active');
-        });
-      });
-    } else if (presentationFrame) {
-      presentationFrame.src = '';
-      presentationFrame.setAttribute('title', 'Presentation video');
-    }
-    setHref('.module-main .module-block:nth-of-type(2) .module-links a[download]', moduleItem.presentation_file_path || '#');
-
-    var transcriptLink = document.querySelector('[data-transcript-open]');
-    var transcriptsList = document.querySelector('#transcript-modal .modal__downloads');
-    if (transcriptsList) {
+    function populateTranscriptModal(items) {
+      var transcriptsList = document.querySelector('#transcript-modal .modal__downloads');
+      if (!transcriptsList) return;
       transcriptsList.innerHTML = '';
-      var downloadTranscriptLabel = locale === 'ru' ? 'Скачать транскрипцию' : 'Download transcript';
-      var effectiveTranscripts = Array.isArray(transcripts) ? transcripts : [];
-      if (!effectiveTranscripts.length && Array.isArray(moduleItem.transcripts)) {
-        effectiveTranscripts = moduleItem.transcripts;
-      }
-      effectiveTranscripts.forEach(function (t) {
+      (items || []).forEach(function (t) {
         var languageCode = String(t.display_name || '').trim().toUpperCase();
         var li = document.createElement('li');
-        li.innerHTML = '<a href="' + (t.file_path || '#') + '" download>' + downloadTranscriptLabel + (languageCode ? ' (' + languageCode + ', PDF)' : ' (PDF)') + '</a>';
+        li.innerHTML = '<a href="' + escapeAttr(t.file_path || '#') + '" download>' + downloadTranscriptLabel +
+          (languageCode ? ' (' + languageCode + ', PDF)' : ' (PDF)') + '</a>';
         transcriptsList.appendChild(li);
       });
-      if (transcriptLink) transcriptLink.style.display = effectiveTranscripts.length ? '' : 'none';
+    }
+
+    function populateLiteratureModal(html) {
+      var literatureList = document.querySelector('#literature-modal .modal__references');
+      if (!literatureList) return;
+      if (htmlHasContent(html)) {
+        literatureList.innerHTML = html;
+      } else {
+        literatureList.innerHTML = '';
+      }
+    }
+
+    function renderComponentVideos(videos, tabsWrap, playerWrap) {
+      if (!tabsWrap || !playerWrap || !videos.length) return;
+      tabsWrap.innerHTML = '';
+      playerWrap.innerHTML = '';
+      if (videos.length > 1) {
+        tabsWrap.style.display = '';
+      } else {
+        tabsWrap.style.display = 'none';
+      }
+      videos.forEach(function (video, idx) {
+        var lang = (video.language_code || '').toUpperCase() || ('V' + (idx + 1));
+        var tab = document.createElement('button');
+        tab.className = 'tab' + (idx === 0 ? ' tab--active' : '');
+        tab.type = 'button';
+        tab.setAttribute('data-tab', String(idx));
+        tab.textContent = lang;
+        tabsWrap.appendChild(tab);
+
+        var panel = document.createElement('div');
+        panel.className = 'about__player-panel' + (idx === 0 ? ' is-active' : '');
+        panel.setAttribute('data-panel', String(idx));
+        panel.innerHTML = renderVideoMarkup(video.video_url, video.video_alt || ('Video ' + lang));
+        playerWrap.appendChild(panel);
+
+        tab.addEventListener('click', function () {
+          tabsWrap.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('tab--active'); });
+          playerWrap.querySelectorAll('.about__player-panel').forEach(function (x) { x.classList.remove('is-active'); });
+          tab.classList.add('tab--active');
+          panel.classList.add('is-active');
+        });
+      });
+    }
+
+    var components = (Array.isArray(moduleItem.components) ? moduleItem.components : []).filter(isRenderableComponent);
+    clearModuleComponentsRoot();
+
+    if (componentsRoot || moduleMain) {
+      components.forEach(function (component) {
+        var videos = Array.isArray(component.videos) ? component.videos : [];
+        var componentTranscripts = Array.isArray(component.transcripts) ? component.transcripts : [];
+        var blockTitle = String(component.block_title || '').trim();
+        var componentName = String(component.name || '').trim();
+        var literatureHtml = String(component.literature_html || '');
+
+        var section = document.createElement('section');
+        section.className = 'section module-block module-block--cms-component';
+        section.innerHTML =
+          '<h2 class="module-label"></h2>' +
+          '<h3 class="module-title"></h3>' +
+          '<div class="module-video-wrap">' +
+            '<div class="tabs"></div>' +
+            '<div class="about__player module-player"></div>' +
+            '<div class="module-links"></div>' +
+          '</div>';
+
+        var labelEl = section.querySelector('.module-label');
+        labelEl.textContent = blockTitle;
+        labelEl.style.display = blockTitle ? '' : 'none';
+        var titleEl = section.querySelector('.module-title');
+        titleEl.textContent = componentName;
+        titleEl.style.display = componentName ? '' : 'none';
+
+        var tabsWrap = section.querySelector('.tabs');
+        var playerWrap = section.querySelector('.about__player.module-player');
+        var linksWrap = section.querySelector('.module-links');
+        var videoWrap = section.querySelector('.module-video-wrap');
+        if (videos.length) {
+          renderComponentVideos(videos, tabsWrap, playerWrap);
+        } else {
+          if (tabsWrap) tabsWrap.style.display = 'none';
+          if (playerWrap) playerWrap.style.display = 'none';
+        }
+
+        if (componentTranscripts.length) {
+          var transcriptLink = document.createElement('a');
+          transcriptLink.href = '#';
+          transcriptLink.className = 'module-link-action card-link__action';
+          transcriptLink.setAttribute('data-transcript-open', '');
+          transcriptLink.innerHTML =
+            '<span class="card-link__action-label">' + transcriptLabel + '</span>' +
+            '<span class="btn-arrow module-link-action__arrow" aria-hidden="true">' + arrowSvg + '</span>';
+          (function (transcriptsForModal) {
+            transcriptLink.addEventListener('click', function (e) {
+              e.preventDefault();
+              populateTranscriptModal(transcriptsForModal);
+            });
+          })(componentTranscripts.slice());
+          linksWrap.appendChild(transcriptLink);
+        }
+        if (htmlHasContent(literatureHtml)) {
+          var literatureLink = document.createElement('a');
+          literatureLink.href = '#';
+          literatureLink.className = 'module-link-action card-link__action';
+          literatureLink.setAttribute('data-literature-open', '');
+          literatureLink.innerHTML =
+            '<span class="card-link__action-label">' + literatureLabel + '</span>' +
+            '<span class="btn-arrow module-link-action__arrow" aria-hidden="true">' + arrowSvg + '</span>';
+          (function (literatureForModal) {
+            literatureLink.addEventListener('click', function (e) {
+              e.preventDefault();
+              populateLiteratureModal(literatureForModal);
+            });
+          })(literatureHtml);
+          linksWrap.appendChild(literatureLink);
+        }
+        if (!linksWrap.children.length) {
+          linksWrap.style.display = 'none';
+        } else if (linksWrap.children.length === 1) {
+          linksWrap.classList.add('module-links--single');
+        }
+
+        if (componentsRoot) {
+          componentsRoot.appendChild(section);
+        } else if (readingsSection && moduleMain) {
+          moduleMain.insertBefore(section, readingsSection);
+        } else if (moduleMain) {
+          moduleMain.appendChild(section);
+        }
+      });
+      if (componentsRoot && !components.length) {
+        componentsRoot.style.display = 'none';
+      }
     }
 
     var readingsGrid = document.querySelector('.module-publications');
-    var readingsSection = readingsGrid ? readingsGrid.closest('.module-block') : null;
     var effectiveReadings = Array.isArray(readings) ? readings : [];
     var readableReadings = effectiveReadings.filter(function (r) {
       return !!resolveReadingTitle(r);
@@ -506,22 +614,6 @@
           '<p class="publication-item__title text-paragraph">' + (title || '') + '</p>';
         readingsGrid.appendChild(card);
       });
-    }
-
-    var literatureLink = document.querySelector('[data-literature-open]');
-    var literatureList = document.querySelector('#literature-modal .modal__references');
-    if (literatureList) {
-      var localized = moduleItem.literature_html || '';
-      if (!localized && moduleItem.translations && moduleItem.translations[locale]) {
-        localized = moduleItem.translations[locale].literature_html || '';
-      }
-      if (localized && String(localized).trim() !== '') {
-        literatureList.innerHTML = localized;
-        if (literatureLink) literatureLink.style.display = '';
-      } else {
-        literatureList.innerHTML = '';
-        if (literatureLink) literatureLink.style.display = 'none';
-      }
     }
 
     var navPair = document.querySelector('.module-nav-pair');
@@ -671,15 +763,20 @@
       }
 
       if (cleanPath.endsWith('/module.html') || cleanPath.endsWith('/module-1.html') || cleanPath.endsWith('/module')) {
+        var moduleRequestId = ++moduleDetailRequestId;
+        clearModuleComponentsRoot();
         var siteModuleDetail = (await apiGet('site-settings', locale)).data || {};
+        if (moduleRequestId !== moduleDetailRequestId) return;
         renderFooter(siteModuleDetail);
         var moduleList = (await apiGet('modules', locale)).data || [];
+        if (moduleRequestId !== moduleDetailRequestId) return;
         var moduleHeroSection = {};
         try {
           moduleHeroSection = (await apiGet('hero-sections?page_key=modules', locale)).data || {};
         } catch (e) {
           moduleHeroSection = {};
         }
+        if (moduleRequestId !== moduleDetailRequestId) return;
         var params = new URLSearchParams(window.location.search);
         var slug = params.get('slug');
         var moduleItem = null;
@@ -688,6 +785,7 @@
         } else {
           moduleItem = moduleList[0] || null;
         }
+        if (moduleRequestId !== moduleDetailRequestId) return;
         var moduleId = Number(moduleItem && (moduleItem.module_id || moduleItem.id));
         if (moduleId > 0) {
           if (!moduleItem.hero_background_image_path && moduleHeroSection.background_image_path) {
@@ -699,7 +797,17 @@
           } catch (e) {
             transcripts = Array.isArray(moduleItem.transcripts) ? moduleItem.transcripts : [];
           }
+          if (moduleRequestId !== moduleDetailRequestId) return;
           var readings = (await apiGet('modules/' + moduleId + '/readings', locale)).data || [];
+          if (moduleRequestId !== moduleDetailRequestId) return;
+          if (locale !== DEFAULT_LOCALE && !hasReadableReading(readings, locale, DEFAULT_LOCALE)) {
+            var fallbackReadings = (await apiGet('modules/' + moduleId + '/readings', DEFAULT_LOCALE)).data || [];
+            if (moduleRequestId !== moduleDetailRequestId) return;
+            if (hasReadableReading(fallbackReadings, DEFAULT_LOCALE, DEFAULT_LOCALE)) {
+              readings = fallbackReadings;
+            }
+          }
+          if (moduleRequestId !== moduleDetailRequestId) return;
           renderModuleDetail(moduleItem, transcripts, readings, locale, moduleList);
           refreshScrollAnimations();
         }
@@ -721,5 +829,12 @@
         setTimeout(hydratePage, 0);
       });
     });
+  });
+
+  window.addEventListener('pageshow', function (event) {
+    if (!isModuleDetailPage) return;
+    if (event.persisted) {
+      hydratePage();
+    }
   });
 })();

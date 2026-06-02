@@ -965,15 +965,9 @@ admin_header(tr('Модули', 'Modules'));
 <?php endif; ?>
 
 <?php if ($isStandaloneComponentPage && $editRow && $moduleComponentsEnabled): ?>
-<div class="card">
-  <div class="kant-drawer-actions">
-    <h2><?= h(tr('Компоненты модуля', 'Module components')) ?></h2>
-    <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>"><?= h(tr('Назад к модулю', 'Back to module')) ?></a>
-  </div>
-  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
-  <?php if (!empty($_GET['error']) && $_GET['error'] === 'invalid_lang'): ?><p class="err"><?= h(tr('Неверный формат кода языка. Используйте только буквы, 2-5 символов (например: en, ru, arm).', 'Language code format is invalid. Use only letters, 2-5 chars (e.g. en, ru, arm).')) ?></p><?php endif; ?>
-  <?php if (!empty($_GET['error']) && $_GET['error'] !== 'invalid_lang'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
-</div>
+<?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
+<?php if (!empty($_GET['error']) && $_GET['error'] === 'invalid_lang'): ?><p class="err"><?= h(tr('Неверный формат кода языка. Используйте только буквы, 2-5 символов (например: en, ru, arm).', 'Language code format is invalid. Use only letters, 2-5 chars (e.g. en, ru, arm).')) ?></p><?php endif; ?>
+<?php if (!empty($_GET['error']) && $_GET['error'] !== 'invalid_lang'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
 <?php require __DIR__ . '/includes/module-components-ui.php'; ?>
 <?php endif; ?>
 

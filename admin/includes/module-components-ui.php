@@ -15,14 +15,10 @@ declare(strict_types=1);
 /** @var string $rightLocale */
 ?>
 <?php if ($moduleComponentsEnabled): ?>
-<?php if ($isStandaloneComponentPage): ?>
-<div class="module-section card" style="margin-top:14px">
-  <div class="module-section__body">
-<?php else: ?>
+<?php if (!$isStandaloneComponentPage): ?>
 <details class="module-section card" open>
   <summary><?= h(tr('Компоненты модуля', 'Module components')) ?></summary>
   <div class="module-section__body">
-<?php endif; ?>
     <div class="kant-section-head">
       <h3><?= h(tr('Список компонентов', 'Components list')) ?></h3>
       <a class="btn" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=new&component_page=1"><?= h(tr('Добавить компонент', 'Add component')) ?></a>
@@ -73,9 +69,6 @@ declare(strict_types=1);
       <div id="components-reorder-ids"></div>
     </form>
   </div>
-<?php if ($isStandaloneComponentPage): ?>
-</div>
-<?php else: ?>
 </details>
 <?php endif; ?>
 
@@ -83,7 +76,7 @@ declare(strict_types=1);
 <div class="card" style="margin-top:14px">
   <div class="kant-section-head">
     <h3><?= $editComponent ? h(tr('Редактирование компонента', 'Edit component')) : h(tr('Добавление компонента', 'Add component')) ?></h3>
-    <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?><?= $isStandaloneComponentPage ? '&component_page=1' : '' ?>"><?= h(tr('Назад к компонентам', 'Back to components')) ?></a>
+    <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>"><?= h($isStandaloneComponentPage ? tr('Назад к модулю', 'Back to module') : tr('Назад к компонентам', 'Back to components')) ?></a>
   </div>
 
   <form method="post" style="margin-bottom:16px">
@@ -115,7 +108,6 @@ declare(strict_types=1);
 
   <?php if ($editComponent): ?>
   <hr style="margin:16px 0">
-  <h4><?= h(tr('Ссылки на видео', 'Video links')) ?></h4>
   <div class="kant-section-head">
     <h3><?= h(tr('Список видео', 'Videos list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="component-video-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
@@ -173,7 +165,6 @@ declare(strict_types=1);
   </form>
 
   <hr style="margin:16px 0">
-  <h4><?= h(tr('Транскрипции', 'Transcripts')) ?></h4>
   <div class="kant-section-head">
     <h3><?= h(tr('Список транскрипций', 'Transcripts list')) ?></h3>
     <button type="button" class="btn" data-toggle-form="component-transcript-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>

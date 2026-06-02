@@ -27,6 +27,107 @@ function admin_lang_url(string $lang): string
     return $path . '?' . http_build_query($query);
 }
 
+function admin_sortable_init_script(): void
+{
+    echo '<script>
+window.initKantSortable = function (tbodyId, formId, idsWrapId) {
+  var tbody = document.getElementById(tbodyId);
+  var form = document.getElementById(formId);
+  var idsWrap = document.getElementById(idsWrapId);
+  if (!tbody || !form || !idsWrap) return;
+
+  function rows() {
+    return tbody.querySelectorAll("tr[data-id]");
+  }
+
+  function rowIndex(row) {
+    return Array.prototype.indexOf.call(rows(), row);
+  }
+
+  function moveRow(dragged, target) {
+    if (!dragged || !target || dragged === target) return false;
+    var from = rowIndex(dragged);
+    var to = rowIndex(target);
+    if (from < 0 || to < 0 || from === to) return false;
+    if (from < to) {
+      tbody.insertBefore(dragged, target.nextSibling);
+    } else {
+      tbody.insertBefore(dragged, target);
+    }
+    return true;
+  }
+
+  function syncIds() {
+    idsWrap.innerHTML = "";
+    rows().forEach(function (tr) {
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "ids[]";
+      input.value = tr.getAttribute("data-id") || "";
+      idsWrap.appendChild(input);
+    });
+  }
+
+  function persistOrder() {
+    syncIds();
+    var action = form.getAttribute("action");
+    var url = action && action !== "" ? action : window.location.href;
+    return fetch(url, {
+      method: "POST",
+      body: new FormData(form),
+      credentials: "same-origin",
+      headers: { "X-Kant-Reorder": "1", "Accept": "application/json" }
+    }).then(function (res) {
+      if (!res.ok) throw new Error("reorder failed");
+      return res.json();
+    });
+  }
+
+  var dragged = null;
+
+  function allowDrop(e) {
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
+  }
+
+  function dropOnRow(e) {
+    e.preventDefault();
+    var target = e.target.closest ? e.target.closest("tr[data-id]") : null;
+    if (!target || !dragged) return;
+    if (!moveRow(dragged, target)) return;
+    dragged = null;
+    persistOrder().catch(function () {
+      window.location.reload();
+    });
+  }
+
+  tbody.addEventListener("dragover", allowDrop);
+  tbody.addEventListener("dragenter", allowDrop);
+  tbody.addEventListener("drop", dropOnRow);
+
+  rows().forEach(function (row) {
+    var handle = row.querySelector(".drag-handle");
+    if (!handle) return;
+    handle.addEventListener("dragstart", function (e) {
+      dragged = row;
+      if (!e.dataTransfer) return;
+      var rowId = row.getAttribute("data-id") || "";
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", rowId);
+      try {
+        e.dataTransfer.setData("application/x-kant-reorder", rowId);
+      } catch (err) {}
+    });
+    handle.addEventListener("dragend", function () {
+      dragged = null;
+    });
+  });
+};
+</script>';
+}
+
 function admin_header(string $title): void
 {
     $user = current_user();
@@ -37,6 +138,7 @@ function admin_header(string $title): void
     echo '<link rel="stylesheet" href="/admin/assets/admin-theme.css">';
     echo '</head><body>';
     if ($user) {
+        admin_sortable_init_script();
         echo '<div id="container">';
         echo '<aside class="sidebar kant-sidebar">';
         echo '<div class="logo">';
@@ -174,91 +276,6 @@ window.initKantDrawerCloseGuard = function (opts) {
     });
   });
 })();
-</script>';
-        echo '<script>
-window.initKantSortable = function (tbodyId, formId, idsWrapId) {
-  var tbody = document.getElementById(tbodyId);
-  var form = document.getElementById(formId);
-  var idsWrap = document.getElementById(idsWrapId);
-  if (!tbody || !form || !idsWrap) return;
-
-  function rows() {
-    return tbody.querySelectorAll("tr[data-id]");
-  }
-
-  function rowIndex(row) {
-    return Array.prototype.indexOf.call(rows(), row);
-  }
-
-  function moveRow(dragged, target) {
-    if (!dragged || !target || dragged === target) return false;
-    var from = rowIndex(dragged);
-    var to = rowIndex(target);
-    if (from < 0 || to < 0 || from === to) return false;
-    if (from < to) {
-      tbody.insertBefore(dragged, target.nextSibling);
-    } else {
-      tbody.insertBefore(dragged, target);
-    }
-    return true;
-  }
-
-  function syncIds() {
-    idsWrap.innerHTML = "";
-    rows().forEach(function (tr) {
-      var input = document.createElement("input");
-      input.type = "hidden";
-      input.name = "ids[]";
-      input.value = tr.getAttribute("data-id") || "";
-      idsWrap.appendChild(input);
-    });
-  }
-
-  function persistOrder() {
-    syncIds();
-    var action = form.getAttribute("action");
-    var url = action && action !== "" ? action : window.location.href;
-    return fetch(url, {
-      method: "POST",
-      body: new FormData(form),
-      credentials: "same-origin",
-      headers: { "X-Kant-Reorder": "1", "Accept": "application/json" }
-    }).then(function (res) {
-      if (!res.ok) throw new Error("reorder failed");
-      return res.json();
-    });
-  }
-
-  var dragged = null;
-  rows().forEach(function (row) {
-    var handle = row.querySelector(".drag-handle");
-    if (handle) {
-      handle.addEventListener("dragstart", function (e) {
-        dragged = row;
-        if (e.dataTransfer) {
-          e.dataTransfer.effectAllowed = "move";
-        }
-      });
-      handle.addEventListener("dragend", function () {
-        dragged = null;
-      });
-    }
-    row.addEventListener("dragover", function (e) {
-      e.preventDefault();
-      if (e.dataTransfer) {
-        e.dataTransfer.dropEffect = "move";
-      }
-    });
-    row.addEventListener("drop", function (e) {
-      e.preventDefault();
-      if (!moveRow(dragged, row)) return;
-      dragged = null;
-      persistOrder().catch(function () {
-        window.location.reload();
-      });
-    });
-  });
-};
 </script>';
         echo '</body></html>';
         return;

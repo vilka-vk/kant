@@ -20,7 +20,7 @@ declare(strict_types=1);
   <summary><?= h(tr('Компоненты модуля', 'Module components')) ?></summary>
   <div class="module-section__body">
     <div class="kant-section-head">
-      <h3><?= h(tr('Список компонентов', 'Components list')) ?></h3>
+      <h4><?= h(tr('Список компонентов', 'Components list')) ?></h4>
       <a class="btn" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=new&component_page=1"><?= h(tr('Добавить компонент', 'Add component')) ?></a>
     </div>
     <div class="table-scroll">
@@ -73,7 +73,7 @@ declare(strict_types=1);
 <?php endif; ?>
 
 <?php if ($isComponentFormOpen): ?>
-<div class="card" style="margin-top:14px">
+<div class="card component-editor-card" style="margin-top:14px">
   <div class="kant-section-head">
     <h3><?= $editComponent ? h(tr('Редактирование компонента', 'Edit component')) : h(tr('Добавление компонента', 'Add component')) ?></h3>
     <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>"><?= h($isStandaloneComponentPage ? tr('Назад к модулю', 'Back to module') : tr('Назад к компонентам', 'Back to components')) ?></a>
@@ -107,9 +107,9 @@ declare(strict_types=1);
   </form>
 
   <?php if ($editComponent): ?>
-  <hr style="margin:16px 0">
+  <hr class="component-editor-divider">
   <div class="kant-section-head">
-    <h3><?= h(tr('Список видео', 'Videos list')) ?></h3>
+    <h4><?= h(tr('Список видео', 'Videos list')) ?></h4>
     <button type="button" class="btn" data-toggle-form="component-video-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
   <div class="table-scroll">
@@ -164,9 +164,9 @@ declare(strict_types=1);
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
   </form>
 
-  <hr style="margin:16px 0">
+  <hr class="component-editor-divider">
   <div class="kant-section-head">
-    <h3><?= h(tr('Список транскрипций', 'Transcripts list')) ?></h3>
+    <h4><?= h(tr('Список транскрипций', 'Transcripts list')) ?></h4>
     <button type="button" class="btn" data-toggle-form="component-transcript-add-form"><?= h(tr('Добавить +', 'Add +')) ?></button>
   </div>
   <table><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Файл', 'File')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
@@ -182,7 +182,7 @@ declare(strict_types=1);
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
   </form>
 
-  <hr style="margin:16px 0">
+  <hr class="component-editor-divider">
   <h4><?= h(tr('Список литературы', 'Literature list')) ?></h4>
   <form method="post">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">

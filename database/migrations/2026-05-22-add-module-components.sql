@@ -33,56 +33,103 @@ CREATE TABLE IF NOT EXISTS module_component_videos (
     ON DELETE CASCADE
 );
 
-ALTER TABLE module_transcripts
-  ADD COLUMN module_component_id INT NULL AFTER module_id;
+SET @col_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'module_transcripts'
+    AND COLUMN_NAME = 'module_component_id'
+);
+SET @ddl := IF(
+  @col_exists = 0,
+  'ALTER TABLE module_transcripts ADD COLUMN module_component_id INT NULL AFTER module_id',
+  'SELECT 1'
+);
+PREPARE stmt_add_col FROM @ddl;
+EXECUTE stmt_add_col;
+DEALLOCATE PREPARE stmt_add_col;
 
 INSERT INTO module_components (module_id, sort_order, presentation_file_path)
 SELECT m.id, 1, ''
 FROM modules m
-WHERE EXISTS (SELECT 1 FROM module_lecture_videos lv WHERE lv.module_id = m.id)
-   OR EXISTS (
-     SELECT 1 FROM modules_translations mt
-     WHERE mt.module_id = m.id
-       AND (
-         TRIM(COALESCE(mt.lecture_title, '')) <> ''
-         OR TRIM(COALESCE(mt.literature_html, '')) <> ''
-       )
-   )
-   OR EXISTS (SELECT 1 FROM module_transcripts t WHERE t.module_id = m.id);
+WHERE (
+    EXISTS (SELECT 1 FROM module_lecture_videos lv WHERE lv.module_id = m.id)
+    OR EXISTS (
+      SELECT 1 FROM modules_translations mt
+      WHERE mt.module_id = m.id
+        AND (
+          TRIM(COALESCE(mt.lecture_title, '')) <> ''
+          OR TRIM(COALESCE(mt.literature_html, '')) <> ''
+        )
+    )
+    OR EXISTS (SELECT 1 FROM module_transcripts t WHERE t.module_id = m.id)
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM module_components lc WHERE lc.module_id = m.id AND lc.sort_order = 1
+  );
 
 INSERT INTO module_components (module_id, sort_order, presentation_file_path)
 SELECT m.id, 2, COALESCE(m.presentation_file_path, '')
 FROM modules m
-WHERE EXISTS (SELECT 1 FROM module_presentation_videos pv WHERE pv.module_id = m.id)
-   OR TRIM(COALESCE(m.presentation_file_path, '')) <> ''
-   OR EXISTS (
-     SELECT 1 FROM modules_translations mt
-     WHERE mt.module_id = m.id AND TRIM(COALESCE(mt.presentation_title, '')) <> ''
-   );
+WHERE (
+    EXISTS (SELECT 1 FROM module_presentation_videos pv WHERE pv.module_id = m.id)
+    OR TRIM(COALESCE(m.presentation_file_path, '')) <> ''
+    OR EXISTS (
+      SELECT 1 FROM modules_translations mt
+      WHERE mt.module_id = m.id AND TRIM(COALESCE(mt.presentation_title, '')) <> ''
+    )
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM module_components pc WHERE pc.module_id = m.id AND pc.sort_order = 2
+  );
 
 INSERT INTO module_components_translations (module_component_id, locale, block_title, name, literature_html)
 SELECT lc.id, mt.locale, COALESCE(mt.lecture_title, ''), COALESCE(mt.lecture_video_title_primary, ''), mt.literature_html
 FROM module_components lc
 JOIN modules_translations mt ON mt.module_id = lc.module_id
-WHERE lc.sort_order = 1;
+WHERE lc.sort_order = 1
+  AND NOT EXISTS (
+    SELECT 1
+    FROM module_components_translations mct
+    WHERE mct.module_component_id = lc.id AND mct.locale = mt.locale
+  );
 
 INSERT INTO module_components_translations (module_component_id, locale, block_title, name, literature_html)
 SELECT pc.id, mt.locale, COALESCE(mt.presentation_title, ''), COALESCE(mt.presentation_video_title_primary, ''), NULL
 FROM module_components pc
 JOIN modules_translations mt ON mt.module_id = pc.module_id
-WHERE pc.sort_order = 2;
+WHERE pc.sort_order = 2
+  AND NOT EXISTS (
+    SELECT 1
+    FROM module_components_translations mct
+    WHERE mct.module_component_id = pc.id AND mct.locale = mt.locale
+  );
 
 INSERT INTO module_component_videos (module_component_id, language_code, video_url, video_alt, sort_order)
 SELECT lc.id, lv.language_code, lv.video_url, lv.video_alt, lv.sort_order
 FROM module_components lc
 JOIN module_lecture_videos lv ON lv.module_id = lc.module_id
-WHERE lc.sort_order = 1;
+WHERE lc.sort_order = 1
+  AND NOT EXISTS (
+    SELECT 1
+    FROM module_component_videos mcv
+    WHERE mcv.module_component_id = lc.id
+      AND mcv.language_code = lv.language_code
+      AND mcv.video_url = lv.video_url
+  );
 
 INSERT INTO module_component_videos (module_component_id, language_code, video_url, video_alt, sort_order)
 SELECT pc.id, pv.language_code, pv.video_url, pv.video_alt, pv.sort_order
 FROM module_components pc
 JOIN module_presentation_videos pv ON pv.module_id = pc.module_id
-WHERE pc.sort_order = 2;
+WHERE pc.sort_order = 2
+  AND NOT EXISTS (
+    SELECT 1
+    FROM module_component_videos mcv
+    WHERE mcv.module_component_id = pc.id
+      AND mcv.language_code = pv.language_code
+      AND mcv.video_url = pv.video_url
+  );
 
 UPDATE module_transcripts t
 JOIN module_components lc ON lc.module_id = t.module_id AND lc.sort_order = 1
@@ -95,7 +142,18 @@ SET t.module_component_id = fc.id
 WHERE t.module_component_id IS NULL
   AND fc.id = (SELECT MIN(c2.id) FROM module_components c2 WHERE c2.module_id = t.module_id);
 
-ALTER TABLE module_transcripts
-  ADD CONSTRAINT fk_module_transcripts_component
-    FOREIGN KEY (module_component_id) REFERENCES module_components(id)
-    ON DELETE CASCADE;
+SET @fk_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'module_transcripts'
+    AND CONSTRAINT_NAME = 'fk_module_transcripts_component'
+);
+SET @fk_ddl := IF(
+  @fk_exists = 0,
+  'ALTER TABLE module_transcripts ADD CONSTRAINT fk_module_transcripts_component FOREIGN KEY (module_component_id) REFERENCES module_components(id) ON DELETE CASCADE',
+  'SELECT 1'
+);
+PREPARE stmt_add_fk FROM @fk_ddl;
+EXECUTE stmt_add_fk;
+DEALLOCATE PREPARE stmt_add_fk;

@@ -68,6 +68,15 @@ window.initKantSortable = function (tbodyId, formId, idsWrapId) {
     });
   }
 
+  function syncOrderLabels() {
+    rows().forEach(function (tr, index) {
+      var orderCell = tr.children[1];
+      if (orderCell) {
+        orderCell.textContent = String(index + 1);
+      }
+    });
+  }
+
   function persistOrder() {
     syncIds();
     var action = form.getAttribute("action");
@@ -98,6 +107,7 @@ window.initKantSortable = function (tbodyId, formId, idsWrapId) {
     if (!target || !dragged) return;
     if (!moveRow(dragged, target)) return;
     dragged = null;
+    syncOrderLabels();
     persistOrder().catch(function () {
       window.location.reload();
     });

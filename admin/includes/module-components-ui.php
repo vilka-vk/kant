@@ -8,18 +8,24 @@ declare(strict_types=1);
 /** @var array $componentTranscripts */
 /** @var array|null $editComponentVideo */
 /** @var bool $isComponentFormOpen */
+/** @var bool $isStandaloneComponentPage */
 /** @var array $editRow */
 /** @var array $locales */
 /** @var string $leftLocale */
 /** @var string $rightLocale */
 ?>
 <?php if ($moduleComponentsEnabled): ?>
+<?php if ($isStandaloneComponentPage): ?>
+<div class="module-section card" style="margin-top:14px">
+  <div class="module-section__body">
+<?php else: ?>
 <details class="module-section card" open>
   <summary><?= h(tr('Компоненты модуля', 'Module components')) ?></summary>
   <div class="module-section__body">
+<?php endif; ?>
     <div class="kant-section-head">
       <h3><?= h(tr('Список компонентов', 'Components list')) ?></h3>
-      <a class="btn" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=new"><?= h(tr('Добавить компонент', 'Add component')) ?></a>
+      <a class="btn" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=new&component_page=1"><?= h(tr('Добавить компонент', 'Add component')) ?></a>
     </div>
     <div class="table-scroll">
       <table>
@@ -46,7 +52,7 @@ declare(strict_types=1);
               <td><?= h(((int) ($component['has_transcripts'] ?? 0) > 0) ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
               <td><?= h(((int) ($component['has_literature'] ?? 0) > 0) ? tr('Да', 'Yes') : tr('Нет', 'No')) ?></td>
               <td class="actions compact-inputs">
-                <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=<?= h((string) $component['id']) ?>"><?= h(tr('Редактировать', 'Edit')) ?></a>
+                <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=<?= h((string) $component['id']) ?>&component_page=1"><?= h(tr('Редактировать', 'Edit')) ?></a>
                 <form method="post" onsubmit="return confirm('<?= h(tr('Удалить компонент?', 'Delete component?')) ?>')">
                   <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
                   <input type="hidden" name="action" value="delete_component">
@@ -67,19 +73,24 @@ declare(strict_types=1);
       <div id="components-reorder-ids"></div>
     </form>
   </div>
+<?php if ($isStandaloneComponentPage): ?>
+</div>
+<?php else: ?>
 </details>
+<?php endif; ?>
 
 <?php if ($isComponentFormOpen): ?>
 <div class="card" style="margin-top:14px">
   <div class="kant-section-head">
     <h3><?= $editComponent ? h(tr('Редактирование компонента', 'Edit component')) : h(tr('Добавление компонента', 'Add component')) ?></h3>
-    <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>"><?= h(tr('Назад к компонентам', 'Back to components')) ?></a>
+    <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?><?= $isStandaloneComponentPage ? '&component_page=1' : '' ?>"><?= h(tr('Назад к компонентам', 'Back to components')) ?></a>
   </div>
 
   <form method="post" style="margin-bottom:16px">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="save_component">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
+    <input type="hidden" name="component_page" value="<?= $isStandaloneComponentPage ? '1' : '0' ?>">
     <?php if ($editComponent): ?>
       <input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>">
       <input type="hidden" name="sort_order" value="<?= h((string) ($editComponent['sort_order'] ?? 1)) ?>">
@@ -120,12 +131,13 @@ declare(strict_types=1);
             <td><a href="<?= h((string) $video['video_url']) ?>" target="_blank" rel="noopener noreferrer"><?= h((string) $video['video_url']) ?></a></td>
             <td><?= h((string) $video['video_alt']) ?></td>
             <td class="actions compact-inputs">
-              <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=<?= h((string) $editComponent['id']) ?>&component_video=<?= h((string) $video['id']) ?>"><?= h(tr('Изменить', 'Edit')) ?></a>
+              <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>&component=<?= h((string) $editComponent['id']) ?>&component_video=<?= h((string) $video['id']) ?>&component_page=1"><?= h(tr('Изменить', 'Edit')) ?></a>
               <form method="post" onsubmit="return confirm('<?= h(tr('Удалить видео?', 'Delete video?')) ?>')">
                 <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
                 <input type="hidden" name="action" value="delete_component_video">
                 <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
                 <input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>">
+                <input type="hidden" name="component_page" value="<?= $isStandaloneComponentPage ? '1' : '0' ?>">
                 <input type="hidden" name="video_id" value="<?= h((string) $video['id']) ?>">
                 <button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button>
               </form>
@@ -140,6 +152,7 @@ declare(strict_types=1);
     <input type="hidden" name="action" value="reorder_component_videos">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>">
+    <input type="hidden" name="component_page" value="<?= $isStandaloneComponentPage ? '1' : '0' ?>">
     <div id="component-videos-reorder-ids"></div>
   </form>
   <p class="inline-help"><?= h(tr('Подсказка: используйте embed URL, например https://www.youtube.com/embed/... или Vimeo player URL.', 'URL hint: use embed URL, e.g. https://www.youtube.com/embed/... or Vimeo player URL.')) ?></p>
@@ -148,6 +161,7 @@ declare(strict_types=1);
     <input type="hidden" name="action" value="<?= h($editComponentVideo ? 'update_component_video' : 'add_component_video') ?>">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>">
+    <input type="hidden" name="component_page" value="<?= $isStandaloneComponentPage ? '1' : '0' ?>">
     <?php if ($editComponentVideo): ?><input type="hidden" name="video_id" value="<?= h((string) $editComponentVideo['id']) ?>"><?php endif; ?>
     <div class="grid">
       <div><label><?= h(tr('Код языка', 'Language code')) ?></label><input name="video_language_code" placeholder="en / ru / arm" required pattern="[A-Za-z]{2,5}" value="<?= h((string) ($editComponentVideo['language_code'] ?? '')) ?>"></div>
@@ -167,12 +181,12 @@ declare(strict_types=1);
   <table><thead><tr><th class="drag-col"></th><th><?= h(tr('Порядок', 'Order')) ?></th><th><?= h(tr('Язык', 'Language')) ?></th><th><?= h(tr('Файл', 'File')) ?></th><th><?= h(tr('Действие', 'Action')) ?></th></tr></thead>
     <tbody id="component-transcripts-sortable">
       <?php foreach ($componentTranscripts as $t): ?>
-        <tr data-id="<?= h((string) $t['id']) ?>"><td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $t['sort_order']) ?></td><td><?= h(strtoupper((string) ($t['display_name'] ?? ''))) ?></td><td><?= h((string) $t['file_path']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить транскрипцию?', 'Delete transcript?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
+        <tr data-id="<?= h((string) $t['id']) ?>"><td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $t['sort_order']) ?></td><td><?= h(strtoupper((string) ($t['display_name'] ?? ''))) ?></td><td><?= h((string) $t['file_path']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить транскрипцию?', 'Delete transcript?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>"><input type="hidden" name="component_page" value="<?= $isStandaloneComponentPage ? '1' : '0' ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
       <?php endforeach; ?>
     </tbody>
   </table>
   <form method="post" style="margin-bottom:12px" class="compact-inputs" id="component-transcript-add-form" enctype="multipart/form-data" hidden>
-    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>">
+    <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="save_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>"><input type="hidden" name="component_page" value="<?= $isStandaloneComponentPage ? '1' : '0' ?>">
     <div class="grid"><div><label><?= h(tr('Загрузить файл транскрипции', 'Upload transcript file')) ?></label><input type="file" name="transcript_file" accept=".pdf,.doc,.docx,.txt" required></div><div><label><?= h(tr('Язык', 'Language')) ?></label><input name="language_code" placeholder="ru / en" required pattern="[A-Za-z]{2,5}"></div></div>
     <div class="actions" style="margin-top:10px"><button type="submit"><?= h(tr('Сохранить', 'Save')) ?></button></div>
   </form>
@@ -184,6 +198,7 @@ declare(strict_types=1);
     <input type="hidden" name="action" value="save_component">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
     <input type="hidden" name="component_id" value="<?= h((string) $editComponent['id']) ?>">
+    <input type="hidden" name="component_page" value="<?= $isStandaloneComponentPage ? '1' : '0' ?>">
     <input type="hidden" name="sort_order" value="<?= h((string) ($editComponent['sort_order'] ?? 1)) ?>">
     <input type="hidden" name="block_title_<?= h($leftLocale) ?>" value="<?= h((string) (($editComponentTrMap[$leftLocale] ?? [])['block_title'] ?? '')) ?>">
     <input type="hidden" name="block_title_<?= h($rightLocale) ?>" value="<?= h((string) (($editComponentTrMap[$rightLocale] ?? [])['block_title'] ?? '')) ?>">

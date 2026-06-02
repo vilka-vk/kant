@@ -170,6 +170,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $componentId = (int) ($_POST['component_id'] ?? 0);
+    $isComponentPageRequest = (string) ($_POST['component_page'] ?? '') === '1';
+    $componentPageSuffix = $isComponentPageRequest ? '&component_page=1' : '';
 
     if ($moduleComponentsEnabled && $action === 'reorder_components') {
         $ids = $_POST['ids'] ?? [];
@@ -180,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id, 'module_id' => $moduleId]);
             }
         }
-        redirect('/admin/modules.php?edit=' . $moduleId);
+        redirect('/admin/modules.php?edit=' . $moduleId . $componentPageSuffix);
     }
 
     if ($moduleComponentsEnabled && $action === 'delete_component') {
@@ -188,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         delete_module_component_files($pdo, $id);
         $pdo->prepare('DELETE FROM module_components WHERE id = :id AND module_id = :module_id')
             ->execute(['id' => $id, 'module_id' => $moduleId]);
-        redirect('/admin/modules.php?edit=' . $moduleId);
+        redirect('/admin/modules.php?edit=' . $moduleId . $componentPageSuffix);
     }
 
     if ($moduleComponentsEnabled && $action === 'save_component') {
@@ -211,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int) $pdo->lastInsertId();
         }
         save_component_translations($pdo, $id, $locales, $_POST);
-        redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $id . '&saved=1');
+        redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $id . $componentPageSuffix . '&saved=1');
     }
 
     if (!$moduleComponentsEnabled && $action === 'save_presentation_file') {
@@ -258,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id, 'component_id' => $componentId]);
             }
         }
-        redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId);
+        redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix);
     }
 
     if ($moduleComponentsEnabled && in_array($action, ['add_component_video', 'update_component_video', 'delete_component_video'], true)) {
@@ -271,16 +273,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM module_component_videos WHERE id = :id AND module_component_id = :component_id')
                 ->execute(['id' => $videoId, 'component_id' => $componentId]);
             delete_public_file((string) ($videoRow['video_url'] ?? ''));
-            redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId);
+            redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix);
         }
         $languageCode = strtolower(trim((string) ($_POST['video_language_code'] ?? '')));
         if (!assertLanguageCode($languageCode, $languageCodePattern)) {
-            redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . '&error=invalid_lang');
+            redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix . '&error=invalid_lang');
         }
         $videoId = (int) ($_POST['video_id'] ?? 0);
         $videoUrl = trim((string) ($_POST['video_url'] ?? ''));
         if ($videoUrl === '') {
-            redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . '&error=' . urlencode('Video URL is required.'));
+            redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix . '&error=' . urlencode('Video URL is required.'));
         }
         $payload = [
             'component_id' => $componentId,
@@ -302,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('UPDATE module_component_videos SET language_code=:language_code, video_url=:video_url, video_alt=:video_alt, sort_order=:sort_order
               WHERE id=:video_id AND module_component_id=:component_id')->execute($payload + ['video_id' => $videoId]);
         }
-        redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId);
+        redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix);
     }
 
     if ($action === 'reorder_lecture_videos' && !$moduleComponentsEnabled) {
@@ -419,7 +421,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ->execute(['id' => $id, 'module_id' => $moduleId]);
             }
             delete_public_file((string) ($transcriptRow['file_path'] ?? ''));
-            $redirectSuffix = $moduleComponentsEnabled ? ('&component=' . $transcriptComponentId) : '';
+            $redirectSuffix = $moduleComponentsEnabled ? ('&component=' . $transcriptComponentId . $componentPageSuffix) : '';
             redirect('/admin/modules.php?edit=' . $moduleId . $redirectSuffix);
         }
         $id = (int) ($_POST['transcript_id'] ?? 0);
@@ -451,7 +453,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
         }
         if ($payload['file_path'] === '') {
-            $redirectSuffix = $moduleComponentsEnabled ? ('&component=' . $transcriptComponentId) : '';
+            $redirectSuffix = $moduleComponentsEnabled ? ('&component=' . $transcriptComponentId . $componentPageSuffix) : '';
             redirect('/admin/modules.php?edit=' . $moduleId . $redirectSuffix . '&error=' . urlencode('Transcript file path is required.'));
         }
         if ($id > 0) {
@@ -488,7 +490,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'display_name' => $languageCode,
                 ]);
         }
-        $redirectSuffix = $moduleComponentsEnabled ? ('&component=' . $transcriptComponentId) : '';
+        $redirectSuffix = $moduleComponentsEnabled ? ('&component=' . $transcriptComponentId . $componentPageSuffix) : '';
         redirect('/admin/modules.php?edit=' . $moduleId . $redirectSuffix);
     }
 
@@ -683,6 +685,7 @@ $editComponentVideoId = (int) ($_GET['component_video'] ?? 0);
 $editComponentVideo = null;
 $componentQuery = (string) ($_GET['component'] ?? '');
 $isComponentFormOpen = false;
+$isStandaloneComponentPage = false;
 
 if ($editId > 0) {
     $stmt = $pdo->prepare('SELECT * FROM modules WHERE id = :id');
@@ -697,6 +700,7 @@ if ($editId > 0) {
         $trMap[$tr['locale']] = $tr;
     }
     if ($moduleComponentsEnabled) {
+        $isStandaloneComponentPage = (string) ($_GET['component_page'] ?? '') === '1';
         $moduleComponents = fetch_module_components($pdo, $editId, admin_locale());
         if ($componentQuery === 'new') {
             $isComponentFormOpen = true;
@@ -875,6 +879,8 @@ if (!empty($heroModules['id'])) {
 }
 
 $isModuleFormOpen = $editRow || (string) ($_GET['form'] ?? '') === '1';
+$leftLocale = $locales[0] ?? 'ru';
+$rightLocale = $locales[1] ?? ($locales[0] ?? 'en');
 admin_header(tr('Модули', 'Modules'));
 ?>
 <style>
@@ -958,7 +964,20 @@ admin_header(tr('Модули', 'Modules'));
 </div>
 <?php endif; ?>
 
-<?php if ($isModuleFormOpen): ?>
+<?php if ($isStandaloneComponentPage && $editRow && $moduleComponentsEnabled): ?>
+<div class="card">
+  <div class="kant-drawer-actions">
+    <h2><?= h(tr('Компоненты модуля', 'Module components')) ?></h2>
+    <a class="btn btn-secondary" href="/admin/modules.php?edit=<?= h((string) $editRow['id']) ?>"><?= h(tr('Назад к модулю', 'Back to module')) ?></a>
+  </div>
+  <?php if (!empty($_GET['saved'])): ?><p class="ok"><?= h(tr('Сохранено.', 'Saved.')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error']) && $_GET['error'] === 'invalid_lang'): ?><p class="err"><?= h(tr('Неверный формат кода языка. Используйте только буквы, 2-5 символов (например: en, ru, arm).', 'Language code format is invalid. Use only letters, 2-5 chars (e.g. en, ru, arm).')) ?></p><?php endif; ?>
+  <?php if (!empty($_GET['error']) && $_GET['error'] !== 'invalid_lang'): ?><p class="err"><?= h((string) $_GET['error']) ?></p><?php endif; ?>
+</div>
+<?php require __DIR__ . '/includes/module-components-ui.php'; ?>
+<?php endif; ?>
+
+<?php if ($isModuleFormOpen && !$isStandaloneComponentPage): ?>
 <div class="card">
   <div class="kant-drawer-actions">
     <h2><?= h($editRow ? tr('Редактирование модуля', 'Edit module') : tr('Добавление модуля', 'Add module')) ?></h2>
@@ -987,10 +1006,6 @@ admin_header(tr('Модули', 'Modules'));
       <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
     </div>
     <hr style="margin:16px 0">
-    <?php
-      $leftLocale = $locales[0] ?? 'ru';
-      $rightLocale = $locales[1] ?? ($locales[0] ?? 'en');
-    ?>
     <p class="muted"><?= h(tr('Таблица локализации: слева', 'Localization table: left column is')) ?> <?= h(strtoupper($leftLocale)) ?>, <?= h(tr('справа', 'right column is')) ?> <?= h(strtoupper($rightLocale)) ?>.</p>
     <table style="margin-bottom:12px">
       <thead><tr><th><?= h(tr('Поле', 'Field')) ?></th><th><?= h(strtoupper($leftLocale)) ?></th><th><?= h(strtoupper($rightLocale)) ?></th></tr></thead>

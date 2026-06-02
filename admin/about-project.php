@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id]);
             }
         }
-        redirect('/admin/about-project.php');
+        kant_reorder_response('/admin/about-project.php');
     }
     foreach ($locales as $locale) {
         $fixedSectionTitle = (string) ($defaultTranslations[$locale]['section_title'] ?? 'About Project');
@@ -181,7 +181,7 @@ admin_header(tr('О проекте', 'About Project'));
       <?php endforeach; ?>
     </tbody>
   </table>
-  <form method="post" id="about-videos-reorder-form" style="display:none">
+  <form method="post" id="about-videos-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_about_videos">
     <div id="about-videos-reorder-ids"></div>
@@ -223,40 +223,6 @@ admin_header(tr('О проекте', 'About Project'));
   });
 })();
 
-(function () {
-  var tbody = document.getElementById('about-videos-sortable');
-  var form = document.getElementById('about-videos-reorder-form');
-  var idsWrap = document.getElementById('about-videos-reorder-ids');
-  var scrollKey = 'kantAboutVideosScrollY';
-  var savedY = sessionStorage.getItem(scrollKey);
-  if (savedY !== null) {
-    window.scrollTo(0, parseInt(savedY, 10) || 0);
-    sessionStorage.removeItem(scrollKey);
-  }
-  if (!tbody || !form || !idsWrap) return;
-  var dragged = null;
-  tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
-    var handle = row.querySelector('.drag-handle');
-    if (handle) {
-      handle.addEventListener('dragstart', function () { dragged = row; });
-    }
-    row.addEventListener('dragover', function (e) { e.preventDefault(); });
-    row.addEventListener('drop', function (e) {
-      e.preventDefault();
-      if (!dragged || dragged === row) return;
-      tbody.insertBefore(dragged, row);
-      idsWrap.innerHTML = '';
-      tbody.querySelectorAll('tr[data-id]').forEach(function (tr) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'ids[]';
-        input.value = tr.getAttribute('data-id') || '';
-        idsWrap.appendChild(input);
-      });
-      sessionStorage.setItem(scrollKey, String(window.scrollY || 0));
-      form.submit();
-    });
-  });
-})();
+window.initKantSortable('about-videos-sortable', 'about-videos-reorder-form', 'about-videos-reorder-ids');
 </script>
 <?php admin_footer();

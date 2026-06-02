@@ -58,7 +58,7 @@ declare(strict_types=1);
       <?php endforeach; ?>
     </tbody>
   </table>
-  <form method="post" id="components-reorder-form" style="display:none">
+  <form method="post" id="components-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_components">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
@@ -134,7 +134,7 @@ declare(strict_types=1);
       </tbody>
     </table>
   </div>
-  <form method="post" id="component-videos-reorder-form" style="display:none">
+  <form method="post" id="component-videos-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_component_videos">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">

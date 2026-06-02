@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['display_order' => $order++, 'id' => (int) $id]);
             }
         }
-        redirect('/admin/publications.php?tab=publications');
+        kant_reorder_response('/admin/publications.php?tab=publications');
     }
     if ($action === 'reorder_publication_types') {
         $ids = $_POST['ids'] ?? [];
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id]);
             }
         }
-        redirect('/admin/publications.php?tab=types');
+        kant_reorder_response('/admin/publications.php?tab=types');
     }
     if ($action === 'save_publication_type') {
         $typeId = (int) ($_POST['type_id'] ?? 0);
@@ -351,7 +351,7 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     </tbody>
   </table>
-  <form method="post" id="publications-reorder-form" style="display:none">
+  <form method="post" id="publications-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_publications">
     <div id="publications-reorder-ids"></div>
@@ -422,7 +422,7 @@ admin_header(tr('Публикации', 'Publications'));
     <?php endforeach; ?>
     </tbody>
   </table>
-  <form method="post" id="publication-types-reorder-form" style="display:none">
+  <form method="post" id="publication-types-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_publication_types">
     <div id="publication-types-reorder-ids"></div>
@@ -489,44 +489,7 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-(function () {
-  var scrollKey = 'kantPublicationsScrollY';
-  var savedY = sessionStorage.getItem(scrollKey);
-  if (savedY !== null) {
-    window.scrollTo(0, parseInt(savedY, 10) || 0);
-    sessionStorage.removeItem(scrollKey);
-  }
-  function initSortable(tbodyId, formId, idsWrapId) {
-    var tbody = document.getElementById(tbodyId);
-    var form = document.getElementById(formId);
-    var idsWrap = document.getElementById(idsWrapId);
-    if (!tbody || !form || !idsWrap) return;
-    var dragged = null;
-    tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
-      var handle = row.querySelector('.drag-handle');
-      if (handle) {
-        handle.addEventListener('dragstart', function () { dragged = row; });
-      }
-      row.addEventListener('dragover', function (e) { e.preventDefault(); });
-      row.addEventListener('drop', function (e) {
-        e.preventDefault();
-        if (!dragged || dragged === row) return;
-        tbody.insertBefore(dragged, row);
-        idsWrap.innerHTML = '';
-        tbody.querySelectorAll('tr[data-id]').forEach(function (tr) {
-          var input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'ids[]';
-          input.value = tr.getAttribute('data-id') || '';
-          idsWrap.appendChild(input);
-        });
-        sessionStorage.setItem(scrollKey, String(window.scrollY || 0));
-        form.submit();
-      });
-    });
-  }
-  initSortable('publications-sortable', 'publications-reorder-form', 'publications-reorder-ids');
-  initSortable('publication-types-sortable', 'publication-types-reorder-form', 'publication-types-reorder-ids');
-})();
+window.initKantSortable('publications-sortable', 'publications-reorder-form', 'publications-reorder-ids');
+window.initKantSortable('publication-types-sortable', 'publication-types-reorder-form', 'publication-types-reorder-ids');
 </script>
 <?php admin_footer();

@@ -163,7 +163,7 @@ window.initKantDrawerCloseGuard = function (opts) {
     }
   } catch (e) {}
 
-  document.querySelectorAll("form[method=\'post\']").forEach(function (form) {
+  document.querySelectorAll("form[method=\'post\']:not(.kant-reorder-form)").forEach(function (form) {
     form.addEventListener("submit", function () {
       try {
         sessionStorage.setItem(KEY, JSON.stringify({
@@ -174,6 +174,91 @@ window.initKantDrawerCloseGuard = function (opts) {
     });
   });
 })();
+</script>';
+        echo '<script>
+window.initKantSortable = function (tbodyId, formId, idsWrapId) {
+  var tbody = document.getElementById(tbodyId);
+  var form = document.getElementById(formId);
+  var idsWrap = document.getElementById(idsWrapId);
+  if (!tbody || !form || !idsWrap) return;
+
+  function rows() {
+    return tbody.querySelectorAll("tr[data-id]");
+  }
+
+  function rowIndex(row) {
+    return Array.prototype.indexOf.call(rows(), row);
+  }
+
+  function moveRow(dragged, target) {
+    if (!dragged || !target || dragged === target) return false;
+    var from = rowIndex(dragged);
+    var to = rowIndex(target);
+    if (from < 0 || to < 0 || from === to) return false;
+    if (from < to) {
+      tbody.insertBefore(dragged, target.nextSibling);
+    } else {
+      tbody.insertBefore(dragged, target);
+    }
+    return true;
+  }
+
+  function syncIds() {
+    idsWrap.innerHTML = "";
+    rows().forEach(function (tr) {
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "ids[]";
+      input.value = tr.getAttribute("data-id") || "";
+      idsWrap.appendChild(input);
+    });
+  }
+
+  function persistOrder() {
+    syncIds();
+    var action = form.getAttribute("action");
+    var url = action && action !== "" ? action : window.location.href;
+    return fetch(url, {
+      method: "POST",
+      body: new FormData(form),
+      credentials: "same-origin",
+      headers: { "X-Kant-Reorder": "1", "Accept": "application/json" }
+    }).then(function (res) {
+      if (!res.ok) throw new Error("reorder failed");
+      return res.json();
+    });
+  }
+
+  var dragged = null;
+  rows().forEach(function (row) {
+    var handle = row.querySelector(".drag-handle");
+    if (handle) {
+      handle.addEventListener("dragstart", function (e) {
+        dragged = row;
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+        }
+      });
+      handle.addEventListener("dragend", function () {
+        dragged = null;
+      });
+    }
+    row.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = "move";
+      }
+    });
+    row.addEventListener("drop", function (e) {
+      e.preventDefault();
+      if (!moveRow(dragged, row)) return;
+      dragged = null;
+      persistOrder().catch(function () {
+        window.location.reload();
+      });
+    });
+  });
+};
 </script>';
         echo '</body></html>';
         return;

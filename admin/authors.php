@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['display_order' => $order++, 'id' => (int) $authorId]);
             }
         }
-        redirect('/admin/authors.php');
+        kant_reorder_response('/admin/authors.php');
     }
     if ($action === 'delete_author') {
         $id = (int) ($_POST['id'] ?? 0);
@@ -160,7 +160,7 @@ admin_header(tr('Авторы', 'Authors'));
     <?php endforeach; ?>
     </tbody>
   </table>
-  <form method="post" id="authors-reorder-form" style="display:none">
+  <form method="post" id="authors-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_authors">
     <div id="authors-reorder-ids"></div>
@@ -232,40 +232,6 @@ window.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 <script>
-(function () {
-  var tbody = document.getElementById('authors-sortable');
-  var form = document.getElementById('authors-reorder-form');
-  var idsWrap = document.getElementById('authors-reorder-ids');
-  var scrollKey = 'kantAuthorsScrollY';
-  var savedY = sessionStorage.getItem(scrollKey);
-  if (savedY !== null) {
-    window.scrollTo(0, parseInt(savedY, 10) || 0);
-    sessionStorage.removeItem(scrollKey);
-  }
-  if (!tbody || !form || !idsWrap) return;
-  var dragged = null;
-  tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
-    var handle = row.querySelector('.drag-handle');
-    if (handle) {
-      handle.addEventListener('dragstart', function () { dragged = row; });
-    }
-    row.addEventListener('dragover', function (e) { e.preventDefault(); });
-    row.addEventListener('drop', function (e) {
-      e.preventDefault();
-      if (!dragged || dragged === row) return;
-      tbody.insertBefore(dragged, row);
-      idsWrap.innerHTML = '';
-      tbody.querySelectorAll('tr[data-id]').forEach(function (tr) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'ids[]';
-        input.value = tr.getAttribute('data-id') || '';
-        idsWrap.appendChild(input);
-      });
-      sessionStorage.setItem(scrollKey, String(window.scrollY || 0));
-      form.submit();
-    });
-  });
-})();
+window.initKantSortable('authors-sortable', 'authors-reorder-form', 'authors-reorder-ids');
 </script>
 <?php admin_footer();

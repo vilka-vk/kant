@@ -45,3 +45,18 @@ function redirect(string $url): void
     header('Location: ' . $url);
     exit;
 }
+
+function kant_wants_json_response(): bool
+{
+    return ($_SERVER['HTTP_X_KANT_REORDER'] ?? '') === '1';
+}
+
+function kant_reorder_response(string $redirectUrl): void
+{
+    if (kant_wants_json_response()) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo '{"ok":true}';
+        exit;
+    }
+    redirect($redirectUrl);
+}

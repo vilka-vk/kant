@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id, 'module_id' => $moduleId]);
             }
         }
-        redirect('/admin/modules.php?edit=' . $moduleId . $componentPageSuffix);
+        kant_reorder_response('/admin/modules.php?edit=' . $moduleId . $componentPageSuffix);
     }
 
     if ($moduleComponentsEnabled && $action === 'delete_component') {
@@ -260,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id, 'component_id' => $componentId]);
             }
         }
-        redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix);
+        kant_reorder_response('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix);
     }
 
     if ($moduleComponentsEnabled && in_array($action, ['add_component_video', 'update_component_video', 'delete_component_video'], true)) {
@@ -316,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id, 'module_id' => $moduleId]);
             }
         }
-        redirect('/admin/modules.php?edit=' . $moduleId);
+        kant_reorder_response('/admin/modules.php?edit=' . $moduleId);
     }
     if ($action === 'reorder_presentation_videos' && !$moduleComponentsEnabled) {
         $ids = $_POST['ids'] ?? [];
@@ -327,7 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id, 'module_id' => $moduleId]);
             }
         }
-        redirect('/admin/modules.php?edit=' . $moduleId);
+        kant_reorder_response('/admin/modules.php?edit=' . $moduleId);
     }
     if ($action === 'reorder_transcripts') {
         $ids = $_POST['ids'] ?? [];
@@ -338,7 +338,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id, 'module_id' => $moduleId]);
             }
         }
-        redirect('/admin/modules.php?edit=' . $moduleId);
+        kant_reorder_response('/admin/modules.php?edit=' . $moduleId);
     }
     if ($action === 'reorder_readings') {
         $ids = $_POST['ids'] ?? [];
@@ -349,7 +349,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['sort_order' => $order++, 'id' => (int) $id, 'module_id' => $moduleId]);
             }
         }
-        redirect('/admin/modules.php?edit=' . $moduleId);
+        kant_reorder_response('/admin/modules.php?edit=' . $moduleId);
     }
 
     if (!$moduleComponentsEnabled && in_array($action, ['add_lecture_video', 'update_lecture_video', 'add_presentation_video', 'update_presentation_video'], true)) {
@@ -1074,7 +1074,7 @@ admin_header(tr('Модули', 'Modules'));
     <?php endforeach; ?>
   </tbody></table>
   </div>
-  <form method="post" id="lecture-reorder-form" style="display:none">
+  <form method="post" id="lecture-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_lecture_videos">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
@@ -1120,7 +1120,7 @@ admin_header(tr('Модули', 'Modules'));
     <?php endforeach; ?>
   </tbody></table>
   </div>
-  <form method="post" id="presentation-reorder-form" style="display:none">
+  <form method="post" id="presentation-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_presentation_videos">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
@@ -1154,7 +1154,7 @@ admin_header(tr('Модули', 'Modules'));
     <tr data-id="<?= h((string) $t['id']) ?>"><td class="drag-col"><span class="drag-handle" draggable="true" title="<?= h(tr('Перетащить', 'Drag')) ?>">☰</span></td><td><?= h((string) $t['sort_order']) ?></td><td><?= h(strtoupper((string) ($t['display_name'] ?? ''))) ?></td><td><?= h((string) $t['file_path']) ?></td><td><form method="post" onsubmit="return confirm('<?= h(tr('Удалить транскрипцию?', 'Delete transcript?')) ?>')"><input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>"><input type="hidden" name="action" value="delete_transcript"><input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>"><input type="hidden" name="transcript_id" value="<?= h((string) $t['id']) ?>"><button type="submit"><?= h(tr('Удалить', 'Delete')) ?></button></form></td></tr>
   <?php endforeach; ?>
   </tbody></table>
-  <form method="post" id="transcripts-reorder-form" style="display:none">
+  <form method="post" id="transcripts-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_transcripts">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
@@ -1243,7 +1243,7 @@ admin_header(tr('Модули', 'Modules'));
     </tr>
   <?php endforeach; ?>
   </tbody></table>
-  <form method="post" id="readings-reorder-form" style="display:none">
+  <form method="post" id="readings-reorder-form" class="kant-reorder-form" style="display:none">
     <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
     <input type="hidden" name="action" value="reorder_readings">
     <input type="hidden" name="id" value="<?= h((string) $editRow['id']) ?>">
@@ -1363,49 +1363,12 @@ if (linkedPublicationSelect) {
   applyReadingMode();
 }
 
-(function () {
-  var pageScrollKey = 'kantModulesPageScrollY';
-  var savedPageY = sessionStorage.getItem(pageScrollKey);
-  if (savedPageY !== null) {
-    window.scrollTo(0, parseInt(savedPageY, 10) || 0);
-    sessionStorage.removeItem(pageScrollKey);
-  }
-  function initSortable(tbodyId, formId, idsWrapId) {
-    var tbody = document.getElementById(tbodyId);
-    var form = document.getElementById(formId);
-    var idsWrap = document.getElementById(idsWrapId);
-    if (!tbody || !form || !idsWrap) return;
-    var dragged = null;
-    tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
-      var handle = row.querySelector('.drag-handle');
-      if (handle) {
-        handle.addEventListener('dragstart', function () { dragged = row; });
-      }
-      row.addEventListener('dragover', function (e) { e.preventDefault(); });
-      row.addEventListener('drop', function (e) {
-        e.preventDefault();
-        if (!dragged || dragged === row) return;
-        tbody.insertBefore(dragged, row);
-        idsWrap.innerHTML = '';
-        tbody.querySelectorAll('tr[data-id]').forEach(function (tr) {
-          var input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'ids[]';
-          input.value = tr.getAttribute('data-id') || '';
-          idsWrap.appendChild(input);
-        });
-        sessionStorage.setItem(pageScrollKey, String(window.scrollY || 0));
-        form.submit();
-      });
-    });
-  }
-  initSortable('components-sortable', 'components-reorder-form', 'components-reorder-ids');
-  initSortable('component-videos-sortable', 'component-videos-reorder-form', 'component-videos-reorder-ids');
-  initSortable('lecture-sortable', 'lecture-reorder-form', 'lecture-reorder-ids');
-  initSortable('presentation-sortable', 'presentation-reorder-form', 'presentation-reorder-ids');
-  initSortable('transcripts-sortable', 'transcripts-reorder-form', 'transcripts-reorder-ids');
-  initSortable('readings-sortable', 'readings-reorder-form', 'readings-reorder-ids');
-})();
+window.initKantSortable('components-sortable', 'components-reorder-form', 'components-reorder-ids');
+window.initKantSortable('component-videos-sortable', 'component-videos-reorder-form', 'component-videos-reorder-ids');
+window.initKantSortable('lecture-sortable', 'lecture-reorder-form', 'lecture-reorder-ids');
+window.initKantSortable('presentation-sortable', 'presentation-reorder-form', 'presentation-reorder-ids');
+window.initKantSortable('transcripts-sortable', 'transcripts-reorder-form', 'transcripts-reorder-ids');
+window.initKantSortable('readings-sortable', 'readings-reorder-form', 'readings-reorder-ids');
 
 function moduleSlugify(value) {
   var map = {

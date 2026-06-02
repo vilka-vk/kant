@@ -1116,6 +1116,18 @@ ul, ol {
 }
 
 
+.module-components-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 120px;
+  width: 100%;
+}
+
+.module-components-root:empty {
+  display: none;
+}
+
 .module-block {
   display: flex;
   flex-direction: column;
@@ -1797,6 +1809,8 @@ ul, ol {
   .footer             { padding: var(--space-2xl) var(--space-xl); }
   .footer__copyright  { font-size: 12px; max-width: 52%; }
 
+  .module-components-root { gap: 80px; }
+
   .module-hero { min-height: 640px; }
   .module-hero .hero__content { left: 32px; right: auto; bottom: 32px; max-width: calc(100% - 32px - 300px); }
   .module-hero__kicker { font-size: 88px; letter-spacing: 1.76px; }
@@ -1830,6 +1844,7 @@ ul, ol {
     gap: 64px;
     padding: 64px 16px;
   }
+  .module-components-root { gap: 64px; }
   .section { gap: 16px; }
 
   /* --- Typography — Figma keeps type LARGE on mobile --- */

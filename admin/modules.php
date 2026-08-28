@@ -58,6 +58,76 @@ function makeModuleSlug(int $moduleNumber, array $locales, array $post): string
     return 'module-' . $slug;
 }
 
+function computeAggregatedModuleLanguages(PDO $pdo, int $moduleId, string $rawLanguages, bool $moduleComponentsEnabled): string
+{
+    $ordered = [];
+    $seen = [];
+    $add = static function (string $code) use (&$ordered, &$seen): void {
+        $upper = strtoupper(trim($code));
+        if ($upper === '') return;
+        foreach (preg_split('/\s*,\s*/', $upper) as $part) {
+            $part = trim((string) $part);
+            if ($part === '') continue;
+            foreach (preg_split('/\s+/', $part) as $sub) {
+                $sub = strtoupper(trim((string) $sub));
+                if ($sub === '' || isset($seen[$sub])) continue;
+                $seen[$sub] = true;
+                $ordered[] = $sub;
+            }
+        }
+    };
+    foreach (preg_split('/\s*,\s*/', (string) $rawLanguages) as $raw) {
+        if (trim((string) $raw) === '') continue;
+        $add((string) $raw);
+    }
+    if (!$moduleComponentsEnabled) {
+        $legacyStmt = $pdo->prepare('SELECT language_code FROM module_lecture_videos WHERE module_id = :mid UNION SELECT language_code FROM module_presentation_videos WHERE module_id = :mid');
+        $legacyStmt->execute(['mid' => $moduleId]);
+        foreach ($legacyStmt->fetchAll(PDO::FETCH_COLUMN) as $lc) {
+            $add((string) $lc);
+        }
+        $transStmt = $pdo->prepare('SELECT mtt.display_name, MIN(mt.sort_order) as min_ord FROM module_transcripts mt JOIN module_transcripts_translations mtt ON mtt.module_transcript_id = mt.id WHERE mt.module_id = :mid AND TRIM(COALESCE(mtt.display_name, "")) <> "" GROUP BY mtt.display_name ORDER BY min_ord ASC, mtt.display_name ASC');
+        $transStmt->execute(['mid' => $moduleId]);
+        foreach ($transStmt->fetchAll(PDO::FETCH_COLUMN, 0) as $td) {
+            $add((string) $td);
+        }
+        return implode(', ', $ordered);
+    }
+    if ($moduleId > 0) {
+        $compStmt = $pdo->prepare('SELECT id FROM module_components WHERE module_id = :mid ORDER BY sort_order ASC, id ASC');
+        $compStmt->execute(['mid' => $moduleId]);
+        foreach ($compStmt->fetchAll(PDO::FETCH_COLUMN) as $cid) {
+            $vidStmt = $pdo->prepare('SELECT language_code FROM module_component_videos WHERE module_component_id = :cid ORDER BY sort_order ASC, id ASC');
+            $vidStmt->execute(['cid' => (int) $cid]);
+            foreach ($vidStmt->fetchAll(PDO::FETCH_COLUMN) as $lc) {
+                $add((string) $lc);
+            }
+        }
+        $transStmt = $pdo->prepare('SELECT mtt.display_name, MIN(mt.sort_order) as min_ord FROM module_transcripts mt JOIN module_transcripts_translations mtt ON mtt.module_transcript_id = mt.id WHERE mt.module_id = :mid AND TRIM(COALESCE(mtt.display_name, "")) <> "" GROUP BY mtt.display_name ORDER BY min_ord ASC, mtt.display_name ASC');
+        $transStmt->execute(['mid' => $moduleId]);
+        foreach ($transStmt->fetchAll(PDO::FETCH_COLUMN, 0) as $td) {
+            $add((string) $td);
+        }
+    }
+    return implode(', ', $ordered);
+}
+
+function syncModuleLanguages(PDO $pdo, int $moduleId, bool $moduleComponentsEnabled): void
+{
+    if ($moduleId <= 0) return;
+    $currentStmt = $pdo->prepare('SELECT languages FROM modules WHERE id = :id LIMIT 1');
+    $currentStmt->execute(['id' => $moduleId]);
+    $current = (string) ($currentStmt->fetchColumn() ?? '');
+    $computed = computeAggregatedModuleLanguages($pdo, $moduleId, $current, $moduleComponentsEnabled);
+    // Avoid clearing languages on empty module (keep original if nothing computed)
+    if ($computed === '' && $current !== '') {
+        return;
+    }
+    if ($computed !== $current) {
+        $pdo->prepare('UPDATE modules SET languages = :languages WHERE id = :id')->execute(['languages' => $computed, 'id' => $moduleId]);
+    }
+}
+
 function nextSortOrder(PDO $pdo, string $table, int $moduleId): int
 {
     $stmt = $pdo->prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_sort FROM {$table} WHERE module_id = :module_id");
@@ -190,6 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         delete_module_component_files($pdo, $id);
         $pdo->prepare('DELETE FROM module_components WHERE id = :id AND module_id = :module_id')
             ->execute(['id' => $id, 'module_id' => $moduleId]);
+        syncModuleLanguages($pdo, $moduleId, $moduleComponentsEnabled);
         redirect('/admin/modules.php?edit=' . $moduleId . $componentPageSuffix);
     }
 
@@ -273,6 +344,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM module_component_videos WHERE id = :id AND module_component_id = :component_id')
                 ->execute(['id' => $videoId, 'component_id' => $componentId]);
             delete_public_file((string) ($videoRow['video_url'] ?? ''));
+            syncModuleLanguages($pdo, $moduleId, $moduleComponentsEnabled);
             redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix);
         }
         $languageCode = strtolower(trim((string) ($_POST['video_language_code'] ?? '')));
@@ -304,6 +376,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('UPDATE module_component_videos SET language_code=:language_code, video_url=:video_url, video_alt=:video_alt, sort_order=:sort_order
               WHERE id=:video_id AND module_component_id=:component_id')->execute($payload + ['video_id' => $videoId]);
         }
+        syncModuleLanguages($pdo, $moduleId, $moduleComponentsEnabled);
         redirect('/admin/modules.php?edit=' . $moduleId . '&component=' . $componentId . $componentPageSuffix);
     }
 
@@ -380,6 +453,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare("UPDATE {$table} SET language_code=:language_code, video_url=:video_url, video_alt=:video_alt, sort_order=:sort_order
               WHERE id=:video_id AND module_id=:module_id")->execute($payload + ['video_id' => $videoId]);
         }
+        syncModuleLanguages($pdo, $moduleId, $moduleComponentsEnabled);
         redirect('/admin/modules.php?edit=' . $moduleId);
     }
 
@@ -394,6 +468,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'module_id' => $moduleId,
         ]);
         delete_public_file((string) ($videoRow['video_url'] ?? ''));
+        syncModuleLanguages($pdo, $moduleId, $moduleComponentsEnabled);
         redirect('/admin/modules.php?edit=' . $moduleId);
     }
 
@@ -421,6 +496,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ->execute(['id' => $id, 'module_id' => $moduleId]);
             }
             delete_public_file((string) ($transcriptRow['file_path'] ?? ''));
+            syncModuleLanguages($pdo, $moduleId, $moduleComponentsEnabled);
             $redirectSuffix = $moduleComponentsEnabled ? ('&component=' . $transcriptComponentId . $componentPageSuffix) : '';
             redirect('/admin/modules.php?edit=' . $moduleId . $redirectSuffix);
         }
@@ -490,6 +566,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'display_name' => $languageCode,
                 ]);
         }
+        syncModuleLanguages($pdo, $moduleId, $moduleComponentsEnabled);
         $redirectSuffix = $moduleComponentsEnabled ? ('&component=' . $transcriptComponentId . $componentPageSuffix) : '';
         redirect('/admin/modules.php?edit=' . $moduleId . $redirectSuffix);
     }
@@ -596,11 +673,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $moduleNumber = (int) ($_POST['sort_order'] ?? 0);
     $fallbackFormats = '';
+    // Languages is now auto-filled from videos + transcripts; posted value is readonly, compute fresh aggregated to avoid stale edits
+    $postedLanguages = trim((string) ($_POST['languages'] ?? ''));
+    $autoLanguages = $postedLanguages;
+    if ($id > 0) {
+        $autoLanguages = computeAggregatedModuleLanguages($pdo, $id, $postedLanguages, $moduleComponentsEnabled);
+        if ($autoLanguages === '') {
+            $autoLanguages = $postedLanguages;
+        }
+    }
     $base = [
         'slug' => makeModuleSlug($moduleNumber, $locales, $_POST),
         'module_number' => $moduleNumber,
         'sort_order' => (int) ($_POST['sort_order'] ?? 0),
-        'languages' => trim((string) ($_POST['languages'] ?? '')),
+        'languages' => $autoLanguages,
         'formats' => $fallbackFormats,
         'list_duration_display' => trim((string) ($_POST['list_duration_display'] ?? '')),
         'hero_background_image_path' => $heroBackground,
@@ -995,7 +1081,14 @@ admin_header(tr('Модули', 'Modules'));
       <div><label><?= h(tr('Номер модуля', 'Module Number')) ?></label><input type="number" name="sort_order" required value="<?= h((string) ($editRow['sort_order'] ?? $nextModuleNumber)) ?>"></div>
       <div><label><?= h(tr('Путь к hero-фону', 'Hero background image path')) ?></label><input value="<?= h((string) ($editRow['hero_background_image_path'] ?? '')) ?>" disabled></div>
       <div><label><?= h(tr('Загрузить hero-изображение', 'Upload hero image')) ?></label><input type="file" name="hero_background_file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg"></div>
-      <div><label>Languages</label><input name="languages" required value="<?= h((string) ($editRow['languages'] ?? 'EN, RU')) ?>"></div>
+      <?php
+        $computedLanguages = '';
+        if (!empty($editRow['id'])) {
+            $computedLanguages = computeAggregatedModuleLanguages($pdo, (int) $editRow['id'], (string) ($editRow['languages'] ?? ''), $moduleComponentsEnabled);
+        }
+        $effectiveLanguages = $computedLanguages !== '' ? $computedLanguages : (string) ($editRow['languages'] ?? 'EN, RU');
+      ?>
+      <div><label>Languages <span class="muted" style="font-weight:400;font-size:11px;">— <?= h(tr('автоматически из видео и транскрипций', 'auto from videos & transcripts')) ?></span></label><input name="languages" value="<?= h($effectiveLanguages) ?>" readonly style="background:#f5f5f5;cursor:not-allowed;opacity:0.85;" title="<?= h(tr('Поле заполняется автоматически и недоступно для редактирования', 'Field is auto-filled and not editable')) ?>"></div>
       <div><label><?= h(tr('Длительность', 'Duration')) ?></label><input name="list_duration_display" value="<?= h((string) ($editRow['list_duration_display'] ?? '')) ?>"></div>
     </div>
     <hr style="margin:16px 0">

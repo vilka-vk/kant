@@ -170,50 +170,84 @@ function normalize_public_asset_path(string $path): string
     return $value;
 }
 
-function fetch_module_card_meta(PDO $pdo, int $moduleId, string $locale, string $defaultLocale, bool $moduleComponentsEnabled): array
+function fetch_module_card_meta(PDO $pdo, int $moduleId, string $locale, string $defaultLocale, bool $moduleComponentsEnabled, string $languagesRaw = ''): array
 {
+    $languagesOrdered = [];
+    $seenLang = [];
+    $addLanguage = static function (string $code) use (&$languagesOrdered, &$seenLang): void {
+        $upper = strtoupper(trim($code));
+        if ($upper === '') return;
+        // normalize comma-separated or single code
+        foreach (preg_split('/\s*,\s*/', $upper) as $part) {
+            $part = trim((string) $part);
+            if ($part === '') continue;
+            // handle space-separated fallbacks as well
+            foreach (preg_split('/\s+/', $part) as $sub) {
+                $sub = strtoupper(trim((string) $sub));
+                if ($sub === '' || isset($seenLang[$sub])) continue;
+                $seenLang[$sub] = true;
+                $languagesOrdered[] = $sub;
+            }
+        }
+    };
+
+    // 1) Languages from modules.languages input
+    foreach (preg_split('/\s*,\s*/', (string) $languagesRaw) as $rawLang) {
+        if (trim((string) $rawLang) === '') continue;
+        $addLanguage((string) $rawLang);
+    }
+
     if (!$moduleComponentsEnabled) {
-        return ['titles' => [], 'titles_display' => '', 'languages' => [], 'languages_display' => ''];
+        // Legacy fallback: collect from legacy video tables + transcripts still applies below
+        $legacyLangStmt = $pdo->prepare('SELECT language_code FROM module_lecture_videos WHERE module_id = :mid UNION SELECT language_code FROM module_presentation_videos WHERE module_id = :mid');
+        $legacyLangStmt->execute(['mid' => $moduleId]);
+        foreach ($legacyLangStmt->fetchAll(PDO::FETCH_COLUMN) as $lc) {
+            $addLanguage((string) $lc);
+        }
+        $transStmt = $pdo->prepare('SELECT mtt.display_name, MIN(mt.sort_order) as min_ord FROM module_transcripts mt JOIN module_transcripts_translations mtt ON mtt.module_transcript_id = mt.id WHERE mt.module_id = :mid AND TRIM(COALESCE(mtt.display_name, "")) <> "" GROUP BY mtt.display_name ORDER BY min_ord ASC, mtt.display_name ASC');
+        $transStmt->execute(['mid' => $moduleId]);
+        foreach ($transStmt->fetchAll(PDO::FETCH_COLUMN, 0) as $td) {
+            $addLanguage((string) $td);
+        }
+        return ['titles' => [], 'titles_display' => '', 'languages' => $languagesOrdered, 'languages_display' => implode(', ', $languagesOrdered)];
     }
     $compStmt = $pdo->prepare('SELECT id FROM module_components WHERE module_id = :mid ORDER BY sort_order ASC, id ASC');
     $compStmt->execute(['mid' => $moduleId]);
     $compIds = $compStmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
-    if (!$compIds) {
-        return ['titles' => [], 'titles_display' => '', 'languages' => [], 'languages_display' => ''];
-    }
     $titles = [];
     $seenTitles = [];
-    $languagesOrdered = [];
-    $seenLang = [];
-    foreach ($compIds as $cid) {
-        $cidInt = (int) $cid;
-        $tr = translated_row($pdo, 'module_components_translations', 'module_component_id', $cidInt, $locale, $defaultLocale);
-        $title = trim((string) ($tr['block_title'] ?? ''));
-        if ($title === '') {
-            $anyStmt = $pdo->prepare('SELECT block_title FROM module_components_translations WHERE module_component_id = :cid AND TRIM(COALESCE(block_title, "")) <> "" ORDER BY CASE WHEN locale = :locale THEN 0 WHEN locale = :def THEN 1 ELSE 2 END, locale ASC LIMIT 1');
-            $anyStmt->execute(['cid' => $cidInt, 'locale' => $locale, 'def' => $defaultLocale]);
-            $any = $anyStmt->fetchColumn();
-            if ($any !== false && $any !== null) {
-                $title = trim((string) $any);
+    if ($compIds) {
+        foreach ($compIds as $cid) {
+            $cidInt = (int) $cid;
+            $tr = translated_row($pdo, 'module_components_translations', 'module_component_id', $cidInt, $locale, $defaultLocale);
+            $title = trim((string) ($tr['block_title'] ?? ''));
+            if ($title === '') {
+                $anyStmt = $pdo->prepare('SELECT block_title FROM module_components_translations WHERE module_component_id = :cid AND TRIM(COALESCE(block_title, "")) <> "" ORDER BY CASE WHEN locale = :locale THEN 0 WHEN locale = :def THEN 1 ELSE 2 END, locale ASC LIMIT 1');
+                $anyStmt->execute(['cid' => $cidInt, 'locale' => $locale, 'def' => $defaultLocale]);
+                $any = $anyStmt->fetchColumn();
+                if ($any !== false && $any !== null) {
+                    $title = trim((string) $any);
+                }
+            }
+            if ($title !== '') {
+                $key = function_exists('mb_strtolower') ? mb_strtolower($title, 'UTF-8') : strtolower($title);
+                if (!isset($seenTitles[$key])) {
+                    $seenTitles[$key] = true;
+                    $titles[] = $title;
+                }
+            }
+            $vidStmt = $pdo->prepare('SELECT language_code FROM module_component_videos WHERE module_component_id = :cid ORDER BY sort_order ASC, id ASC');
+            $vidStmt->execute(['cid' => $cidInt]);
+            foreach ($vidStmt->fetchAll(PDO::FETCH_COLUMN) as $lc) {
+                $addLanguage((string) $lc);
             }
         }
-        if ($title !== '') {
-            $key = function_exists('mb_strtolower') ? mb_strtolower($title, 'UTF-8') : strtolower($title);
-            if (!isset($seenTitles[$key])) {
-                $seenTitles[$key] = true;
-                $titles[] = $title;
-            }
-        }
-        $vidStmt = $pdo->prepare('SELECT language_code FROM module_component_videos WHERE module_component_id = :cid ORDER BY sort_order ASC, id ASC');
-        $vidStmt->execute(['cid' => $cidInt]);
-        foreach ($vidStmt->fetchAll(PDO::FETCH_COLUMN) as $lc) {
-            $upper = strtoupper(trim((string) $lc));
-            if ($upper === '') continue;
-            if (!isset($seenLang[$upper])) {
-                $seenLang[$upper] = true;
-                $languagesOrdered[] = $upper;
-            }
-        }
+    }
+    // 2) Languages from transcripts (covers both legacy and component-linked transcripts) — ordered by admin sort_order to keep manual order
+    $transStmt = $pdo->prepare('SELECT mtt.display_name, MIN(mt.sort_order) as min_ord FROM module_transcripts mt JOIN module_transcripts_translations mtt ON mtt.module_transcript_id = mt.id WHERE mt.module_id = :mid AND TRIM(COALESCE(mtt.display_name, "")) <> "" GROUP BY mtt.display_name ORDER BY min_ord ASC, mtt.display_name ASC');
+    $transStmt->execute(['mid' => $moduleId]);
+    foreach ($transStmt->fetchAll(PDO::FETCH_COLUMN, 0) as $td) {
+        $addLanguage((string) $td);
     }
     return [
         'titles' => $titles,
@@ -285,11 +319,13 @@ if ($route === 'modules') {
         $tr = translated_row($pdo, 'modules_translations', 'module_id', (int) $row['id'], $locale, $defaultLocale) ?: [];
         $merged = merge_entity_with_translation($row, $tr);
         $merged['module_id'] = (int) $row['id'];
-        $meta = fetch_module_card_meta($pdo, (int) $row['id'], $locale, $defaultLocale, $moduleComponentsEnabled);
+        $meta = fetch_module_card_meta($pdo, (int) $row['id'], $locale, $defaultLocale, $moduleComponentsEnabled, (string) ($row['languages'] ?? ''));
         $merged['component_titles'] = $meta['titles'];
         $merged['component_titles_display'] = $meta['titles_display'];
         $merged['component_languages'] = $meta['languages'];
         $merged['component_languages_display'] = $meta['languages_display'];
+        // keep raw languages for debugging/fallback
+        $merged['languages_normalized'] = $meta['languages_display'];
         $result[] = $merged;
     }
     out($result, $locale);

@@ -625,6 +625,9 @@ ul, ol {
   font-weight: var(--text-paragraph-weight);
   line-height: normal;
   color: var(--color-gray);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .card-link__meta-action {

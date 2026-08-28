@@ -241,6 +241,26 @@
     });
   }
 
+  function escapeHtml(text) {
+    return String(text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function normalizeLanguages(raw) {
+    var parts = String(raw || '').split(',');
+    var seen = {};
+    var out = [];
+    parts.forEach(function (p) {
+      var v = p.trim().toUpperCase();
+      if (!v) return;
+      if (!seen[v]) { seen[v] = true; out.push(v); }
+    });
+    return out.join(', ');
+  }
+
   function renderModulesList(modules, limit) {
     var list = document.querySelector('.modules__cards');
     if (!list) return;
@@ -252,22 +272,50 @@
     var presentationLabel = locale === 'ru' ? 'Презентация' : 'Presentation';
     modules.slice(0, limit).forEach(function (m) {
       var href = 'module?slug=' + encodeURIComponent(m.slug);
-      var moduleKinds = [];
-      if (Number(m.has_lecture) > 0) moduleKinds.push(lectureLabel);
-      if (Number(m.has_presentation) > 0) moduleKinds.push(presentationLabel);
-      var moduleKindsLabel = moduleKinds.join(', ');
+      // New: titles from module_components.block_title (deduplicated, comma-separated, wraps)
+      var componentTitlesLabel = '';
+      if (m.component_titles_display && String(m.component_titles_display).trim() !== '') {
+        componentTitlesLabel = String(m.component_titles_display).trim();
+      } else if (Array.isArray(m.component_titles) && m.component_titles.length) {
+        // fallback dedup preserve order
+        var seenT = {};
+        var uniqT = [];
+        m.component_titles.forEach(function (t) {
+          var v = String(t || '').trim();
+          if (!v) return;
+          var k = v.toLowerCase();
+          if (!seenT[k]) { seenT[k] = true; uniqT.push(v); }
+        });
+        componentTitlesLabel = uniqT.join(', ');
+      }
+      // Fallback to legacy has_lecture/has_presentation if no components
+      if (!componentTitlesLabel) {
+        var moduleKinds = [];
+        if (Number(m.has_lecture) > 0) moduleKinds.push(lectureLabel);
+        if (Number(m.has_presentation) > 0) moduleKinds.push(presentationLabel);
+        componentTitlesLabel = moduleKinds.join(', ');
+      }
+      // New: languages aggregated from module_component_videos (deduplicated)
+      var componentLangsLabel = '';
+      if (m.component_languages_display && String(m.component_languages_display).trim() !== '') {
+        componentLangsLabel = normalizeLanguages(m.component_languages_display);
+      } else if (Array.isArray(m.component_languages) && m.component_languages.length) {
+        componentLangsLabel = normalizeLanguages(m.component_languages.join(', '));
+      } else {
+        componentLangsLabel = normalizeLanguages(m.languages || '');
+      }
       var item = document.createElement('a');
       item.className = 'card-link perforated_row';
       item.setAttribute('href', href);
       item.innerHTML =
-        '<p class="card-link__number text-card-number">' + (m.module_number || '') + '</p>' +
+        '<p class="card-link__number text-card-number">' + escapeHtml(m.module_number || '') + '</p>' +
         '<div class="card-link__body"><div class="card-link__content">' +
-        '<h3 class="card-link__title text-h3">' + (m.title || '') + '</h3>' +
-        '<p class="card-link__description text-paragraph">' + (m.short_description || '') + '</p>' +
-        '<div class="card-link__meta-action"><p class="card-link__meta text-paragraph">' +
-        (moduleKindsLabel || '') + '<br>' +
-        (m.list_duration_display || '') + '<br><strong>' + (m.languages || '') + '</strong></p>' +
-        '<div class="card-link__action"><div class="card-link__action-label"><p>' + learnLabel + '</p></div>' +
+        '<h3 class="card-link__title text-h3">' + escapeHtml(m.title || '') + '</h3>' +
+        '<p class="card-link__description text-paragraph">' + escapeHtml(m.short_description || '') + '</p>' +
+        '<div class="card-link__meta-action"><p class="card-link__meta text-paragraph" style="overflow-wrap:anywhere;word-break:break-word;white-space:normal;">' +
+        escapeHtml(componentTitlesLabel || '') + '<br>' +
+        escapeHtml(m.list_duration_display || '') + '<br><strong>' + escapeHtml(componentLangsLabel || '') + '</strong></p>' +
+        '<div class="card-link__action"><div class="card-link__action-label"><p>' + escapeHtml(learnLabel) + '</p></div>' +
         '<span class="icon icon--md"><img src="assets/icons/arrow-right.svg" alt=""></span></div>' +
         '</div></div></div>';
       list.appendChild(item);
